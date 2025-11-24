@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { mockProductsWithVariants, mockProductCategories } from "@/lib/mocks/products";
+import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,13 +24,17 @@ const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_PRODUCTS_ITEMS_PER_PAGE;
 type SortOption = "name" | "price-low" | "price-high";
 
 export default function AdminProductsPage() {
+  const allProducts = mockProductsWithVariants;
+  const categories = mockProductCategories;
+
+  // Get upcoming bake sales for bake date display
+  const upcomingBakeSales = mockBakeSalesWithLocation.filter((bs) => bs.is_active);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const allProducts = mockProductsWithVariants;
-  const categories = mockProductCategories;
+  const [selectedBakeSale, setSelectedBakeSale] = useState<string>(upcomingBakeSales[0]?.id || "");
 
   // Filter products by category and search query
   let products = selectedCategory
@@ -65,11 +70,11 @@ export default function AdminProductsPage() {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
 
-  // Reset to page 1 when search query, sort, category changes
+  // Reset to page 1 when search query, sort, category, bake sale changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
-  }, [searchQuery, sortBy, selectedCategory]);
+  }, [searchQuery, sortBy, selectedCategory, selectedBakeSale]);
 
   // Reset to first page if current page exceeds total pages
   useEffect(() => {
@@ -91,9 +96,13 @@ export default function AdminProductsPage() {
   const handleClearFilters = () => {
     setSelectedCategory(null);
     setSearchQuery("");
+    setSelectedBakeSale(upcomingBakeSales[0]?.id || "");
   };
 
-  const hasActiveFilters = selectedCategory !== null || searchQuery !== "";
+  const hasActiveFilters =
+    selectedCategory !== null ||
+    searchQuery !== "" ||
+    selectedBakeSale !== upcomingBakeSales[0]?.id;
 
   return (
     <div>
@@ -111,7 +120,7 @@ export default function AdminProductsPage() {
       />
 
       {/* Filters and Sort */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Search */}
         <div>
           <label className="block text-sm font-medium mb-2">Search</label>
@@ -122,6 +131,28 @@ export default function AdminProductsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full"
           />
+        </div>
+
+        {/* Bake Sale Filter */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Bake Sale</label>
+          <Select value={selectedBakeSale} onValueChange={setSelectedBakeSale}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {upcomingBakeSales.map((bakeSale) => (
+                <SelectItem key={bakeSale.id} value={bakeSale.id}>
+                  {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}{" "}
+                  - {bakeSale.location.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Category Filter */}
@@ -162,6 +193,17 @@ export default function AdminProductsPage() {
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className="text-sm text-muted-foreground">Active filters:</span>
+          {selectedBakeSale !== upcomingBakeSales[0]?.id && (
+            <Badge variant="secondary" className="gap-1">
+              {upcomingBakeSales.find((bs) => bs.id === selectedBakeSale)?.location.name}
+              <button
+                onClick={() => setSelectedBakeSale(upcomingBakeSales[0]?.id || "")}
+                className="ml-1 hover:text-destructive"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
           {selectedCategory && (
             <Badge variant="secondary" className="gap-1">
               {categories.find((c) => c.id === selectedCategory)?.name}
@@ -203,6 +245,7 @@ export default function AdminProductsPage() {
               <th className="text-left p-4 font-medium">Name</th>
               <th className="text-left p-4 font-medium">Category</th>
               <th className="text-left p-4 font-medium">Price</th>
+              <th className="text-center p-4 font-medium">Bake Date</th>
               <th className="text-left p-4 font-medium">Status</th>
               <th className="text-right p-4 font-medium">Actions</th>
             </tr>
@@ -210,14 +253,41 @@ export default function AdminProductsPage() {
           <tbody>
             {paginatedProducts.map((product) => {
               const category = categories.find((c) => c.id === product.category_id);
+              const selectedBakeSaleData = upcomingBakeSales.find(
+                (bs) => bs.id === selectedBakeSale
+              );
               return (
                 <tr key={product.id} className="border-t hover:bg-muted/30">
                   <td className="p-4 font-medium">{product.name}</td>
                   <td className="p-4 text-sm">{category?.name}</td>
                   <td className="p-4 font-medium">£{product.base_price.toFixed(2)}</td>
                   <td className="p-4">
-                    <Badge variant={product.is_active ? "default" : "secondary"}>
-                      {product.is_active ? "Active" : "Inactive"}
+                    {selectedBakeSaleData && (
+                      <div className="flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-medium">
+                          {new Date(selectedBakeSaleData.date).toLocaleDateString("en-GB", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <Badge
+                      variant={
+                        upcomingBakeSales.length === 0
+                          ? "destructive"
+                          : product.is_active
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
+                      {upcomingBakeSales.length === 0
+                        ? "Unavailable"
+                        : product.is_active
+                        ? "Active"
+                        : "Inactive"}
                     </Badge>
                   </td>
                   <td className="p-4 text-right">

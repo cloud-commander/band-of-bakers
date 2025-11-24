@@ -49,7 +49,7 @@ export const HERO_SECTION = {
   /** Hero background image alt text */
   backgroundAlt: "Baker's hands kneading dough",
   /** Hero main heading */
-  heading: "Baking for the Village since 1998.",
+  heading: "Baking for the Village since 2012.",
   /** Hero subheading/description */
   description:
     "Every loaf tells a story. We use traditional methods, local grains, and time to create bread that nourishes both body and soul. This is more than baking—it's a commitment to craft.",

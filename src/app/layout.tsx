@@ -50,6 +50,7 @@ export const metadata: Metadata = {
 };
 
 import { CartProvider } from "@/context/cart-context";
+import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
 
 // ... existing imports
@@ -73,12 +74,14 @@ export default function RootLayout({
           backgroundColor: "var(--bg-warm)",
         }}
       >
-        <CartProvider>
-          <Navbar />
-          {children}
-          <Footer />
-          <Toaster position="top-center" />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            {children}
+            <Footer />
+            <Toaster position="top-center" />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
