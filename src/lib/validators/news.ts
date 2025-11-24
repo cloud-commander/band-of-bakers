@@ -14,6 +14,8 @@ export const newsPostSchema = z.object({
   content: z.string().min(1, "Content is required"),
   excerpt: z.string().nullable().optional(),
   image_url: z.string().url().nullable().optional(),
+  featured_image: z.string().url().nullable().optional(),
+  author: z.string().nullable().optional(),
   author_id: z.string().uuid(),
   is_published: z.boolean().default(false),
   published_at: z.string().datetime().nullable().optional(),

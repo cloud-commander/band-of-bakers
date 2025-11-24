@@ -4,6 +4,8 @@ import { mockOrders } from "@/lib/mocks/orders";
 import { mockProducts } from "@/lib/mocks/products";
 import { mockUsers } from "@/lib/mocks/users";
 import { Badge } from "@/components/ui/badge";
+import { SectionDivider } from "@/components/section-divider";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import Link from "next/link";
 import { ArrowUpRight, Package, ShoppingCart, Users } from "lucide-react";
 
@@ -47,12 +49,16 @@ export default function AdminDashboard() {
       <PageHeader title="Dashboard" description="Overview of your store" />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${DESIGN_TOKENS.sections.gap} mb-8`}
+      >
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover:shadow-md transition-shadow border border-opacity-20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle
+                  className={`${DESIGN_TOKENS.typography.body.sm.size} font-medium text-muted-foreground`}
+                >
                   {stat.title}
                 </CardTitle>
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
@@ -66,9 +72,14 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <Card>
+      <SectionDivider variant="subtle" className="mb-8" />
+      <Card className="border border-opacity-20">
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle
+            className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight}`}
+          >
+            Recent Orders
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -80,15 +91,13 @@ export default function AdminDashboard() {
               >
                 <div>
                   <p className="font-medium">Order #{order.id}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={`${DESIGN_TOKENS.typography.body.sm.size} text-muted-foreground`}>
                     {new Date(order.created_at).toLocaleDateString("en-GB")}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge>{order.status}</Badge>
-                  <span className="font-semibold">
-                    £{order.total.toFixed(2)}
-                  </span>
+                  <span className="font-semibold">£{order.total.toFixed(2)}</span>
                 </div>
               </Link>
             ))}

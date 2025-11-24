@@ -16,17 +16,25 @@
 
 import Link from "next/link";
 import { Instagram, Facebook, Twitter } from "lucide-react";
-import { STORE } from "@/constants/app";
+import { STORE } from "@/lib/constants";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 export function Footer() {
   return (
-    <footer className="bg-card border-t py-16">
+    <footer className={`bg-card border-t border-opacity-20 py-16`}>
       <div className="container mx-auto px-4">
         <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Branding Section */}
           <div>
-            <h3 className="text-foreground mb-4 text-lg font-bold">🍞 {STORE.shortName}</h3>
-            <p className="text-muted-foreground mb-4 text-sm whitespace-pre-line">
+            <h3
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
+            >
+              🍞 {STORE.shortName}
+            </h3>
+            <p
+              className={`text-muted-foreground mb-4 ${DESIGN_TOKENS.typography.body.sm.size} whitespace-pre-line`}
+            >
               {STORE.address.formatted}
             </p>
             {STORE.social.enabled && (
@@ -70,11 +78,16 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-foreground mb-4 font-semibold">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
+            <h4
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
+            >
+              Quick Links
+            </h4>
+            <ul className={`space-y-2 ${DESIGN_TOKENS.typography.body.sm.size}`}>
               <li>
                 <Link
-                  href="/products"
+                  href="/menu"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Shop
@@ -82,7 +95,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="/account"
+                  href="/profile"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   My Account
@@ -101,8 +114,13 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-foreground mb-4 font-semibold">Legal</h4>
-            <ul className="space-y-2 text-sm">
+            <h4
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
+            >
+              Legal
+            </h4>
+            <ul className={`space-y-2 ${DESIGN_TOKENS.typography.body.sm.size}`}>
               <li>
                 <a
                   href="#"
@@ -135,7 +153,9 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="text-muted-foreground border-t pt-8 text-center text-sm">
+        <div
+          className={`text-muted-foreground border-t border-opacity-20 pt-8 text-center ${DESIGN_TOKENS.typography.body.sm.size}`}
+        >
           <p>
             © {new Date().getFullYear()} {STORE.name}. All rights reserved.
             {STORE.designCredit && (

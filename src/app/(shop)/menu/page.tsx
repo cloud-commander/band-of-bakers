@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/state/page-header";
 import { mockProducts, mockProductCategories } from "@/lib/mocks/products";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ export default function MenuPage() {
   const categories = mockProductCategories;
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen ${DESIGN_TOKENS.sections.padding}`}>
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Our Menu"
@@ -30,14 +31,12 @@ export default function MenuPage() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${DESIGN_TOKENS.sections.gap}`}
+        >
           {products.map((product) => (
-            <Link
-              key={product.id}
-              href={`/menu/${product.slug}`}
-              className="group"
-            >
-              <div className="bg-card rounded-lg overflow-hidden border border-border transition-all hover:shadow-lg">
+            <Link key={product.id} href={`/menu/${product.slug}`} className="group">
+              <div className={`${DESIGN_TOKENS.cards.base} border border-opacity-20`}>
                 {/* Product Image */}
                 <div className="relative aspect-square bg-muted">
                   {product.image_url ? (
@@ -55,17 +54,19 @@ export default function MenuPage() {
                 </div>
 
                 {/* Product Info */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
+                <div className={DESIGN_TOKENS.cards.padding}>
+                  <h3
+                    className={`${DESIGN_TOKENS.typography.h4.size} font-semibold mb-1 group-hover:text-primary transition-colors`}
+                  >
                     {product.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                  <p
+                    className={`${DESIGN_TOKENS.typography.body.sm.size} text-muted-foreground line-clamp-2 mb-3`}
+                  >
                     {product.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold">
-                      £{product.base_price.toFixed(2)}
-                    </span>
+                    <span className="text-lg font-bold">£{product.base_price.toFixed(2)}</span>
                     <Button size="sm" variant="ghost">
                       View Details
                     </Button>

@@ -60,8 +60,8 @@ export const STORE = {
   },
   social: BUSINESS_INFO.social,
   designCredit: {
-    name: "Design Credit Name", // Placeholder - update as needed
-    url: "https://example.com", // Placeholder - update as needed
+    name: "Severn Web",
+    url: "https://www.severnweb.net",
   },
 } as const;
 

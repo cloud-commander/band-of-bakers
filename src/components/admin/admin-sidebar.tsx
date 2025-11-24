@@ -3,14 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Calendar,
-  Users,
-  Settings,
-} from "lucide-react";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { LayoutDashboard, Package, ShoppingCart, Calendar, Users, Settings } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -25,10 +19,14 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-card border-r min-h-screen p-6">
+    <aside className={`w-64 bg-card border-r min-h-screen p-6 border-opacity-20`}>
       <div className="mb-8">
-        <h2 className="text-xl font-bold">Admin Panel</h2>
-        <p className="text-sm text-muted-foreground">Band of Bakers</p>
+        <h2 className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight}`}>
+          Admin Panel
+        </h2>
+        <p className={`${DESIGN_TOKENS.typography.body.sm.size} text-muted-foreground`}>
+          Band of Bakers
+        </p>
       </div>
       <nav className="space-y-2">
         {navigation.map((item) => {
@@ -38,7 +36,7 @@ export function AdminSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
+                `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`,
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted text-muted-foreground hover:text-foreground"

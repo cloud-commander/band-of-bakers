@@ -8,48 +8,70 @@ import { mockAdminUsers } from "./users";
 export const mockNewsPosts: NewsPost[] = [
   {
     id: "news-1",
-    title: "Welcome to Band of Bakers!",
-    slug: "welcome-to-band-of-bakers",
-    content: "<p>We're thrilled to announce our new bake sale platform...</p>",
-    excerpt: "We're thrilled to announce our new bake sale platform",
-    image_url: null,
-    author_id: mockAdminUsers[0].id, // Owner
+    title: "Introducing Our New Sourdough Varieties",
+    slug: "introducing-new-sourdough-varieties",
+    content:
+      "<p>We're excited to announce three new sourdough varieties joining our lineup! After months of testing and perfecting our recipes, we're proud to introduce Seeded Rye, Olive & Rosemary, and Sun-Dried Tomato & Basil sourdough loaves.</p><p>Each loaf is made with our signature 24-hour fermentation process and local ingredients...</p>",
+    excerpt:
+      "Three new artisan sourdough varieties are joining our regular lineup, including Seeded Rye, Olive & Rosemary, and Sun-Dried Tomato & Basil.",
+    featured_image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?q=80&w=2070",
+    author: "Sarah Mitchell",
+    author_id: mockAdminUsers[0].id,
     is_published: true,
-    published_at: new Date("2024-01-15T10:00:00Z").toISOString(),
-    created_at: new Date("2024-01-10T00:00:00Z").toISOString(),
-    updated_at: new Date("2024-01-15T10:00:00Z").toISOString(),
+    published_at: "2024-11-20T10:00:00.000Z",
+    created_at: "2024-11-15T00:00:00.000Z",
+    updated_at: "2024-11-20T10:00:00.000Z",
   },
   {
     id: "news-2",
-    title: "Christmas Bake Sale Announced",
-    slug: "christmas-bake-sale-announced",
+    title: "Christmas Bake Sale Dates Announced",
+    slug: "christmas-bake-sale-dates-announced",
     content:
-      "<p>Join us for our special Christmas bake sale on December 21st...</p>",
-    excerpt: "Join us for our special Christmas bake sale",
-    image_url: null,
-    author_id: mockAdminUsers[1].id, // Manager
+      "<p>The festive season is approaching, and we're thrilled to announce our special Christmas bake sale schedule! We'll be offering limited-edition seasonal treats including Stollen, Mince Pies, and Christmas Pudding.</p><p>Pre-orders open December 1st with collection dates on December 21st and 22nd...</p>",
+    excerpt:
+      "Mark your calendars! Our Christmas bake sale featuring Stollen, Mince Pies, and festive treats runs December 21-22. Pre-orders open December 1st.",
+    featured_image: "https://images.unsplash.com/photo-1512636618879-bbe79107e9e3?q=80&w=2070",
+    author: "James Thompson",
+    author_id: mockAdminUsers[1].id,
     is_published: true,
-    published_at: new Date("2024-11-01T10:00:00Z").toISOString(),
-    created_at: new Date("2024-10-25T00:00:00Z").toISOString(),
-    updated_at: new Date("2024-11-01T10:00:00Z").toISOString(),
+    published_at: "2024-11-15T10:00:00.000Z",
+    created_at: "2024-11-10T00:00:00.000Z",
+    updated_at: "2024-11-15T10:00:00.000Z",
   },
   {
     id: "news-3",
-    title: "New Products Coming Soon",
-    slug: "new-products-coming-soon",
-    content: "<p>We're working on exciting new products for next month...</p>",
-    excerpt: "We're working on exciting new products",
-    image_url: null,
+    title: "Behind the Scenes: A Day in Our Bakery",
+    slug: "behind-the-scenes-bakery-day",
+    content:
+      "<p>Ever wondered what goes into making your favourite artisan bread? Join us for a behind-the-scenes look at a typical baking day at Band of Bakers.</p><p>We start at 4 AM, shaping the dough that's been fermenting overnight...</p>",
+    excerpt:
+      "Go behind the scenes and discover what it takes to create your favourite artisan bread. From 4 AM starts to the final bake.",
+    featured_image: "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?q=80&w=2070",
+    author: "Sarah Mitchell",
     author_id: mockAdminUsers[0].id,
+    is_published: true,
+    published_at: "2024-11-10T10:00:00.000Z",
+    created_at: "2024-11-05T00:00:00.000Z",
+    updated_at: "2024-11-10T10:00:00.000Z",
+  },
+  {
+    id: "news-4",
+    title: "Supporting Local Flour Mills",
+    slug: "supporting-local-flour-mills",
+    content:
+      "<p>At Band of Bakers, we're committed to using locally sourced ingredients. This month, we're highlighting our partnership with Shipton Mill...</p>",
+    excerpt:
+      "Learn about our commitment to local sourcing and our partnership with Shipton Mill for premium British flour.",
+    featured_image: "https://images.unsplash.com/photo-1574856344991-aaa31b6f4ce3?q=80&w=2060",
+    author: "James Thompson",
+    author_id: mockAdminUsers[1].id,
     is_published: false,
     published_at: null,
-    created_at: new Date("2024-11-20T00:00:00Z").toISOString(),
-    updated_at: new Date("2024-11-20T00:00:00Z").toISOString(),
+    created_at: "2024-11-20T00:00:00.000Z",
+    updated_at: "2024-11-20T00:00:00.000Z",
   },
 ];
 
 export const mockNewsPostsEmpty: NewsPost[] = [];
-export const mockNewsPostsPublished = mockNewsPosts.filter(
-  (p) => p.is_published
-);
+export const mockNewsPostsPublished = mockNewsPosts.filter((p) => p.is_published);
 export const mockNewsPostsDraft = mockNewsPosts.filter((p) => !p.is_published);
