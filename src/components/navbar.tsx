@@ -30,6 +30,7 @@ import { useCart } from "@/context/cart-context";
 import { MobileMenu } from "@/components/mobile-menu";
 import { CartPreview } from "@/components/cart-preview";
 import { SearchBar } from "@/components/search-bar";
+import { FlourIcon } from "@/components/ui/flour-icon";
 import { Suspense } from "react";
 
 export function Navbar() {
@@ -89,57 +90,62 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-6">
             <Link
               href="/"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                fontFamily: "var(--font-geist-sans)",
-              }}
+              className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group"
             >
-              <Home className="h-4 w-4" />
+              <FlourIcon
+                icon={Home}
+                size="sm"
+                variant="default"
+                className="group-hover:scale-110 transition-transform"
+              />
               Home
             </Link>
             <Link
               href="/menu"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                fontFamily: "var(--font-geist-sans)",
-              }}
+              className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group"
             >
-              <ShoppingBag className="h-4 w-4" />
+              <FlourIcon
+                icon={ShoppingBag}
+                size="sm"
+                variant="wheat"
+                className="group-hover:scale-110 transition-transform"
+              />
               Shop
             </Link>
             <Link
               href="/about"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                fontFamily: "var(--font-geist-sans)",
-              }}
+              className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group"
             >
-              <Info className="h-4 w-4" />
+              <FlourIcon
+                icon={Info}
+                size="sm"
+                variant="award"
+                className="group-hover:scale-110 transition-transform"
+              />
               About
             </Link>
             <Link
               href="/news"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                fontFamily: "var(--font-geist-sans)",
-              }}
+              className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group"
             >
-              <Newspaper className="h-4 w-4" />
+              <FlourIcon
+                icon={Newspaper}
+                size="sm"
+                variant="time"
+                className="group-hover:scale-110 transition-transform"
+              />
               News
             </Link>
             <Link
               href="/faq"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                fontFamily: "var(--font-geist-sans)",
-              }}
+              className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group"
             >
-              <HelpCircle className="h-4 w-4" />
+              <FlourIcon
+                icon={HelpCircle}
+                size="sm"
+                variant="default"
+                className="group-hover:scale-110 transition-transform"
+              />
               FAQ
             </Link>
           </div>

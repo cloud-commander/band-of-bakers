@@ -7,9 +7,9 @@ import { RecentNews } from "@/components/recent-news";
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { InstagramFeed } from "@/components/instagram-feed";
 import { SectionDivider } from "@/components/section-divider";
+import { Heading } from "@/components/ui/heading";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import {
-  mockFeaturedBakes,
   HERO_SECTION,
   SIGNATURE_BAKES_SECTION,
   STORY_SECTION,
@@ -48,28 +48,15 @@ export default function Home() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <FadeIn>
             <div className="max-w-2xl">
-              <h1
-                className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} mb-6 ${DESIGN_TOKENS.typography.h1.lineHeight} text-white`}
-                style={{
-                  fontFamily: DESIGN_TOKENS.typography.h1.family,
-                }}
-              >
+              <Heading level={1} className="text-white mb-6">
                 {HERO_SECTION.heading}
-              </h1>
-              <p
-                className={`${DESIGN_TOKENS.typography.body.lg.size} mb-8 ${DESIGN_TOKENS.typography.body.lg.lineHeight} text-white`}
-                style={{
-                  opacity: DESIGN_TOKENS.opacity.high,
-                }}
-              >
+              </Heading>
+              <p className="text-lg md:text-xl text-stone-100 mb-8 font-sans leading-relaxed opacity-90">
                 {HERO_SECTION.description}
               </p>
               <Button
                 asChild
-                className={DESIGN_TOKENS.buttons.primary}
-                style={{
-                  backgroundColor: DESIGN_TOKENS.colors.accent,
-                }}
+                className="bg-bakery-amber-700 hover:bg-bakery-amber-800 text-white font-sans"
               >
                 <a href={HERO_SECTION.ctaLink}>{HERO_SECTION.ctaText}</a>
               </Button>
@@ -80,33 +67,15 @@ export default function Home() {
 
       {/* Signature Bakes Bento Grid */}
       <SectionDivider variant="subtle" />
-      <section
-        id="bakes"
-        className={DESIGN_TOKENS.sections.padding}
-        style={{
-          backgroundColor: DESIGN_TOKENS.colors.background,
-        }}
-      >
-        <div className="max-w-6xl mx-auto">
+      <section id="bakes" className="py-16 md:py-24 bg-stone-50">
+        <div className="max-w-6xl mx-auto px-4">
           <FadeIn>
-            <h2
-              className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} text-center mb-4`}
-              style={{
-                fontFamily: DESIGN_TOKENS.typography.h2.family,
-                color: DESIGN_TOKENS.colors.text.main,
-              }}
-            >
-              {SIGNATURE_BAKES_SECTION.heading}
-            </h2>
-            <p
-              className={`text-center ${DESIGN_TOKENS.typography.body.lg.size} mb-16`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                opacity: DESIGN_TOKENS.opacity.medium,
-              }}
-            >
-              {SIGNATURE_BAKES_SECTION.subheading}
-            </p>
+            <div className="text-center mb-16">
+              <Heading level={2}>{SIGNATURE_BAKES_SECTION.heading}</Heading>
+              <p className="text-stone-600 text-lg font-sans max-w-2xl mx-auto">
+                {SIGNATURE_BAKES_SECTION.subheading}
+              </p>
+            </div>
           </FadeIn>
 
           <div className={`grid grid-cols-1 md:grid-cols-3 ${DESIGN_TOKENS.sections.gap}`}>
@@ -166,39 +135,16 @@ export default function Home() {
 
       {/* Family Story Section */}
       <SectionDivider variant="subtle" />
-      <section
-        id="story"
-        className={DESIGN_TOKENS.sections.padding}
-        style={{
-          backgroundColor: DESIGN_TOKENS.colors.background,
-        }}
-      >
-        <div className="max-w-3xl mx-auto text-center">
+      <section id="story" className="py-16 md:py-24 bg-stone-50">
+        <div className="max-w-3xl mx-auto text-center px-4">
           <FadeIn>
-            <h2
-              className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-10`}
-              style={{
-                fontFamily: DESIGN_TOKENS.typography.h2.family,
-                color: DESIGN_TOKENS.colors.text.main,
-              }}
-            >
+            <Heading level={2} className="mb-10">
               {STORY_SECTION.heading}
-            </h2>
-            <p
-              className={`${DESIGN_TOKENS.typography.body.lg.size} ${DESIGN_TOKENS.typography.body.lg.lineHeight} mb-8`}
-              style={{
-                color: DESIGN_TOKENS.colors.text.main,
-                opacity: DESIGN_TOKENS.opacity.high,
-              }}
-            >
+            </Heading>
+            <p className="text-lg md:text-xl text-stone-600 font-sans leading-relaxed mb-8">
               {STORY_SECTION.mainText}
             </p>
-            <p
-              className={`${DESIGN_TOKENS.typography.body.lg.size} font-semibold`}
-              style={{
-                color: DESIGN_TOKENS.colors.accent,
-              }}
-            >
+            <p className="text-xl font-medium text-bakery-amber-700 font-serif italic">
               {STORY_SECTION.tagline}
             </p>
           </FadeIn>
@@ -207,24 +153,12 @@ export default function Home() {
 
       {/* CTA Section */}
       <SectionDivider variant="subtle" />
-      <section
-        id="order"
-        className={DESIGN_TOKENS.sections.padding}
-        style={{
-          backgroundColor: DESIGN_TOKENS.colors.card,
-        }}
-      >
-        <div className="max-w-2xl mx-auto text-center">
+      <section id="order" className="py-16 md:py-24 bg-white">
+        <div className="max-w-2xl mx-auto text-center px-4">
           <FadeIn>
-            <h2
-              className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-8`}
-              style={{
-                fontFamily: DESIGN_TOKENS.typography.h2.family,
-                color: DESIGN_TOKENS.colors.text.main,
-              }}
-            >
+            <Heading level={2} className="mb-8">
               {CTA_SECTION.heading}
-            </h2>
+            </Heading>
             {/* Upcoming Bake Sales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {mockBakeSalesWithLocation.slice(0, 3).map((bakeSale, index) => (
@@ -284,30 +218,14 @@ export default function Home() {
 
       {/* Customer Testimonials */}
       <SectionDivider variant="subtle" />
-      <section
-        className={DESIGN_TOKENS.sections.padding}
-        style={{
-          backgroundColor: DESIGN_TOKENS.colors.background,
-        }}
-      >
-        <div className="max-w-6xl mx-auto">
+      <section className="py-16 md:py-24 bg-stone-50">
+        <div className="max-w-6xl mx-auto px-4">
           <FadeIn>
             <div className="text-center mb-12">
-              <h2
-                className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-4`}
-                style={{
-                  fontFamily: DESIGN_TOKENS.typography.h2.family,
-                  color: DESIGN_TOKENS.colors.text.main,
-                }}
-              >
+              <Heading level={2} className="mb-4">
                 What Our Customers Say
-              </h2>
-              <p
-                className={`${DESIGN_TOKENS.typography.body.lg.size} max-w-2xl mx-auto`}
-                style={{
-                  color: DESIGN_TOKENS.colors.text.muted,
-                }}
-              >
+              </Heading>
+              <p className="text-stone-600 font-sans max-w-2xl mx-auto">
                 Don&apos;t just take our word for it - hear from our happy customers
               </p>
             </div>

@@ -2,6 +2,8 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
+import { Heading } from "@/components/ui/heading";
+
 interface Breadcrumb {
   label: string;
   href?: string;
@@ -37,11 +39,9 @@ export function PageHeader({ title, description, breadcrumbs, actions }: PageHea
       )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1
-            className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} tracking-tight`}
-          >
+          <Heading level={2} className="mb-0">
             {title}
-          </h1>
+          </Heading>
           {description && (
             <p className={`text-muted-foreground mt-2 ${DESIGN_TOKENS.typography.body.base.size}`}>
               {description}

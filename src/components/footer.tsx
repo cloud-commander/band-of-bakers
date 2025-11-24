@@ -19,6 +19,7 @@ import Image from "next/image";
 import { Instagram, Facebook, Twitter } from "lucide-react";
 import { STORE, PAYMENT_METHOD_LOGOS, SOCIAL_MEDIA_LOGOS } from "@/lib/constants";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { Heading } from "@/components/ui/heading";
 
 export function Footer() {
   return (
@@ -38,44 +39,26 @@ export function Footer() {
 
           {/* Address */}
           <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
+            <Heading level={4} className="mb-4">
               Address
-            </h4>
+            </Heading>
             <ul className="space-y-2">
-              <li
-                className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-              >
-                Station Road
-              </li>
-              <li
-                className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-              >
-                Cressage
-              </li>
-              <li
-                className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-              >
-                SY5 6AD
-              </li>
+              <li className="text-stone-600 font-sans text-sm">Station Road</li>
+              <li className="text-stone-600 font-sans text-sm">Cressage</li>
+              <li className="text-stone-600 font-sans text-sm">SY5 6AD</li>
             </ul>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
+            <Heading level={4} className="mb-4">
               Quick Links
-            </h4>
+            </Heading>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/menu"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                  className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Shop
                 </Link>
@@ -83,7 +66,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/profile"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                  className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   My Account
                 </Link>
@@ -91,7 +74,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                  className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Contact Us
                 </a>
@@ -101,17 +84,14 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
+            <Heading level={4} className="mb-4">
               Legal
-            </h4>
+            </Heading>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                  className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Privacy Policy
                 </a>
@@ -119,7 +99,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                  className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Terms of Service
                 </a>
@@ -127,7 +107,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                  className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Cookies
                 </a>
@@ -137,12 +117,9 @@ export function Footer() {
 
           {/* Social */}
           <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
+            <Heading level={4} className="mb-4">
               Social Media
-            </h4>
+            </Heading>
             {STORE.social.enabled && (
               <div className="flex gap-3">
                 {STORE.social.instagram && (
@@ -150,7 +127,7 @@ export function Footer() {
                     href={STORE.social.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-stone-600 hover:text-bakery-amber-700 transition-colors"
                     aria-label="Instagram"
                   >
                     <Instagram className="h-5 w-5" />
@@ -161,7 +138,7 @@ export function Footer() {
                     href={STORE.social.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-stone-600 hover:text-bakery-amber-700 transition-colors"
                     aria-label="Facebook"
                   >
                     <Facebook className="h-5 w-5" />
@@ -172,7 +149,7 @@ export function Footer() {
                     href={STORE.social.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-stone-600 hover:text-bakery-amber-700 transition-colors"
                     aria-label="Twitter"
                   >
                     <Twitter className="h-5 w-5" />
@@ -183,7 +160,7 @@ export function Footer() {
                     href={STORE.social.mixcloud}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-stone-600 hover:text-bakery-amber-700 transition-colors"
                     aria-label="Mixcloud"
                   >
                     <Image
@@ -202,7 +179,7 @@ export function Footer() {
                     href={STORE.social.soundcloud}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-stone-600 hover:text-bakery-amber-700 transition-colors"
                     aria-label="Soundcloud"
                   >
                     <Image
@@ -222,12 +199,9 @@ export function Footer() {
 
           {/* Payment Methods */}
           <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
+            <Heading level={4} className="mb-4">
               We Accept
-            </h4>
+            </Heading>
             <div className="flex flex-wrap gap-3 items-center">
               <Image
                 src={PAYMENT_METHOD_LOGOS.VISA}
