@@ -27,7 +27,7 @@ export const mockFeaturedBakes: FeaturedBake[] = [
     name: "Croissant",
     description: "Buttery layers of perfection",
     image:
-      "https://images.unsplash.com/photo-1555507036-ab794f9a9f86?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
   },
   {
     id: 3,

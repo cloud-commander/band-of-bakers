@@ -9,7 +9,7 @@ import type {
 // PRODUCT CATEGORIES - MOCK DATA
 // ============================================================================
 
-export const mockProductCategories: ProductCategory[] = [
+export const mockProductCategories: (ProductCategory & { image: string })[] = [
   {
     id: "cat-breads",
     name: "Breads",
@@ -18,6 +18,8 @@ export const mockProductCategories: ProductCategory[] = [
     sort_order: 1,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
+    image:
+      "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=600&fit=crop&auto=format",
   },
   {
     id: "cat-pastries-bakes",
@@ -27,6 +29,8 @@ export const mockProductCategories: ProductCategory[] = [
     sort_order: 2,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
+    image:
+      "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=600&h=600&fit=crop&auto=format",
   },
   {
     id: "cat-cakes-loaves",
@@ -36,6 +40,8 @@ export const mockProductCategories: ProductCategory[] = [
     sort_order: 3,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
+    image:
+      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
   },
   {
     id: "cat-tarts-pies",
@@ -45,6 +51,8 @@ export const mockProductCategories: ProductCategory[] = [
     sort_order: 4,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
+    image:
+      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
   },
   {
     id: "cat-savoury-specialities",
@@ -54,6 +62,8 @@ export const mockProductCategories: ProductCategory[] = [
     sort_order: 5,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
+    image:
+      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=600&fit=crop&auto=format",
   },
 ];
 
@@ -125,7 +135,7 @@ export const mockProducts: Product[] = [
     description: "Delicious focaccia topped with green olives.",
     base_price: 4.5,
     image_url:
-      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/212813/pexels-photo-212813.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -138,7 +148,7 @@ export const mockProducts: Product[] = [
     description: "Focaccia topped with caramelised red onions.",
     base_price: 4.5,
     image_url:
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/212813/pexels-photo-212813.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -151,7 +161,7 @@ export const mockProducts: Product[] = [
     description: "Focaccia topped with sun-dried tomatoes.",
     base_price: 4.5,
     image_url:
-      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028684/pexels-photo-1028684.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -164,7 +174,7 @@ export const mockProducts: Product[] = [
     description: "Classic focaccia with fresh rosemary.",
     base_price: 4.5,
     image_url:
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028683/pexels-photo-1028683.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -177,7 +187,7 @@ export const mockProducts: Product[] = [
     description: "Focaccia topped with manchego cheese and pesto.",
     base_price: 5.0,
     image_url:
-      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028682/pexels-photo-1028682.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -190,7 +200,7 @@ export const mockProducts: Product[] = [
     description: "Sweet cinnamon-spiced pastry knots.",
     base_price: 3.5,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/56007/pexels-photo-56007.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -203,7 +213,7 @@ export const mockProducts: Product[] = [
     description: "Savoury swirl with sundried tomatoes, pesto, basil and cheese.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028681/pexels-photo-1028681.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -216,7 +226,7 @@ export const mockProducts: Product[] = [
     description: "Savoury swirl with pesto, basil and cheese.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028680/pexels-photo-1028680.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -229,7 +239,7 @@ export const mockProducts: Product[] = [
     description: "Savoury swirl with fresh basil and cheese.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028679/pexels-photo-1028679.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -242,7 +252,7 @@ export const mockProducts: Product[] = [
     description: "Delicious flapjacks with raspberry, chocolate and hazelnut.",
     base_price: 3.5,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028671/pexels-photo-1028671.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -255,7 +265,7 @@ export const mockProducts: Product[] = [
     description: "Rich brownies with raspberry and chocolate.",
     base_price: 3.25,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160839/pexels-photo-160839.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -268,7 +278,7 @@ export const mockProducts: Product[] = [
     description: "Classic rich chocolate brownies.",
     base_price: 3.0,
     image_url:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160839/pexels-photo-160839.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -281,7 +291,7 @@ export const mockProducts: Product[] = [
     description: "Buttery croissants topped with almonds.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -294,7 +304,7 @@ export const mockProducts: Product[] = [
     description: "Flaky croissants with chocolate and hazelnut filling.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -307,7 +317,7 @@ export const mockProducts: Product[] = [
     description: "Savoury croissants with mozzarella and tomato.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -320,7 +330,7 @@ export const mockProducts: Product[] = [
     description: "Savoury croissants with brie and red grapes.",
     base_price: 3.75,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -335,7 +345,7 @@ export const mockProducts: Product[] = [
     description: "Traditional malt loaf, perfect for slicing.",
     base_price: 5.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/461431/pexels-photo-461431.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -348,7 +358,7 @@ export const mockProducts: Product[] = [
     description: "Zesty lemon loaf with sweet glaze.",
     base_price: 5.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -361,7 +371,7 @@ export const mockProducts: Product[] = [
     description: "Moist apple and cinnamon loaf cake.",
     base_price: 5.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029660/pexels-photo-1029660.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -374,7 +384,7 @@ export const mockProducts: Product[] = [
     description: "Moist carrot cake with orange and blueberry.",
     base_price: 11.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -387,7 +397,7 @@ export const mockProducts: Product[] = [
     description: "Rich coffee cake with walnuts.",
     base_price: 11.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -400,7 +410,7 @@ export const mockProducts: Product[] = [
     description: "Decadent chocolate cake with orange zest.",
     base_price: 11.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/212813/pexels-photo-212813.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -413,7 +423,7 @@ export const mockProducts: Product[] = [
     description: "Traditional Dundee cake. We have several whole and one for slicing.",
     base_price: 9.5,
     image_url:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029648/pexels-photo-1029648.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -428,7 +438,7 @@ export const mockProducts: Product[] = [
     description: "Delicious plum frangipane tart.",
     base_price: 8.5,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029660/pexels-photo-1029660.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -441,7 +451,7 @@ export const mockProducts: Product[] = [
     description: "Classic Bakewell tart with almond filling.",
     base_price: 8.5,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029660/pexels-photo-1029660.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -454,7 +464,7 @@ export const mockProducts: Product[] = [
     description: "Festive mincemeat frangipane tart.",
     base_price: 8.5,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -467,7 +477,7 @@ export const mockProducts: Product[] = [
     description: "Classic French apple tart.",
     base_price: 9.5,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -480,7 +490,7 @@ export const mockProducts: Product[] = [
     description: "Whole apple and blackberry crumble cake.",
     base_price: 10.0,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028703/pexels-photo-1028703.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -493,7 +503,7 @@ export const mockProducts: Product[] = [
     description: "Individual-sized apple and blackberry pies.",
     base_price: 4.5,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028702/pexels-photo-1028702.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -506,7 +516,7 @@ export const mockProducts: Product[] = [
     description: "Large apple pies sold frozen.",
     base_price: 12.0,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -519,7 +529,7 @@ export const mockProducts: Product[] = [
     description: "Very large apple pies sold frozen, ideal for Christmas.",
     base_price: 18.0,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028699/pexels-photo-1028699.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -532,7 +542,7 @@ export const mockProducts: Product[] = [
     description: "Whole banoffee pie with toffee and banana.",
     base_price: 11.0,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1028698/pexels-photo-1028698.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -545,7 +555,7 @@ export const mockProducts: Product[] = [
     description: "Classic French lemon tart, made to order.",
     base_price: 10.0,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029658/pexels-photo-1029658.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
@@ -558,7 +568,7 @@ export const mockProducts: Product[] = [
     description: "Whole lemon meringue pie, made to order.",
     base_price: 10.5,
     image_url:
-      "https://images.unsplash.com/photo-1563379091339-03246963d7d3?w=600&h=600&fit=crop&auto=format",
+      "https://images.pexels.com/photos/1029658/pexels-photo-1029658.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",

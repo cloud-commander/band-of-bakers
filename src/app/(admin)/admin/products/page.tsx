@@ -1,32 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { mockProductsWithVariants, mockProductCategories } from "@/lib/mocks/products";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_PRODUCTS_ITEMS_PER_PAGE;
 
+type SortOption = "name" | "price-low" | "price-high";
+
 export default function AdminProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  const products = mockProductsWithVariants;
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("name");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const allProducts = mockProductsWithVariants;
   const categories = mockProductCategories;
 
+  // Filter products by category and search query
+  let products = selectedCategory
+    ? allProducts.filter((p) => p.category_id === selectedCategory)
+    : allProducts;
+
+  // Apply search filter
+  if (searchQuery) {
+    products = products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  // Apply sorting
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortBy) {
+      case "name":
+        return a.name.localeCompare(b.name);
+      case "price-low":
+        return a.base_price - b.base_price;
+      case "price-high":
+        return b.base_price - a.base_price;
+      default:
+        return 0;
+    }
+  });
+
   // Calculate pagination
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedProducts = products.slice(startIndex, endIndex);
+  const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search query, sort, category changes
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, selectedCategory]);
+
+  // Reset to first page if current page exceeds total pages
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentPage(totalPages > 0 ? totalPages : 1);
+    }
+  }, [currentPage, totalPages]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId === "all" ? null : categoryId);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedCategory(null);
+    setSearchQuery("");
+  };
+
+  const hasActiveFilters = selectedCategory !== null || searchQuery !== "";
 
   return (
     <div>
@@ -43,12 +110,89 @@ export default function AdminProductsPage() {
         }
       />
 
+      {/* Filters and Sort */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {/* Search */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Search</label>
+          <Input
+            type="search"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
+
+        {/* Category Filter */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Category</label>
+          <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Sort */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Sort By</label>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Name (A-Z)</SelectItem>
+              <SelectItem value="price-low">Price (Low to High)</SelectItem>
+              <SelectItem value="price-high">Price (High to Low)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Active Filters */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className="text-sm text-muted-foreground">Active filters:</span>
+          {selectedCategory && (
+            <Badge variant="secondary" className="gap-1">
+              {categories.find((c) => c.id === selectedCategory)?.name}
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="ml-1 hover:text-destructive"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {searchQuery && (
+            <Badge variant="secondary" className="gap-1">
+              Search: {searchQuery}
+              <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+            Clear all
+          </Button>
+        </div>
+      )}
+
       {/* Pagination Info */}
       <div className="mb-6">
         <PaginationInfo
           currentPage={currentPage}
           pageSize={ITEMS_PER_PAGE}
-          totalItems={products.length}
+          totalItems={sortedProducts.length}
         />
       </div>
 

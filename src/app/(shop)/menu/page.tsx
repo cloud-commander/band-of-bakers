@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/state/page-header";
 import { mockProducts, mockProductCategories } from "@/lib/mocks/products";
+import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import Image from "next/image";
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { mockReviews, Review } from "@/lib/mocks/reviews";
 import { StarRating } from "@/components/ui/star-rating";
@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.MENU_ITEMS_PER_PAGE;
 
@@ -36,9 +36,27 @@ function MenuPageContent() {
   const { addItem } = useCart();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const bakeSaleParam = searchParams.get("bakeSale");
+  const categoryParam = searchParams.get("category");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => {
+    if (categoryParam) {
+      const category = mockProductCategories.find((c) => c.slug === categoryParam);
+      return category ? category.id : null;
+    }
+    return null;
+  });
+
+  // Get upcoming bake sales for filter
+  const upcomingBakeSales = mockBakeSalesWithLocation.filter((bs) => bs.is_active);
+
+  // Initialize with URL param or first available bake sale
+  const [selectedBakeSale, setSelectedBakeSale] = useState<string>(
+    bakeSaleParam && upcomingBakeSales.find((bs) => bs.id === bakeSaleParam)
+      ? bakeSaleParam
+      : upcomingBakeSales[0]?.id || ""
+  );
   const [sortBy, setSortBy] = useState<SortOption>("name");
 
   const allProducts = mockProducts.filter((p) => p.is_active);
@@ -91,17 +109,17 @@ function MenuPageContent() {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
 
-  // Reset to page 1 when search query or sort changes
+  // Reset to page 1 when search query, sort, category, or bake sale changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
-  }, [searchQuery, sortBy]);
+  }, [searchQuery, sortBy, selectedCategory, selectedBakeSale]);
 
   // Reset to first page if current page exceeds total pages
   useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
+    if (currentPage > totalPages) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCurrentPage(totalPages);
+      setCurrentPage(totalPages > 0 ? totalPages : 1);
     }
   }, [currentPage, totalPages]);
 
@@ -112,12 +130,12 @@ function MenuPageContent() {
 
   const handleCategoryChange = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
-    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
     setSelectedCategory(null);
-    setCurrentPage(1);
+    // Reset to first bake sale instead of null
+    setSelectedBakeSale(upcomingBakeSales[0]?.id || "");
   };
 
   const hasActiveFilters = selectedCategory !== null || searchQuery !== "";
@@ -131,67 +149,99 @@ function MenuPageContent() {
           breadcrumbs={[{ label: "Home", href: "/" }, { label: "Menu" }]}
         />
 
-        {/* Category Filters & Sort */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleCategoryChange(null)}
+        {/* Filters and Sort */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {/* Bake Sale Filter */}
+          <div>
+            <label
+              className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
             >
-              All Products
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategoryChange(category.id)}
-              >
-                {category.name}
-              </Button>
-            ))}
+              <Calendar className="inline h-4 w-4 mr-1" />
+              Collection Date
+            </label>
+            <Select value={selectedBakeSale} onValueChange={setSelectedBakeSale}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {upcomingBakeSales.map((bakeSale) => (
+                  <SelectItem key={bakeSale.id} value={bakeSale.id}>
+                    {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    - {bakeSale.location.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Name (A-Z)</SelectItem>
-              <SelectItem value="price-low">Price (Low-High)</SelectItem>
-              <SelectItem value="price-high">Price (High-Low)</SelectItem>
-              <SelectItem value="rating">Top Rated</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Category Filter */}
+          <div>
+            <label
+              className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
+            >
+              Category
+            </label>
+            <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Sort */}
+          <div>
+            <label
+              className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
+            >
+              Sort By
+            </label>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Name (A-Z)</SelectItem>
+                <SelectItem value="price-low">Price (Low to High)</SelectItem>
+                <SelectItem value="price-high">Price (High to Low)</SelectItem>
+                <SelectItem value="rating">Rating (High to Low)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Active Filters */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 mb-6">
             <span className="text-sm text-muted-foreground">Active filters:</span>
-            {searchQuery && (
-              <Badge variant="secondary" className="gap-1">
-                Search: {searchQuery}
-              </Badge>
-            )}
             {selectedCategory && (
               <Badge variant="secondary" className="gap-1">
-                Category: {categories.find((c) => c.id === selectedCategory)?.name}
+                {categories.find((c) => c.id === selectedCategory)?.name}
                 <button
-                  onClick={() => handleCategoryChange(null)}
-                  className="ml-1 hover:text-foreground"
+                  onClick={() => setSelectedCategory(null)}
+                  className="ml-1 hover:text-destructive"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearFilters}
-              className="h-6 px-2 text-xs"
-            >
+            {searchQuery && (
+              <Badge variant="secondary" className="gap-1">
+                Search: {searchQuery}
+              </Badge>
+            )}
+            <Button variant="ghost" size="sm" onClick={handleClearFilters}>
               Clear all
             </Button>
           </div>
@@ -207,19 +257,8 @@ function MenuPageContent() {
         </div>
 
         {/* Products Grid */}
-        <motion.div
+        <div
           className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${DESIGN_TOKENS.sections.gap}`}
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1,
-              },
-            },
-          }}
         >
           {paginatedProducts.map((product) => {
             const isOutOfStock = product.stock_quantity === 0;
@@ -230,13 +269,7 @@ function MenuPageContent() {
               product.stock_quantity < 5;
 
             return (
-              <motion.div
-                key={product.id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-              >
+              <div key={product.id}>
                 <Link href={`/menu/${product.slug}`} className="group block h-full">
                   <div
                     className={`${DESIGN_TOKENS.cards.base} border border-opacity-20 h-full flex flex-col`}
@@ -334,10 +367,10 @@ function MenuPageContent() {
                     </div>
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
@@ -356,9 +389,7 @@ function MenuPageContent() {
 
 export default function MenuPage() {
   return (
-    <Suspense
-      fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}
-    >
+    <Suspense fallback={<div>Loading...</div>}>
       <MenuPageContent />
     </Suspense>
   );

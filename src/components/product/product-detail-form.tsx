@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Product, ProductVariant } from "@/lib/validators/product";
-import { BakeSale } from "@/lib/validators/bake-sale";
+import { BakeSaleWithLocation } from "@/lib/validators/bake-sale";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 interface ProductDetailFormProps {
   product: Product & { variants?: ProductVariant[] };
-  upcomingBakeSales: BakeSale[];
+  upcomingBakeSales: BakeSaleWithLocation[];
 }
 
 export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailFormProps) {
@@ -53,6 +53,7 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
       image: product.image_url || undefined,
       quantity: parseInt(quantity),
       variantId: selectedVariant?.id,
+      bakeSaleId: selectedBakeSaleId,
     });
     toast.success(`Added ${product.name} to cart`);
   };
@@ -150,6 +151,8 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
                   month: "long",
                   day: "numeric",
                 })}
+                {" at "}
+                {bakeSale.location.name}
                 {" - Order by "}
                 {new Date(bakeSale.cutoff_datetime).toLocaleDateString("en-GB")}
               </SelectItem>

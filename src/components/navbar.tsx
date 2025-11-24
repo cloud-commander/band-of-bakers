@@ -4,7 +4,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { User, LogOut, Package, UserCircle } from "lucide-react";
+import {
+  User,
+  LogOut,
+  Package,
+  UserCircle,
+  Home,
+  ShoppingBag,
+  Info,
+  Newspaper,
+  HelpCircle,
+  LogIn,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UI_THRESHOLDS, BUSINESS_INFO } from "@/lib/constants/frontend";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { useCart } from "@/context/cart-context";
 
 import { MobileMenu } from "@/components/mobile-menu";
 import { CartPreview } from "@/components/cart-preview";
@@ -22,10 +34,10 @@ import { Suspense } from "react";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { cartCount } = useCart();
 
   // Mock user state - in Phase 4, this will come from auth context
   const isLoggedIn = false; // Change to true to see logged-in state
-  const cartItemCount = 0; // Mock cart count
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,7 +61,10 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16 relative">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <Link
+              href="/"
+              className="flex items-center gap-3 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md transition-colors"
+            >
               <Image
                 src="/Bandofbakers-logo-removebg-preview.png"
                 alt="Band of Bakers Logo"
@@ -73,43 +88,58 @@ export function Navbar() {
           {/* Center: Main Navigation (Desktop) */}
           <div className="hidden lg:flex items-center gap-6">
             <Link
-              href="/menu"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
+              href="/"
+              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
               style={{
                 color: DESIGN_TOKENS.colors.text.main,
                 fontFamily: "var(--font-geist-sans)",
               }}
             >
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+            <Link
+              href="/menu"
+              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
+              style={{
+                color: DESIGN_TOKENS.colors.text.main,
+                fontFamily: "var(--font-geist-sans)",
+              }}
+            >
+              <ShoppingBag className="h-4 w-4" />
               Shop
             </Link>
             <Link
               href="/about"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
+              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
               style={{
                 color: DESIGN_TOKENS.colors.text.main,
                 fontFamily: "var(--font-geist-sans)",
               }}
             >
+              <Info className="h-4 w-4" />
               About
             </Link>
             <Link
               href="/news"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
+              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
               style={{
                 color: DESIGN_TOKENS.colors.text.main,
                 fontFamily: "var(--font-geist-sans)",
               }}
             >
+              <Newspaper className="h-4 w-4" />
               News
             </Link>
             <Link
               href="/faq"
-              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
+              className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-colors hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md flex items-center gap-2`}
               style={{
                 color: DESIGN_TOKENS.colors.text.main,
                 fontFamily: "var(--font-geist-sans)",
               }}
             >
+              <HelpCircle className="h-4 w-4" />
               FAQ
             </Link>
           </div>
@@ -134,7 +164,11 @@ export function Navbar() {
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full hover:bg-red-50 hover:text-red-700 transition-colors"
+                  >
                     <User className="h-6 w-6" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -163,16 +197,19 @@ export function Navbar() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="text-sm font-medium"
+                className="text-sm font-medium flex items-center gap-2 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md transition-colors"
                 style={{ fontFamily: "var(--font-geist-sans)" }}
               >
-                <Link href="/auth/login">Login</Link>
+                <Link href="/auth/login">
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Link>
               </Button>
             )}
           </div>
 
           {/* Mobile Menu */}
-          <MobileMenu isLoggedIn={isLoggedIn} cartItemCount={cartItemCount} />
+          <MobileMenu isLoggedIn={isLoggedIn} cartItemCount={cartCount} />
         </div>
       </div>
     </nav>

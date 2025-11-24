@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/state/page-header";
 import { mockProductsWithVariants } from "@/lib/mocks/products";
-import { mockBakeSales } from "@/lib/mocks/bake-sales";
+import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ProductDetailForm } from "@/components/product/product-detail-form";
@@ -20,7 +20,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const upcomingBakeSales = mockBakeSales.filter((bs) => bs.is_active);
+  const upcomingBakeSales = mockBakeSalesWithLocation.filter((bs) => bs.is_active);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">

@@ -24,29 +24,125 @@ export function Footer() {
   return (
     <footer className={`bg-card border-t border-opacity-20 py-16`}>
       <div className="container mx-auto px-4">
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Branding Section */}
+        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-6">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <Image
+              src="/Bandofbakers-logo-removebg-preview.png"
+              alt="Band of Bakers Logo"
+              width={120}
+              height={120}
+              className="object-contain"
+            />
+          </div>
+
+          {/* Address */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Image
-                src="/Bandofbakers-logo-removebg-preview.png"
-                alt="Band of Bakers Logo"
-                width={30}
-                height={30}
-                className="object-contain"
-              />
-              <h3
-                className={`text-foreground ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-                style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-              >
-                {STORE.shortName}
-              </h3>
-            </div>
-            <p
-              className={`text-muted-foreground mb-4 ${DESIGN_TOKENS.typography.body.sm.size} whitespace-pre-line`}
+            <h4
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
             >
-              {STORE.address.formatted}
-            </p>
+              Address
+            </h4>
+            <ul className="space-y-2">
+              <li
+                className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+              >
+                Station Road
+              </li>
+              <li
+                className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+              >
+                Cressage
+              </li>
+              <li
+                className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+              >
+                SY5 6AD
+              </li>
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
+            >
+              Quick Links
+            </h4>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/menu"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                >
+                  Shop
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/profile"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                >
+                  My Account
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                >
+                  Contact Us
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
+            >
+              Legal
+            </h4>
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                >
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                >
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
+                >
+                  Cookies
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Social */}
+          <div>
+            <h4
+              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
+              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
+            >
+              Social Media
+            </h4>
             {STORE.social.enabled && (
               <div className="flex gap-3">
                 {STORE.social.instagram && (
@@ -122,78 +218,6 @@ export function Footer() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
-              Quick Links
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/menu"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-                >
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/profile"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-                >
-                  My Account
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-                >
-                  Contact Us
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4
-              className={`text-foreground mb-4 ${DESIGN_TOKENS.typography.h5.size} ${DESIGN_TOKENS.typography.h5.weight}`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h5.family }}
-            >
-              Legal
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-                >
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-                >
-                  Terms of Service
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
-                >
-                  Cookies
-                </a>
-              </li>
-            </ul>
           </div>
 
           {/* Payment Methods */}

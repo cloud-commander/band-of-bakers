@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/cart-context";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 
 export function CartPreview() {
   const { items, removeItem, cartTotal, cartCount } = useCart();
@@ -19,13 +20,14 @@ export function CartPreview() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-full">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative rounded-full hover:bg-red-50 hover:text-red-700 transition-colors"
+        >
           <ShoppingCart className="h-6 w-6" />
           {cartCount > 0 && (
-            <Badge
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
-            >
+            <Badge className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs text-white font-bold border-2 border-white bg-orange-600">
               {cartCount}
             </Badge>
           )}
@@ -63,6 +65,24 @@ export function CartPreview() {
                   </div>
                   <div className="flex-1 space-y-1">
                     <h5 className="font-medium text-sm line-clamp-2">{item.name}</h5>
+                    {item.bakeSaleId ? (
+                      (() => {
+                        const bakeSale = mockBakeSalesWithLocation.find(
+                          (bs) => bs.id === item.bakeSaleId
+                        );
+                        return bakeSale ? (
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                              month: "short",
+                              day: "numeric",
+                            })}{" "}
+                            at {bakeSale.location.name}
+                          </p>
+                        ) : null;
+                      })()
+                    ) : (
+                      <p className="text-xs text-orange-600">⚠️ No collection date</p>
+                    )}
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Qty: {item.quantity}</span>
                       <span className="font-medium">
@@ -76,7 +96,7 @@ export function CartPreview() {
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
                     onClick={(e) => {
                       e.preventDefault();
-                      removeItem(item.productId, item.variantId);
+                      removeItem(item.productId, item.variantId, item.bakeSaleId);
                     }}
                   >
                     <Trash2 className="h-4 w-4" />

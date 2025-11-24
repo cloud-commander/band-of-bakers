@@ -4,7 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShoppingCart, LogOut, Package, UserCircle, ChevronRight } from "lucide-react";
+import {
+  Menu,
+  X,
+  ShoppingCart,
+  LogOut,
+  Package,
+  UserCircle,
+  ChevronRight,
+  Home,
+  ShoppingBag,
+  Info,
+  Newspaper,
+  HelpCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
@@ -38,10 +51,11 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
   }, [isOpen]);
 
   const menuItems = [
-    { href: "/menu", label: "Shop" },
-    { href: "/about", label: "About" },
-    { href: "/news", label: "News" },
-    { href: "/faq", label: "FAQ" },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/menu", label: "Shop", icon: ShoppingBag },
+    { href: "/about", label: "About", icon: Info },
+    { href: "/news", label: "News", icon: Newspaper },
+    { href: "/faq", label: "FAQ", icon: HelpCircle },
   ];
 
   const userItems = [
@@ -60,10 +74,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
       >
         <Menu className="h-6 w-6" />
         {cartItemCount > 0 && !isOpen && (
-          <Badge
-            className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px]"
-            style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
-          >
+          <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-[10px] text-white font-bold border border-white bg-orange-600">
             {cartItemCount}
           </Badge>
         )}
@@ -121,7 +132,10 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
                         pathname === item.href ? "bg-muted font-medium" : "hover:bg-muted/50"
                       }`}
                     >
-                      <span className="text-lg">{item.label}</span>
+                      <div className="flex items-center gap-3">
+                        <item.icon className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-lg">{item.label}</span>
+                      </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </Link>
                   ))}
@@ -140,7 +154,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
                       <span className="font-medium">Shopping Cart</span>
                     </div>
                     {cartItemCount > 0 && (
-                      <Badge style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}>
+                      <Badge className="text-white font-bold bg-orange-600">
                         {cartItemCount} items
                       </Badge>
                     )}

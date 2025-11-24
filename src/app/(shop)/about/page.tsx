@@ -56,7 +56,7 @@ export default function AboutPage() {
       >
         <div className="max-w-4xl mx-auto">
           {/* Introduction */}
-          <div className="mb-16">
+          <div>
             <h2
               className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-6 text-center`}
               style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
@@ -78,10 +78,17 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Values Grid */}
-          <SectionDivider variant="medium" className="mb-16" />
-          <div className="mb-16">
+      {/* Values Grid */}
+      <SectionDivider variant="medium" />
+      <section
+        className={DESIGN_TOKENS.sections.padding}
+        style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
+      >
+        <div className="max-w-4xl mx-auto">
+          <div>
             <h2
               className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}
               style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
@@ -130,10 +137,17 @@ export default function AboutPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* How We Work */}
-          <SectionDivider variant="medium" className="mb-16" />
-          <div className="mb-16">
+      {/* How We Work */}
+      <SectionDivider variant="medium" />
+      <section
+        className={DESIGN_TOKENS.sections.padding}
+        style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
+      >
+        <div className="max-w-4xl mx-auto">
+          <div>
             <h2
               className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}
               style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
@@ -172,9 +186,16 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Location */}
-          <SectionDivider variant="medium" className="mb-16" />
+      {/* Location */}
+      <SectionDivider variant="medium" />
+      <section
+        className={DESIGN_TOKENS.sections.padding}
+        style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
+      >
+        <div className="max-w-4xl mx-auto">
           <FindUs
             title="Find Us in Shropshire"
             description="We serve the communities of Cressage and Shrewsbury, and Telford through our regular bake sales. Follow us on social media to stay updated on our schedule and special offerings."

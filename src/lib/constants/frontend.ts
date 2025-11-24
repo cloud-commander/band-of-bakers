@@ -21,7 +21,7 @@ export const BUSINESS_INFO = {
     city: "Cressage",
     postcode: "SY5 6AD",
     country: "United Kingdom",
-    formatted: "Station Road,\n Cressage,\n SY5 6AD",
+    formatted: "Station Road\nCressage\nSY5 6AD",
   },
 
   // Coordinates for Google Maps

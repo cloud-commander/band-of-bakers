@@ -7,6 +7,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 export type CartItem = {
   productId: string;
   variantId?: string;
+  bakeSaleId?: string;
   name: string;
   price: number;
   image?: string;
@@ -17,8 +18,13 @@ export type CartItem = {
 type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void;
-  removeItem: (productId: string, variantId?: string) => void;
-  updateQuantity: (productId: string, variantId: string | undefined, quantity: number) => void;
+  removeItem: (productId: string, variantId?: string, bakeSaleId?: string) => void;
+  updateQuantity: (
+    productId: string,
+    variantId: string | undefined,
+    quantity: number,
+    bakeSaleId?: string
+  ) => void;
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
@@ -59,7 +65,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = (newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
     setItems((currentItems) => {
       const existingItemIndex = currentItems.findIndex(
-        (item) => item.productId === newItem.productId && item.variantId === newItem.variantId
+        (item) =>
+          item.productId === newItem.productId &&
+          item.variantId === newItem.variantId &&
+          item.bakeSaleId === newItem.bakeSaleId
       );
 
       const quantityToAdd = newItem.quantity || 1;
@@ -86,21 +95,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // setIsOpen(true);
   };
 
-  const removeItem = (productId: string, variantId?: string) => {
+  const removeItem = (productId: string, variantId?: string, bakeSaleId?: string) => {
     setItems((currentItems) =>
-      currentItems.filter((item) => !(item.productId === productId && item.variantId === variantId))
+      currentItems.filter(
+        (item) =>
+          !(
+            item.productId === productId &&
+            item.variantId === variantId &&
+            item.bakeSaleId === bakeSaleId
+          )
+      )
     );
   };
 
-  const updateQuantity = (productId: string, variantId: string | undefined, quantity: number) => {
+  const updateQuantity = (
+    productId: string,
+    variantId: string | undefined,
+    quantity: number,
+    bakeSaleId?: string
+  ) => {
     if (quantity < 1) {
-      removeItem(productId, variantId);
+      removeItem(productId, variantId, bakeSaleId);
       return;
     }
 
     setItems((currentItems) =>
       currentItems.map((item) => {
-        if (item.productId === productId && item.variantId === variantId) {
+        if (
+          item.productId === productId &&
+          item.variantId === variantId &&
+          item.bakeSaleId === bakeSaleId
+        ) {
           // Check max quantity
           if (item.maxQuantity && quantity > item.maxQuantity) {
             return { ...item, quantity: item.maxQuantity };

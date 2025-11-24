@@ -12,46 +12,46 @@ interface InstagramPost {
   link: string;
 }
 
-// Mock Instagram posts - in production, these would come from Instagram API
+// Mock Instagram posts - using local images as permanent fixtures
 const mockInstagramPosts: InstagramPost[] = [
   {
     id: "1",
-    imageUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop",
+    imageUrl: "/instagram/instagram-1.jpg",
     caption: "Fresh sourdough ready for collection",
     likes: 245,
     link: "#",
   },
   {
     id: "2",
-    imageUrl: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=400&fit=crop",
+    imageUrl: "/instagram/instagram-2.jpg",
     caption: "Almond croissants - weekend special",
     likes: 189,
     link: "#",
   },
   {
     id: "3",
-    imageUrl: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=400&h=400&fit=crop",
+    imageUrl: "/instagram/instagram-3.jpg",
     caption: "Behind the scenes at the bakery",
     likes: 312,
     link: "#",
   },
   {
     id: "4",
-    imageUrl: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400&h=400&fit=crop",
+    imageUrl: "/instagram/instagram-4.jpg",
     caption: "Chocolate brownies - customer favorite",
     likes: 276,
     link: "#",
   },
   {
     id: "5",
-    imageUrl: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&h=400&fit=crop",
+    imageUrl: "/instagram/instagram-5.jpg",
     caption: "Artisan bread selection",
     likes: 198,
     link: "#",
   },
   {
     id: "6",
-    imageUrl: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=400&fit=crop",
+    imageUrl: "/instagram/instagram-6.jpg",
     caption: "Fresh from the oven",
     likes: 234,
     link: "#",
@@ -81,7 +81,7 @@ export function InstagramFeed() {
             color: DESIGN_TOKENS.colors.text.muted,
           }}
         >
-          See what&apos;s fresh from our ovens daily @bandofbakers
+          See what&apos;s fresh from our ovens @band_of_bakers
         </p>
       </div>
 
@@ -115,13 +115,13 @@ export function InstagramFeed() {
       {/* Follow Button */}
       <div className="text-center mt-8">
         <a
-          href="https://instagram.com/bandofbakers"
+          href="https://www.instagram.com/band_of_bakers/"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
         >
           <Instagram className="h-5 w-5" />
-          Follow @bandofbakers
+          Follow @band_of_bakers
         </a>
       </div>
     </div>

@@ -4,14 +4,19 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 import Image from "next/image";
-import { Minus, Plus, ArrowRight, ShoppingCart } from "lucide-react";
+import { Minus, Plus, ArrowRight, ShoppingCart, CreditCard, Banknote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/state/page-header";
 import { useCart } from "@/context/cart-context";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
+import { useState } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart();
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "collection">("online");
 
   if (items.length === 0) {
     return (
@@ -68,6 +73,28 @@ export default function CartPage() {
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg truncate">{item.name}</h3>
+                  {item.bakeSaleId ? (
+                    (() => {
+                      const bakeSale = mockBakeSalesWithLocation.find(
+                        (bs) => bs.id === item.bakeSaleId
+                      );
+                      return bakeSale ? (
+                        <p className="text-sm text-muted-foreground">
+                          Collection:{" "}
+                          {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}{" "}
+                          at {bakeSale.location.name}
+                        </p>
+                      ) : null;
+                    })()
+                  ) : (
+                    <p className="text-sm text-orange-600">
+                      ⚠️ No collection date selected - Please re-add this item
+                    </p>
+                  )}
                   <p className="text-muted-foreground">£{item.price.toFixed(2)}</p>
                 </div>
 
@@ -78,7 +105,12 @@ export default function CartPage() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() =>
-                      updateQuantity(item.productId, item.variantId, item.quantity - 1)
+                      updateQuantity(
+                        item.productId,
+                        item.variantId,
+                        item.quantity - 1,
+                        item.bakeSaleId
+                      )
                     }
                   >
                     <Minus className="h-4 w-4" />
@@ -89,7 +121,12 @@ export default function CartPage() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() =>
-                      updateQuantity(item.productId, item.variantId, item.quantity + 1)
+                      updateQuantity(
+                        item.productId,
+                        item.variantId,
+                        item.quantity + 1,
+                        item.bakeSaleId
+                      )
                     }
                   >
                     <Plus className="h-4 w-4" />
@@ -103,7 +140,7 @@ export default function CartPage() {
                     variant="ghost"
                     size="sm"
                     className="text-destructive hover:text-destructive/90 h-auto p-0 mt-1"
-                    onClick={() => removeItem(item.productId, item.variantId)}
+                    onClick={() => removeItem(item.productId, item.variantId, item.bakeSaleId)}
                   >
                     Remove
                   </Button>
@@ -116,6 +153,52 @@ export default function CartPage() {
           <div className="lg:col-span-1">
             <div className={`${DESIGN_TOKENS.cards.base} p-6 sticky top-24`}>
               <h3 className={`${DESIGN_TOKENS.typography.h4.size} mb-4`}>Order Summary</h3>
+
+              {/* Payment Method Selection */}
+              <div className="mb-6 pb-6 border-b">
+                <label
+                  className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-3`}
+                >
+                  Payment Method
+                </label>
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={(value) => setPaymentMethod(value as "online" | "collection")}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="online" id="online" />
+                      <Label
+                        htmlFor="online"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">Pay Online</div>
+                          <div className="text-xs text-muted-foreground">
+                            Secure payment via Stripe
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="collection" id="collection" />
+                      <Label
+                        htmlFor="collection"
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <Banknote className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">Pay on Collection</div>
+                          <div className="text-xs text-muted-foreground">
+                            Cash or card at pickup
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-muted-foreground">
@@ -133,14 +216,16 @@ export default function CartPage() {
               </div>
 
               <Button asChild className="w-full" size="lg">
-                <Link href="/checkout">
+                <Link href={paymentMethod === "online" ? "/checkout" : "/checkout/collection"}>
                   Proceed to Checkout
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
 
               <p className="text-xs text-muted-foreground text-center mt-4">
-                Secure checkout powered by Stripe
+                {paymentMethod === "online"
+                  ? "Secure checkout powered by Stripe"
+                  : "You'll pay when you collect your order"}
               </p>
             </div>
           </div>

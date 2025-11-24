@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 import { FadeIn } from "@/components/fade-in";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecentNews } from "@/components/recent-news";
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { InstagramFeed } from "@/components/instagram-feed";
@@ -13,9 +15,11 @@ import {
   STORY_SECTION,
   CTA_SECTION,
 } from "@/lib/mocks/homepage";
+import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
+import { mockProductCategories } from "@/lib/mocks/products";
 
 export default function Home() {
-  const bakes = mockFeaturedBakes.slice(0, 6);
+  const categories = mockProductCategories;
 
   return (
     <>
@@ -106,47 +110,54 @@ export default function Home() {
           </FadeIn>
 
           <div className={`grid grid-cols-1 md:grid-cols-3 ${DESIGN_TOKENS.sections.gap}`}>
-            {bakes.map((bake, index) => (
-              <FadeIn key={bake.id} delay={index * 0.1}>
-                <div
-                  className={DESIGN_TOKENS.cards.base}
-                  style={{
-                    backgroundColor: DESIGN_TOKENS.colors.card,
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                  }}
-                >
-                  {/* Image - 60% of card */}
+            {categories.map((category, index) => (
+              <FadeIn key={category.id} delay={index * 0.1}>
+                <Link href={`/menu?category=${category.slug}`}>
                   <div
-                    className="relative w-full"
+                    className={`${DESIGN_TOKENS.cards.base} cursor-pointer hover:shadow-lg transition-shadow`}
                     style={{
-                      paddingBottom: "60%",
+                      backgroundColor: DESIGN_TOKENS.colors.card,
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                     }}
                   >
-                    <Image src={bake.image} alt={bake.name} fill className="object-cover" />
-                  </div>
+                    {/* Image - 60% of card */}
+                    <div
+                      className="relative w-full"
+                      style={{
+                        paddingBottom: "60%",
+                      }}
+                    >
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
 
-                  {/* Text - 40% of card */}
-                  <div className={DESIGN_TOKENS.cards.padding}>
-                    <h3
-                      className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-2`}
-                      style={{
-                        fontFamily: DESIGN_TOKENS.typography.h4.family,
-                        color: DESIGN_TOKENS.colors.text.main,
-                      }}
-                    >
-                      {bake.name}
-                    </h3>
-                    <p
-                      className={DESIGN_TOKENS.typography.body.sm.size}
-                      style={{
-                        color: DESIGN_TOKENS.colors.text.main,
-                        opacity: DESIGN_TOKENS.opacity.low,
-                      }}
-                    >
-                      {bake.description}
-                    </p>
+                    {/* Text - 40% of card */}
+                    <div className={DESIGN_TOKENS.cards.padding}>
+                      <h3
+                        className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-2 text-center`}
+                        style={{
+                          fontFamily: DESIGN_TOKENS.typography.h4.family,
+                          color: DESIGN_TOKENS.colors.text.main,
+                        }}
+                      >
+                        {category.name}
+                      </h3>
+                      <p
+                        className={`${DESIGN_TOKENS.typography.body.sm.size} text-center`}
+                        style={{
+                          color: DESIGN_TOKENS.colors.text.main,
+                          opacity: DESIGN_TOKENS.opacity.low,
+                        }}
+                      >
+                        {category.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </FadeIn>
             ))}
           </div>
@@ -165,7 +176,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto text-center">
           <FadeIn>
             <h2
-              className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-8`}
+              className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-10`}
               style={{
                 fontFamily: DESIGN_TOKENS.typography.h2.family,
                 color: DESIGN_TOKENS.colors.text.main,
@@ -206,14 +217,58 @@ export default function Home() {
         <div className="max-w-2xl mx-auto text-center">
           <FadeIn>
             <h2
-              className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-6`}
+              className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-8`}
               style={{
-                fontFamily: DESIGN_TOKENS.typography.h3.family,
+                fontFamily: DESIGN_TOKENS.typography.h2.family,
                 color: DESIGN_TOKENS.colors.text.main,
               }}
             >
               {CTA_SECTION.heading}
             </h2>
+            {/* Upcoming Bake Sales */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              {mockBakeSalesWithLocation.slice(0, 3).map((bakeSale, index) => (
+                <FadeIn key={bakeSale.id} delay={index * 0.1}>
+                  <Link href={`/menu?bakeSale=${bakeSale.id}`}>
+                    <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">
+                          {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                          })}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          {bakeSale.location.name}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </FadeIn>
+              ))}
+            </div>
             <p
               className={`${DESIGN_TOKENS.typography.body.lg.size} mb-8`}
               style={{
@@ -221,17 +276,8 @@ export default function Home() {
                 opacity: DESIGN_TOKENS.opacity.medium,
               }}
             >
-              {CTA_SECTION.description}
+              Reserve your fresh loaves today. Available for collection.
             </p>
-            <Button
-              asChild
-              className={DESIGN_TOKENS.buttons.primary}
-              style={{
-                backgroundColor: DESIGN_TOKENS.colors.accent,
-              }}
-            >
-              <a href={CTA_SECTION.ctaLink}>{CTA_SECTION.ctaText}</a>
-            </Button>
           </FadeIn>
         </div>
       </section>

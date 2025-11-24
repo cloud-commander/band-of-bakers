@@ -10,7 +10,7 @@ export default function NotFound() {
         {/* Background Image */}
         <div className="absolute inset-0 w-full h-full">
           <Image
-            src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072"
+            src="/artisan-bread.jpg"
             alt="Freshly baked artisan bread"
             fill
             className="object-cover opacity-10"
@@ -94,8 +94,12 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 text-lg font-semibold text-white rounded-full transition-all hover:opacity-90 min-w-[140px]"
-              style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium text-base rounded-lg transition-colors min-w-[140px]"
+              style={{
+                borderColor: DESIGN_TOKENS.colors.border,
+                color: DESIGN_TOKENS.colors.text.main,
+                border: "1px solid",
+              }}
             >
               🏠 Back to Home
             </Link>
