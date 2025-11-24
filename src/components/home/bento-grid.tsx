@@ -3,10 +3,8 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import {
-  ANIMATION_DURATIONS,
-  ANIMATION_DELAYS,
-} from "@/lib/constants/frontend";
+import { ANIMATION_DURATIONS, ANIMATION_DELAYS } from "@/lib/constants/frontend";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 const items = [
   {
@@ -57,10 +55,7 @@ export function BentoGrid() {
               delay: index * ANIMATION_DELAYS.STAGGER,
             }}
             viewport={{ once: true }}
-            className={cn(
-              "relative group overflow-hidden rounded-2xl bg-muted",
-              item.className
-            )}
+            className={cn("relative group overflow-hidden rounded-2xl bg-muted", item.className)}
           >
             <Image
               src={item.image}
@@ -72,10 +67,17 @@ export function BentoGrid() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
 
             <div className="absolute bottom-0 left-0 p-6 text-white">
-              <p className="text-sm font-medium tracking-widest uppercase opacity-80 mb-1">
+              <p
+                className={`${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} ${DESIGN_TOKENS.typography.label.letterSpacing} uppercase opacity-80 mb-1`}
+              >
                 {item.subtitle}
               </p>
-              <h3 className="font-serif text-3xl md:text-4xl">{item.title}</h3>
+              <h3
+                className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight}`}
+                style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
+              >
+                {item.title}
+              </h3>
             </div>
           </motion.div>
         ))}

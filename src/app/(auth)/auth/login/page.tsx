@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { QuotesDisplay } from "@/components/quotes-display";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,8 +29,16 @@ export default function LoginPage() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <CardTitle
+            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
+            style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
+          >
+            Login
+          </CardTitle>
+          <p
+            className={`${DESIGN_TOKENS.typography.body.sm.size}`}
+            style={{ color: DESIGN_TOKENS.colors.text.muted }}
+          >
             Enter your credentials to access your account
           </p>
         </CardHeader>

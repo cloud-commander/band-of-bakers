@@ -1,4 +1,5 @@
 import React from "react";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 type FindUsProps = {
   address?: string;
@@ -39,37 +40,43 @@ export function FindUs({
   const iframeTitle = title ? `Google Map - ${title}` : "Google Map";
 
   return (
-    <section className="bg-card py-12 md:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-4xl text-center">
-          <div className="space-y-2">
-            <h1 className="font-headline text-3xl sm:text-5xl">{title}</h1>
-            {description ? (
-              <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                {description}
-              </p>
-            ) : null}
-          </div>
+    <div className="w-full">
+      <div className="mx-auto mb-12 max-w-4xl text-center">
+        <div className="space-y-2">
+          <h3
+            className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-4`}
+            style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
+          >
+            {title}
+          </h3>
+          {description ? (
+            <p
+              className={`${DESIGN_TOKENS.typography.body.lg.size} max-w-[900px] mx-auto`}
+              style={{ color: DESIGN_TOKENS.colors.text.muted }}
+            >
+              {description}
+            </p>
+          ) : null}
         </div>
+      </div>
 
-        <div className="mx-auto mt-6 max-w-6xl">
-          <div className="flex justify-center">
-            <div className={"w-full max-w-6xl " + className}>
-              <iframe
-                src={src}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen={true}
-                loading="lazy"
-                title={iframeTitle}
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
+      <div className="mx-auto max-w-6xl">
+        <div className="flex justify-center">
+          <div className={"w-full max-w-6xl " + className}>
+            <iframe
+              src={src}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              title={iframeTitle}
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 

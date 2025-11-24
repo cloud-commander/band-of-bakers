@@ -57,7 +57,10 @@ export default function NotFound() {
                 className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: `${DESIGN_TOKENS.colors.accent}20` }}
               >
-                <div className="text-2xl" style={{ color: DESIGN_TOKENS.colors.accent }}>
+                <div
+                  className={`${DESIGN_TOKENS.typography.h2.size}`}
+                  style={{ color: DESIGN_TOKENS.colors.accent }}
+                >
                   🔍
                 </div>
               </div>

@@ -136,7 +136,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/menu"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
                 >
                   Shop
                 </Link>
@@ -144,7 +144,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/profile"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
                 >
                   My Account
                 </Link>
@@ -152,7 +152,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
                 >
                   Contact Us
                 </a>
@@ -172,7 +172,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
                 >
                   Privacy Policy
                 </a>
@@ -180,7 +180,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
                 >
                   Terms of Service
                 </a>
@@ -188,7 +188,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-muted-foreground hover:text-foreground transition-colors ${DESIGN_TOKENS.typography.body.sm.size}`}
                 >
                   Cookies
                 </a>
@@ -250,17 +250,15 @@ export function Footer() {
                 className="transition-opacity hover:opacity-75"
                 title="Google Pay"
               />
-              <svg
-                role="img"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Cash (GBP)"
-              >
-                <title>Cash (GBP)</title>
-                <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm4 17h-8v-2h1.5c1.5 0 2.5-1 2.5-2.5 0-1.2-.8-2.2-2-2.8l.5-1.5c1.5 0 2.5-1.2 2.5-2.5 0-1.5-1.2-2.5-2.5-2.5-1.2 0-2.2.8-2.5 2h-1.5V3.5h2c2.5 0 4.5 1.8 4.5 4s-1.5 3.5-3.5 4c1.2.5 2 1.5 2 3 .2 1.5 1.2 2.5 2.5 2.5V17z" />
-              </svg>
+              <Image
+                src="/sterling.svg"
+                alt="Cash (GBP)"
+                width={24}
+                height={24}
+                unoptimized
+                className="transition-opacity hover:opacity-75"
+                title="Cash (GBP)"
+              />
             </div>
           </div>
         </div>

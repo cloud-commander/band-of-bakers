@@ -13,6 +13,7 @@ import {
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 interface ProductDetailFormProps {
   product: Product & { variants?: ProductVariant[] };
@@ -59,9 +60,19 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
+        <h1
+          className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} mb-2`}
+          style={{ fontFamily: DESIGN_TOKENS.typography.h1.family }}
+        >
+          {product.name}
+        </h1>
         <div className="flex items-center gap-4">
-          <p className="text-3xl font-semibold text-primary">£{currentPrice.toFixed(2)}</p>
+          <p
+            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
+            style={{ color: DESIGN_TOKENS.colors.accent }}
+          >
+            £{currentPrice.toFixed(2)}
+          </p>
           {isOutOfStock && (
             <span className="bg-destructive text-destructive-foreground px-3 py-1 text-sm font-bold rounded-full">
               Out of Stock
@@ -74,7 +85,10 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
           )}
         </div>
         {product.available_from && (
-          <p className="text-sm text-muted-foreground mt-2">
+          <p
+            className={`${DESIGN_TOKENS.typography.body.sm.size} mt-2`}
+            style={{ color: DESIGN_TOKENS.colors.text.muted }}
+          >
             Available from:{" "}
             {new Date(product.available_from).toLocaleDateString("en-GB", {
               day: "numeric",
@@ -85,12 +99,21 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
         )}
       </div>
 
-      <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+      <p
+        className={`${DESIGN_TOKENS.typography.body.base.size} leading-relaxed`}
+        style={{ color: DESIGN_TOKENS.colors.text.muted }}
+      >
+        {product.description}
+      </p>
 
       {/* Variant Selector */}
       {product.variants && product.variants.length > 0 && (
         <div>
-          <label className="block text-sm font-medium mb-2">Select Size</label>
+          <label
+            className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
+          >
+            Select Size
+          </label>
           <Select value={selectedVariantId} onValueChange={setSelectedVariantId}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Choose a size" />
@@ -109,7 +132,11 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
 
       {/* Bake Sale Selector */}
       <div>
-        <label className="block text-sm font-medium mb-2">Select Collection Date</label>
+        <label
+          className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
+        >
+          Select Collection Date
+        </label>
         <Select value={selectedBakeSaleId} onValueChange={setSelectedBakeSaleId}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Choose a bake sale date" />
@@ -129,14 +156,21 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p
+          className={`${DESIGN_TOKENS.typography.body.sm.size} mt-2`}
+          style={{ color: DESIGN_TOKENS.colors.text.muted }}
+        >
           Orders must be placed before the cutoff date
         </p>
       </div>
 
       {/* Quantity */}
       <div>
-        <label className="block text-sm font-medium mb-2">Quantity</label>
+        <label
+          className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
+        >
+          Quantity
+        </label>
         <Select value={quantity} onValueChange={setQuantity}>
           <SelectTrigger className="w-32">
             <SelectValue />

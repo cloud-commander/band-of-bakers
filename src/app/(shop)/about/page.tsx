@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { SectionDivider } from "@/components/section-divider";
+import { FindUs } from "@/components/find-us";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { BUSINESS_INFO } from "@/lib/constants";
 import Link from "next/link";
@@ -174,22 +175,15 @@ export default function AboutPage() {
 
           {/* Location */}
           <SectionDivider variant="medium" className="mb-16" />
-          <div className="mb-16 text-center">
-            <h2
-              className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-6`}
-              style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
-            >
-              Find Us in Shropshire
-            </h2>
-            <p className={`${DESIGN_TOKENS.typography.body.lg.size} mb-6 text-muted-foreground`}>
-              {BUSINESS_INFO.address.formatted}
-            </p>
-            <p className={`${DESIGN_TOKENS.typography.body.base.size} mb-8`}>
-              We serve the communities of Cressage, Shrewsbury, and Telford through our regular bake
-              sales. Follow us on social media to stay updated on our schedule and special
-              offerings.
-            </p>
-          </div>
+          <FindUs
+            title="Find Us in Shropshire"
+            description="We serve the communities of Cressage and Shrewsbury, and Telford through our regular bake sales. Follow us on social media to stay updated on our schedule and special offerings."
+            address={BUSINESS_INFO.address.formatted}
+            lat={BUSINESS_INFO.coordinates.latitude}
+            lng={BUSINESS_INFO.coordinates.longitude}
+            zoom={17}
+            className="w-full h-[300px] md:h-[400px] rounded-lg overflow-hidden border"
+          />
         </div>
       </section>
 

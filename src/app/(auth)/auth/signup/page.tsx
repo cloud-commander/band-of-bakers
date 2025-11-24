@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { QuotesDisplay } from "@/components/quotes-display";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -28,8 +29,16 @@ export default function SignupPage() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Create an Account</CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <CardTitle
+            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
+            style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
+          >
+            Create an Account
+          </CardTitle>
+          <p
+            className={`${DESIGN_TOKENS.typography.body.sm.size}`}
+            style={{ color: DESIGN_TOKENS.colors.text.muted }}
+          >
             Sign up to start ordering from Band of Bakers
           </p>
         </CardHeader>
@@ -54,9 +63,16 @@ export default function SignupPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Sign Up"}
             </Button>
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
-              <Link href="/auth/login" className="text-primary hover:underline">
+            <div
+              className={`text-center ${DESIGN_TOKENS.typography.body.sm.size}`}
+              style={{ color: DESIGN_TOKENS.colors.text.muted }}
+            >
+              <span>Already have an account? </span>
+              <Link
+                href="/auth/login"
+                className="hover:underline"
+                style={{ color: DESIGN_TOKENS.colors.accent }}
+              >
                 Login
               </Link>
             </div>

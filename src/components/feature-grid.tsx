@@ -2,29 +2,24 @@
 
 import { motion } from "framer-motion";
 import { Wheat, Clock, Flame, Hand } from "lucide-react";
-import {
-  ANIMATION_DURATIONS,
-  ANIMATION_DELAYS,
-} from "@/lib/constants/frontend";
+import { ANIMATION_DURATIONS, ANIMATION_DELAYS } from "@/lib/constants/frontend";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 const features = [
   {
     icon: Wheat,
     title: "Premium Flour",
-    description:
-      "Sourced from local mills using traditional stone-grinding methods.",
+    description: "Sourced from local mills using traditional stone-grinding methods.",
   },
   {
     icon: Clock,
     title: "Long Fermentation",
-    description:
-      "48-hour cold fermentation for complex flavor and digestibility.",
+    description: "48-hour cold fermentation for complex flavor and digestibility.",
   },
   {
     icon: Flame,
     title: "Stone Fired",
-    description:
-      "Baked in our wood-fired oven at 500°C for perfect crust and crumb.",
+    description: "Baked in our wood-fired oven at 500°C for perfect crust and crumb.",
   },
   {
     icon: Hand,
@@ -39,12 +34,18 @@ export function FeatureGrid() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2
-            className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4"
-            style={{ fontFamily: "var(--font-libre-baskerville)" }}
+            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-4`}
+            style={{
+              fontFamily: DESIGN_TOKENS.typography.h2.family,
+              color: DESIGN_TOKENS.colors.text.main,
+            }}
           >
             Why We Bake
           </h2>
-          <p className="text-neutral-600 text-lg">
+          <p
+            className={`${DESIGN_TOKENS.typography.body.lg.size}`}
+            style={{ color: DESIGN_TOKENS.colors.text.muted }}
+          >
             Crafted with intention, baked with passion.
           </p>
         </div>
@@ -64,11 +65,20 @@ export function FeatureGrid() {
                 viewport={{ once: true }}
                 className="p-8 border border-neutral-200 bg-white"
               >
-                <Icon className="w-8 h-8 text-neutral-900 mb-4" />
-                <h3 className="text-lg font-bold text-neutral-900 mb-2">
+                <Icon className="w-8 h-8 mb-4" style={{ color: DESIGN_TOKENS.colors.text.main }} />
+                <h3
+                  className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-2`}
+                  style={{
+                    fontFamily: DESIGN_TOKENS.typography.h4.family,
+                    color: DESIGN_TOKENS.colors.text.main,
+                  }}
+                >
                   {feature.title}
                 </h3>
-                <p className="text-neutral-600 text-sm leading-relaxed">
+                <p
+                  className={`${DESIGN_TOKENS.typography.body.sm.size} leading-relaxed`}
+                  style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                >
                   {feature.description}
                 </p>
               </motion.div>

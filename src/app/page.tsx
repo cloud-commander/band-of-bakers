@@ -1,12 +1,10 @@
 import Image from "next/image";
 import { FadeIn } from "@/components/fade-in";
 import { Button } from "@/components/ui/button";
-import { FindUs } from "@/components/find-us";
 import { RecentNews } from "@/components/recent-news";
 import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 import { InstagramFeed } from "@/components/instagram-feed";
 import { SectionDivider } from "@/components/section-divider";
-import { BUSINESS_INFO } from "@/lib/constants/frontend";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import {
   mockFeaturedBakes,
@@ -297,17 +295,6 @@ export default function Home() {
           </FadeIn>
         </div>
       </section>
-
-      {/* Find Us Section */}
-      <SectionDivider variant="subtle" />
-      <FindUs
-        title="Find Us"
-        description="Visit our bakery in the heart of Cressage village. We're open daily, serving fresh bread and pastries to our community."
-        address={BUSINESS_INFO.address.formatted}
-        lat={BUSINESS_INFO.coordinates.latitude}
-        lng={BUSINESS_INFO.coordinates.longitude}
-        zoom={16}
-      />
     </>
   );
 }

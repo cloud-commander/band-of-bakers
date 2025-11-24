@@ -64,7 +64,12 @@ export default function AdminDashboard() {
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div
+                  className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
+                  style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
+                >
+                  {stat.value}
+                </div>
               </CardContent>
             </Card>
           </Link>
@@ -90,14 +95,27 @@ export default function AdminDashboard() {
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div>
-                  <p className="font-medium">Order #{order.id}</p>
-                  <p className={`${DESIGN_TOKENS.typography.body.sm.size} text-muted-foreground`}>
+                  <p
+                    className={`${DESIGN_TOKENS.typography.body.base.size} font-medium`}
+                    style={{ color: DESIGN_TOKENS.colors.text.main }}
+                  >
+                    Order #{order.id}
+                  </p>
+                  <p
+                    className={`${DESIGN_TOKENS.typography.body.sm.size}`}
+                    style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                  >
                     {new Date(order.created_at).toLocaleDateString("en-GB")}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge>{order.status}</Badge>
-                  <span className="font-semibold">£{order.total.toFixed(2)}</span>
+                  <span
+                    className={`${DESIGN_TOKENS.typography.body.base.size} font-semibold`}
+                    style={{ color: DESIGN_TOKENS.colors.text.main }}
+                  >
+                    £{order.total.toFixed(2)}
+                  </span>
                 </div>
               </Link>
             ))}

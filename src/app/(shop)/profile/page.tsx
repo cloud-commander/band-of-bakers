@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { mockCurrentUser } from "@/lib/mocks/users";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -48,15 +49,36 @@ export default function ProfilePage() {
             <div className="flex items-center gap-6">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={mockCurrentUser.avatar_url || undefined} />
-                <AvatarFallback className="text-2xl">
+                <AvatarFallback
+                  className={`${DESIGN_TOKENS.typography.h2.size}`}
+                  style={{ color: DESIGN_TOKENS.colors.text.main }}
+                >
                   {getInitials(mockCurrentUser.name)}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-semibold text-lg">{mockCurrentUser.name}</h3>
-                <p className="text-sm text-muted-foreground capitalize">{mockCurrentUser.role}</p>
+                <h3
+                  className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight}`}
+                  style={{
+                    fontFamily: DESIGN_TOKENS.typography.h4.family,
+                    color: DESIGN_TOKENS.colors.text.main,
+                  }}
+                >
+                  {mockCurrentUser.name}
+                </h3>
+                <p
+                  className={`${DESIGN_TOKENS.typography.body.sm.size} capitalize`}
+                  style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                >
+                  {mockCurrentUser.role}
+                </p>
                 {mockCurrentUser.email_verified && (
-                  <p className="text-xs text-green-600 mt-1">✓ Email verified</p>
+                  <p
+                    className={`${DESIGN_TOKENS.typography.body.sm.size} mt-1`}
+                    style={{ color: "#16a34a" }}
+                  >
+                    ✓ Email verified
+                  </p>
                 )}
               </div>
             </div>
@@ -64,7 +86,15 @@ export default function ProfilePage() {
 
           {/* Profile Form */}
           <form onSubmit={handleSave} className="border rounded-lg p-6">
-            <h2 className="font-semibold text-lg mb-4">Personal Information</h2>
+            <h2
+              className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-4`}
+              style={{
+                fontFamily: DESIGN_TOKENS.typography.h4.family,
+                color: DESIGN_TOKENS.colors.text.main,
+              }}
+            >
+              Personal Information
+            </h2>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name">Full Name</Label>
@@ -121,11 +151,27 @@ export default function ProfilePage() {
 
           {/* Account Stats */}
           <div className="border rounded-lg p-6">
-            <h2 className="font-semibold text-lg mb-4">Account Activity</h2>
+            <h2
+              className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-4`}
+              style={{
+                fontFamily: DESIGN_TOKENS.typography.h4.family,
+                color: DESIGN_TOKENS.colors.text.main,
+              }}
+            >
+              Account Activity
+            </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Member Since</p>
-                <p className="font-medium">
+                <p
+                  className={`${DESIGN_TOKENS.typography.body.sm.size}`}
+                  style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                >
+                  Member Since
+                </p>
+                <p
+                  className={`${DESIGN_TOKENS.typography.body.base.size} font-medium`}
+                  style={{ color: DESIGN_TOKENS.colors.text.main }}
+                >
                   {new Date(mockCurrentUser.created_at).toLocaleDateString("en-GB", {
                     year: "numeric",
                     month: "long",
@@ -133,8 +179,16 @@ export default function ProfilePage() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Last Updated</p>
-                <p className="font-medium">
+                <p
+                  className={`${DESIGN_TOKENS.typography.body.sm.size}`}
+                  style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                >
+                  Last Updated
+                </p>
+                <p
+                  className={`${DESIGN_TOKENS.typography.body.base.size} font-medium`}
+                  style={{ color: DESIGN_TOKENS.colors.text.main }}
+                >
                   {new Date(mockCurrentUser.updated_at).toLocaleDateString("en-GB", {
                     year: "numeric",
                     month: "long",
