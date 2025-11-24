@@ -14,6 +14,8 @@ import { useAuth } from "@/context/auth-context";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();

@@ -14,6 +14,8 @@ import { useAuth } from "@/context/auth-context";
 import { signupSchema, type SignupFormData } from "@/lib/validators/auth";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();

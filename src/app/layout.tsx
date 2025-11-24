@@ -28,32 +28,78 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://bandofbakers.co.uk"),
   title: {
-    default: "Band of Bakers",
+    default: "Band of Bakers | Artisan Bakery in Shropshire",
     template: "%s | Band of Bakers",
   },
-  description: "Fresh-baked goodness every day - Artisan bread and bakes from Shropshire",
+  description:
+    "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods. Visit our bake sales at Cressage Village Hall every Saturday.",
+  keywords: [
+    "artisan bakery",
+    "sourdough bread",
+    "Shropshire bakery",
+    "fresh baked goods",
+    "Cressage",
+    "bake sale",
+    "handmade bread",
+    "local bakery",
+  ],
+  authors: [{ name: "Band of Bakers" }],
+  creator: "Band of Bakers",
+  publisher: "Band of Bakers",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: "/logo.ico",
+    apple: "/Bandofbakers-logo.png",
   },
   openGraph: {
-    title: "Band of Bakers",
-    description: "Fresh-baked goodness every day - Artisan bread and bakes from Shropshire",
-    images: ["/Bandofbakers-logo.png"],
     type: "website",
+    locale: "en_GB",
+    url: "https://bandofbakers.co.uk",
+    siteName: "Band of Bakers",
+    title: "Band of Bakers | Artisan Bakery in Shropshire",
+    description:
+      "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
+    images: [
+      {
+        url: "/Bandofbakers-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Band of Bakers - Artisan Bakery",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Band of Bakers",
-    description: "Fresh-baked goodness every day - Artisan bread and bakes from Shropshire",
+    title: "Band of Bakers | Artisan Bakery in Shropshire",
+    description:
+      "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
     images: ["/Bandofbakers-logo.png"],
+    creator: "@bandofbakers",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "your-google-verification-code",
   },
 };
 
 import { CartProvider } from "@/context/cart-context";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
-
-// ... existing imports
+import { StructuredData } from "@/components/seo/structured-data";
 
 export default function RootLayout({
   children,
@@ -62,6 +108,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${playfairDisplay.variable}`}>
+      <head>
+        <StructuredData />
+      </head>
       <body
         className={cn(
           "min-h-screen antialiased font-sans bg-stone-50 relative",

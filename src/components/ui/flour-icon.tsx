@@ -1,8 +1,12 @@
-import { LucideIcon } from "lucide-react";
+import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ComponentType } from "react";
+
+type LucideComponent = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 interface FlourIconProps {
-  icon: LucideIcon;
+  // Accept either the icon component itself (client-only) or a serializable icon name (string)
+  icon: string | LucideComponent;
   size?: "sm" | "md" | "lg";
   active?: boolean;
   variant?: "wheat" | "time" | "award" | "leaf" | "default";
@@ -10,12 +14,18 @@ interface FlourIconProps {
 }
 
 export function FlourIcon({
-  icon: Icon,
+  icon,
   size = "md",
   active = false,
   variant = "default",
   className,
 }: FlourIconProps) {
+  // Resolve icon when a string is provided (use lucide-react export map)
+  const IconComponent: LucideComponent =
+    typeof icon === "string"
+      ? // fallback to Package if not found
+        (Icons as unknown as Record<string, LucideComponent>)[icon] || Icons.Package
+      : (icon as LucideComponent);
   const config = {
     sm: { wrapper: "w-8 h-8", icon: "w-4 h-4", stroke: 2 },
     md: { wrapper: "w-12 h-12", icon: "w-6 h-6", stroke: 2 },
@@ -30,7 +40,7 @@ export function FlourIcon({
     default: "text-bakery-amber-800",
   };
 
-  const { wrapper, icon, stroke } = config[size];
+  const { wrapper, icon: iconClass, stroke } = config[size];
 
   return (
     <div
@@ -56,7 +66,7 @@ export function FlourIcon({
         )`,
       }}
     >
-      <Icon className={cn(colorMap[variant], icon)} strokeWidth={stroke} />
+      <IconComponent className={cn(colorMap[variant], iconClass)} strokeWidth={stroke} />
     </div>
   );
 }

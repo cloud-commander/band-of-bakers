@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  signInWithEmailAndPassword,
-  signUpWithEmailAndPassword,
-  GoogleUser,
-} from "@/lib/google-identity";
+import { signInWithEmailAndPassword, signUpWithEmailAndPassword } from "@/lib/google-identity";
 
 interface AuthRequest {
   email: string;

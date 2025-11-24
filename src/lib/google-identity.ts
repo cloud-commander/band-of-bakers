@@ -8,7 +8,6 @@ const OAUTH2_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 // Configuration from environment variables
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
-const PROJECT_ID = process.env.GOOGLE_PROJECT_ID!;
 const API_KEY = process.env.GCP_IDENTITY_PLATFORM_API_KEY!;
 const TENANT_ID = process.env.GCP_IDENTITY_PLATFORM_TENANT_ID;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";

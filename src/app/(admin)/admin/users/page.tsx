@@ -7,9 +7,7 @@ import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search, ChevronUp, ChevronDown, X } from "lucide-react";
-import type { User } from "@/lib/validators/user";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_USERS_ITEMS_PER_PAGE;

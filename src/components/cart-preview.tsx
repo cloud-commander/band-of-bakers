@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/cart-context";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 
 export function CartPreview() {

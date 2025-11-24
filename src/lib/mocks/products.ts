@@ -377,11 +377,37 @@ export const mockProducts: Product[] = [
     updated_at: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "prod-carrot-orange-blueberry",
+    id: "prod-carrot-cake",
     category_id: "cat-cakes-loaves",
-    name: "Carrot, Orange and Blueberry Cake",
-    slug: "carrot-orange-blueberry-cake",
-    description: "Moist carrot cake with orange and blueberry.",
+    name: "Carrot Cake",
+    slug: "carrot-cake",
+    description: "Moist carrot cake with cream cheese frosting.",
+    base_price: 11.5,
+    image_url:
+      "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "prod-orange-cake",
+    category_id: "cat-cakes-loaves",
+    name: "Orange Cake",
+    slug: "orange-cake",
+    description: "Zesty orange cake with citrus glaze.",
+    base_price: 11.5,
+    image_url:
+      "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "prod-blueberry-cake",
+    category_id: "cat-cakes-loaves",
+    name: "Blueberry Cake",
+    slug: "blueberry-cake",
+    description: "Delicious blueberry cake bursting with fresh berries.",
     base_price: 11.5,
     image_url:
       "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
@@ -839,10 +865,10 @@ export const mockProductVariants: ProductVariant[] = [
     updated_at: "2024-01-01T00:00:00.000Z",
   },
 
-  // Carrot, Orange and Blueberry Cake - whole or sliced
+  // Carrot Cake - whole or sliced
   {
-    id: "var-carrot-orange-blueberry-whole",
-    product_id: "prod-carrot-orange-blueberry",
+    id: "var-carrot-cake-whole",
+    product_id: "prod-carrot-cake",
     name: "Whole",
     price_adjustment: 0,
     sort_order: 1,
@@ -851,8 +877,52 @@ export const mockProductVariants: ProductVariant[] = [
     updated_at: "2024-01-01T00:00:00.000Z",
   },
   {
-    id: "var-carrot-orange-blueberry-sliced",
-    product_id: "prod-carrot-orange-blueberry",
+    id: "var-carrot-cake-sliced",
+    product_id: "prod-carrot-cake",
+    name: "Sliced",
+    price_adjustment: 0,
+    sort_order: 2,
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+
+  // Orange Cake - whole or sliced
+  {
+    id: "var-orange-cake-whole",
+    product_id: "prod-orange-cake",
+    name: "Whole",
+    price_adjustment: 0,
+    sort_order: 1,
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "var-orange-cake-sliced",
+    product_id: "prod-orange-cake",
+    name: "Sliced",
+    price_adjustment: 0,
+    sort_order: 2,
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+
+  // Blueberry Cake - whole or sliced
+  {
+    id: "var-blueberry-cake-whole",
+    product_id: "prod-blueberry-cake",
+    name: "Whole",
+    price_adjustment: 0,
+    sort_order: 1,
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+  {
+    id: "var-blueberry-cake-sliced",
+    product_id: "prod-blueberry-cake",
     name: "Sliced",
     price_adjustment: 0,
     sort_order: 2,

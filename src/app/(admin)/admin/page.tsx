@@ -1,13 +1,16 @@
 import { PageHeader } from "@/components/state/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { mockOrders } from "@/lib/mocks/orders";
 import { mockProducts } from "@/lib/mocks/products";
 import { mockUsers } from "@/lib/mocks/users";
 import { Badge } from "@/components/ui/badge";
-import { SectionDivider } from "@/components/section-divider";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import Link from "next/link";
-import { ArrowUpRight, Package, ShoppingCart, Users } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { RevenueTrendChart } from "@/components/admin/revenue-chart";
+import { TopProductsChart } from "@/components/admin/top-products-chart";
+import { OrderStatusChart } from "@/components/admin/order-status-chart";
+import { Heading } from "@/components/ui/heading";
+import { KPICard } from "@/components/admin/kpi-card";
 
 export default function AdminDashboard() {
   const totalOrders = mockOrders.length;
@@ -15,113 +18,118 @@ export default function AdminDashboard() {
   const totalProducts = mockProducts.filter((p) => p.is_active).length;
   const totalUsers = mockUsers.filter((u) => u.role === "customer").length;
 
-  const recentOrders = mockOrders.slice(0, 5);
+  // Calculate trends (mock data - in production, compare with previous period)
+  const ordersTrend = 12.5;
+  const revenueTrend = 8.3;
+  const productsTrend = -2.1;
+  const customersTrend = 15.7;
 
-  const stats = [
-    {
-      title: "Total Orders",
-      value: totalOrders,
-      icon: ShoppingCart,
-      href: "/admin/orders",
-    },
-    {
-      title: "Revenue",
-      value: `£${totalRevenue.toFixed(2)}`,
-      icon: ArrowUpRight,
-      href: "/admin/orders",
-    },
-    {
-      title: "Products",
-      value: totalProducts,
-      icon: Package,
-      href: "/admin/products",
-    },
-    {
-      title: "Customers",
-      value: totalUsers,
-      icon: Users,
-      href: "/admin/users",
-    },
-  ];
+  const recentOrders = mockOrders.slice(0, 5);
 
   return (
     <div>
-      <PageHeader title="Dashboard" description="Overview of your store" />
+      <PageHeader
+        title="Dashboard"
+        description="Overview of your store performance and analytics"
+      />
 
-      {/* Stats Grid */}
-      <div
-        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${DESIGN_TOKENS.sections.gap} mb-8`}
-      >
-        {stats.map((stat) => (
-          <Link key={stat.title} href={stat.href}>
-            <Card className="hover:shadow-md transition-shadow border border-opacity-20">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle
-                  className={`${DESIGN_TOKENS.typography.body.sm.size} font-medium text-muted-foreground`}
-                >
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
-                  style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
-                >
-                  {stat.value}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+      {/* KPI Cards with Trends */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Link href="/admin/orders">
+          <KPICard
+            title="Total Orders"
+            value={totalOrders}
+            icon="ShoppingCart"
+            variant="wheat"
+            trend={{ value: ordersTrend, label: "vs last month" }}
+          />
+        </Link>
+        <Link href="/admin/orders">
+          <KPICard
+            title="Revenue"
+            value={`£${totalRevenue.toFixed(2)}`}
+            icon="ArrowUpRight"
+            variant="award"
+            trend={{ value: revenueTrend, label: "vs last month" }}
+          />
+        </Link>
+        <Link href="/admin/products">
+          <KPICard
+            title="Active Products"
+            value={totalProducts}
+            icon="Package"
+            variant="leaf"
+            trend={{ value: productsTrend, label: "vs last month" }}
+          />
+        </Link>
+        <Link href="/admin/users">
+          <KPICard
+            title="Customers"
+            value={totalUsers}
+            icon="Users"
+            variant="time"
+            trend={{ value: customersTrend, label: "vs last month" }}
+          />
+        </Link>
       </div>
 
-      {/* Recent Orders */}
-      <SectionDivider variant="subtle" className="mb-8" />
-      <Card className="border border-opacity-20">
-        <CardHeader>
-          <CardTitle
-            className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight}`}
-          >
-            Recent Orders
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentOrders.map((order) => (
-              <Link
-                key={order.id}
-                href={`/admin/orders/${order.id}`}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div>
-                  <p
-                    className={`${DESIGN_TOKENS.typography.body.base.size} font-medium`}
-                    style={{ color: DESIGN_TOKENS.colors.text.main }}
-                  >
-                    Order #{order.id}
-                  </p>
-                  <p
-                    className={`${DESIGN_TOKENS.typography.body.sm.size}`}
-                    style={{ color: DESIGN_TOKENS.colors.text.muted }}
-                  >
-                    {new Date(order.created_at).toLocaleDateString("en-GB")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Badge>{order.status}</Badge>
-                  <span
-                    className={`${DESIGN_TOKENS.typography.body.base.size} font-semibold`}
-                    style={{ color: DESIGN_TOKENS.colors.text.main }}
-                  >
-                    £{order.total.toFixed(2)}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        {/* Revenue Trend - Full Width */}
+        <RevenueTrendChart />
+
+        {/* Top Products and Order Status - Side by Side */}
+        <TopProductsChart />
+        <OrderStatusChart />
+      </div>
+
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="border border-stone-200">
+          <CardHeader>
+            <Heading level={3} className="mb-0">
+              Recent Orders
+            </Heading>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentOrders.map((order) => (
+                <Link
+                  key={order.id}
+                  href={`/admin/orders/${order.id}`}
+                  className="flex items-center justify-between p-4 border border-stone-200 rounded-lg hover:bg-stone-50 hover:border-bakery-amber-200 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-bakery-amber-100 flex items-center justify-center">
+                      <ShoppingCart className="w-5 h-5 text-bakery-amber-700" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-stone-800 group-hover:text-bakery-amber-700 transition-colors">
+                        Order #{order.id.slice(0, 8)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(order.created_at).toLocaleDateString("en-GB", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Badge variant="outline" className="bg-white capitalize">
+                      {order.status}
+                    </Badge>
+                    <span className="font-serif font-bold text-stone-800 min-w-[80px] text-right">
+                      £{order.total.toFixed(2)}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

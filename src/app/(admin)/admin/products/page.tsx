@@ -244,7 +244,8 @@ export default function AdminProductsPage() {
             <tr>
               <th className="text-left p-4 font-medium">Name</th>
               <th className="text-left p-4 font-medium">Category</th>
-              <th className="text-left p-4 font-medium">Price</th>
+              <th className="text-left p-4 font-medium">Base Price</th>
+              <th className="text-center p-4 font-medium">Variants</th>
               <th className="text-center p-4 font-medium">Bake Date</th>
               <th className="text-left p-4 font-medium">Status</th>
               <th className="text-right p-4 font-medium">Actions</th>
@@ -256,11 +257,30 @@ export default function AdminProductsPage() {
               const selectedBakeSaleData = upcomingBakeSales.find(
                 (bs) => bs.id === selectedBakeSale
               );
+              const variantCount = product.variants?.length || 0;
+              const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
+
               return (
                 <tr key={product.id} className="border-t hover:bg-muted/30">
                   <td className="p-4 font-medium">{product.name}</td>
                   <td className="p-4 text-sm">{category?.name}</td>
-                  <td className="p-4 font-medium">£{product.base_price.toFixed(2)}</td>
+                  <td className="p-4 font-medium font-serif">£{product.base_price.toFixed(2)}</td>
+                  <td className="p-4">
+                    {variantCount > 0 ? (
+                      <div className="flex items-center justify-center">
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          {activeVariants} / {variantCount}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <span className="text-xs text-muted-foreground">No variants</span>
+                      </div>
+                    )}
+                  </td>
                   <td className="p-4">
                     {selectedBakeSaleData && (
                       <div className="flex items-center justify-center">
