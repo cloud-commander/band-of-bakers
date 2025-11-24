@@ -4,7 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
-import { LayoutDashboard, Package, ShoppingCart, Calendar, Users, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Calendar,
+  Users,
+  Newspaper,
+  Settings,
+} from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -12,6 +20,7 @@ const navigation = [
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Bake Sales", href: "/admin/bake-sales", icon: Calendar },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "News", href: "/admin/news", icon: Newspaper },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

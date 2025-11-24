@@ -19,19 +19,22 @@ export const mockFeaturedBakes: FeaturedBake[] = [
     id: 1,
     name: "Sourdough",
     description: "Classic artisan loaf",
-    image: "https://picsum.photos/600/600?random=1",
+    image:
+      "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=600&fit=crop&auto=format",
   },
   {
     id: 2,
     name: "Croissant",
     description: "Buttery layers of perfection",
-    image: "https://picsum.photos/600/600?random=2",
+    image:
+      "https://images.unsplash.com/photo-1555507036-ab794f9a9f86?w=600&h=600&fit=crop&auto=format",
   },
   {
     id: 3,
     name: "Focaccia",
     description: "Herb-infused Italian classic",
-    image: "https://picsum.photos/600/600?random=3",
+    image:
+      "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=600&h=600&fit=crop&auto=format",
   },
 ];
 
@@ -41,7 +44,8 @@ export const mockFeaturedBakes: FeaturedBake[] = [
 
 export const HERO_SECTION = {
   /** Hero background image URL */
-  backgroundImage: "https://picsum.photos/1400/900?random=hero",
+  backgroundImage:
+    "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=2000&h=1200&fit=crop&auto=format",
   /** Hero background image alt text */
   backgroundAlt: "Baker's hands kneading dough",
   /** Hero main heading */
@@ -88,8 +92,7 @@ export const CTA_SECTION = {
   /** Section heading */
   heading: "Ready to Order?",
   /** Section description */
-  description:
-    "Reserve your fresh loaves today. Available for pickup or delivery.",
+  description: "Reserve your fresh loaves today. Available for pickup or delivery.",
   /** CTA button text */
   ctaText: "Order Online",
   /** CTA button link */

@@ -96,7 +96,8 @@ export const mockStaff: User = mockUsers[2];
 export const mockCustomers: User[] = mockUsers.filter((u) => u.role === "customer");
 
 // Public users (without password hash)
-export const mockPublicUsers: PublicUser[] = mockUsers.map(({ password_hash, ...user }) => user);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const mockPublicUsers: PublicUser[] = mockUsers.map(({ password_hash: _, ...user }) => user);
 
 // Empty state
 export const mockUsersEmpty: User[] = [];

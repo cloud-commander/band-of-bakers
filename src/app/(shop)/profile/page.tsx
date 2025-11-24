@@ -1,6 +1,8 @@
 "use client";
 
 import { PageHeader } from "@/components/state/page-header";
+
+export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,11 +39,7 @@ export default function ProfilePage() {
           title="My Profile"
           description="Manage your account information"
           breadcrumbs={[{ label: "Home", href: "/" }, { label: "Profile" }]}
-          actions={
-            !isEditing && (
-              <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-            )
-          }
+          actions={!isEditing && <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>}
         />
 
         <div className="space-y-6">
@@ -55,16 +53,10 @@ export default function ProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-semibold text-lg">
-                  {mockCurrentUser.name}
-                </h3>
-                <p className="text-sm text-muted-foreground capitalize">
-                  {mockCurrentUser.role}
-                </p>
+                <h3 className="font-semibold text-lg">{mockCurrentUser.name}</h3>
+                <p className="text-sm text-muted-foreground capitalize">{mockCurrentUser.role}</p>
                 {mockCurrentUser.email_verified && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ✓ Email verified
-                  </p>
+                  <p className="text-xs text-green-600 mt-1">✓ Email verified</p>
                 )}
               </div>
             </div>
@@ -79,9 +71,7 @@ export default function ProfilePage() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={!isEditing}
                 />
               </div>
@@ -91,9 +81,7 @@ export default function ProfilePage() {
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={!isEditing}
                 />
               </div>
@@ -103,9 +91,7 @@ export default function ProfilePage() {
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   disabled={!isEditing}
                   placeholder="+44 7700 900000"
                 />
@@ -140,26 +126,20 @@ export default function ProfilePage() {
               <div>
                 <p className="text-sm text-muted-foreground">Member Since</p>
                 <p className="font-medium">
-                  {new Date(mockCurrentUser.created_at).toLocaleDateString(
-                    "en-GB",
-                    {
-                      year: "numeric",
-                      month: "long",
-                    }
-                  )}
+                  {new Date(mockCurrentUser.created_at).toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                  })}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Last Updated</p>
                 <p className="font-medium">
-                  {new Date(mockCurrentUser.updated_at).toLocaleDateString(
-                    "en-GB",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}
+                  {new Date(mockCurrentUser.updated_at).toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </p>
               </div>
             </div>

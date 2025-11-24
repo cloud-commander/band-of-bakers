@@ -26,9 +26,33 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Band of Bakers",
-  description: "Fresh-baked goodness every day",
+  metadataBase: new URL("https://bandofbakers.co.uk"),
+  title: {
+    default: "Band of Bakers",
+    template: "%s | Band of Bakers",
+  },
+  description: "Fresh-baked goodness every day - Artisan bread and bakes from Shropshire",
+  icons: {
+    icon: "/logo.ico",
+  },
+  openGraph: {
+    title: "Band of Bakers",
+    description: "Fresh-baked goodness every day - Artisan bread and bakes from Shropshire",
+    images: ["/Bandofbakers-logo.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Band of Bakers",
+    description: "Fresh-baked goodness every day - Artisan bread and bakes from Shropshire",
+    images: ["/Bandofbakers-logo.png"],
+  },
 };
+
+import { CartProvider } from "@/context/cart-context";
+import { Toaster } from "sonner";
+
+// ... existing imports
 
 export default function RootLayout({
   children,
@@ -49,9 +73,12 @@ export default function RootLayout({
           backgroundColor: "var(--bg-warm)",
         }}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <CartProvider>
+          <Navbar />
+          {children}
+          <Footer />
+          <Toaster position="top-center" />
+        </CartProvider>
       </body>
     </html>
   );

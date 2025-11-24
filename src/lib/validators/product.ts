@@ -27,11 +27,9 @@ export const insertProductCategorySchema = z.object({
   sort_order: z.number().int().default(0),
 });
 
-export const updateProductCategorySchema = insertProductCategorySchema
-  .partial()
-  .extend({
-    id: z.string().uuid(),
-  });
+export const updateProductCategorySchema = insertProductCategorySchema.partial().extend({
+  id: z.string().uuid(),
+});
 
 // ============================================================================
 // PRODUCT SCHEMAS
@@ -49,6 +47,8 @@ export const productSchema = z.object({
   base_price: z.number().positive("Price must be positive"),
   image_url: z.string().url().nullable().optional(),
   is_active: z.boolean().default(true),
+  stock_quantity: z.number().int().nullable().optional(),
+  available_from: z.string().datetime().nullable().optional(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });
@@ -64,6 +64,8 @@ export const insertProductSchema = z.object({
   base_price: z.number().positive("Price must be positive"),
   image_url: z.string().url().nullable().optional(),
   is_active: z.boolean().default(true),
+  stock_quantity: z.number().int().nullable().optional(),
+  available_from: z.string().datetime().nullable().optional(),
 });
 
 export const updateProductSchema = insertProductSchema.partial().extend({
@@ -93,11 +95,9 @@ export const insertProductVariantSchema = z.object({
   is_active: z.boolean().default(true),
 });
 
-export const updateProductVariantSchema = insertProductVariantSchema
-  .partial()
-  .extend({
-    id: z.string().uuid(),
-  });
+export const updateProductVariantSchema = insertProductVariantSchema.partial().extend({
+  id: z.string().uuid(),
+});
 
 // ============================================================================
 // COMBINED PRODUCT WITH VARIANTS

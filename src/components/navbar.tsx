@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { ShoppingCart, User, LogOut, Package, UserCircle } from "lucide-react";
+import { User, LogOut, Package, UserCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { UI_THRESHOLDS, BUSINESS_INFO } from "@/lib/constants/frontend";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+
+import { MobileMenu } from "@/components/mobile-menu";
+import { CartPreview } from "@/components/cart-preview";
+import { SearchBar } from "@/components/search-bar";
+import { Suspense } from "react";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,67 +46,89 @@ export function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 relative">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link
-              href="/"
-              className="text-2xl font-bold hover:opacity-80 transition-opacity"
-              style={{
-                fontFamily: DESIGN_TOKENS.typography.h4.family,
-                color: DESIGN_TOKENS.colors.text.main,
-              }}
-            >
-              {BUSINESS_INFO.logo} {BUSINESS_INFO.shortName}
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <Image
+                src="/Bandofbakers-logo-removebg-preview.png"
+                alt="Band of Bakers Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
+              <span
+                className="text-xl font-bold"
+                style={{
+                  fontFamily: DESIGN_TOKENS.typography.h4.family,
+                  color: DESIGN_TOKENS.colors.text.main,
+                }}
+              >
+                {BUSINESS_INFO.shortName}
+              </span>
             </Link>
           </div>
 
-          {/* Center: Main Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Center: Main Navigation (Desktop) */}
+          <div className="hidden lg:flex items-center gap-6">
             <Link
               href="/menu"
               className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
-              style={{ color: DESIGN_TOKENS.colors.text.main }}
+              style={{
+                color: DESIGN_TOKENS.colors.text.main,
+                fontFamily: "var(--font-geist-sans)",
+              }}
             >
               Shop
             </Link>
             <Link
               href="/about"
               className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
-              style={{ color: DESIGN_TOKENS.colors.text.main }}
+              style={{
+                color: DESIGN_TOKENS.colors.text.main,
+                fontFamily: "var(--font-geist-sans)",
+              }}
             >
               About
             </Link>
             <Link
               href="/news"
               className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
-              style={{ color: DESIGN_TOKENS.colors.text.main }}
+              style={{
+                color: DESIGN_TOKENS.colors.text.main,
+                fontFamily: "var(--font-geist-sans)",
+              }}
             >
               News
             </Link>
             <Link
               href="/faq"
               className={`${DESIGN_TOKENS.typography.nav.size} ${DESIGN_TOKENS.typography.nav.weight} transition-opacity hover:opacity-70`}
-              style={{ color: DESIGN_TOKENS.colors.text.main }}
+              style={{
+                color: DESIGN_TOKENS.colors.text.main,
+                fontFamily: "var(--font-geist-sans)",
+              }}
             >
               FAQ
             </Link>
           </div>
 
-          {/* Right: Cart + User Menu */}
-          <div className="flex items-center gap-4">
-            {/* Cart Icon */}
-            <Link href="/cart" className="relative p-2 hover:opacity-70 transition-opacity">
-              <ShoppingCart className="h-6 w-6" style={{ color: DESIGN_TOKENS.colors.text.main }} />
-              {cartItemCount > 0 && (
-                <Badge
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                  style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
-                >
-                  {cartItemCount}
-                </Badge>
-              )}
-            </Link>
+          {/* Search Bar (Desktop) */}
+          <div className="hidden lg:flex items-center justify-end">
+            <div className="w-80">
+              <Suspense
+                fallback={<div className="w-full h-10 bg-gray-200 rounded animate-pulse" />}
+              >
+                <SearchBar />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Right: Cart + User Menu (Desktop) */}
+          <div className="hidden lg:flex items-center gap-4">
+            {/* Cart Preview Dropdown */}
+            <CartPreview />
 
             {/* User Menu / Login */}
             {isLoggedIn ? (
@@ -132,11 +159,20 @@ export function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild variant="ghost" size="sm">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-sm font-medium"
+                style={{ fontFamily: "var(--font-geist-sans)" }}
+              >
                 <Link href="/auth/login">Login</Link>
               </Button>
             )}
           </div>
+
+          {/* Mobile Menu */}
+          <MobileMenu isLoggedIn={isLoggedIn} cartItemCount={cartItemCount} />
         </div>
       </div>
     </nav>

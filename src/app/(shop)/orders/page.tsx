@@ -1,10 +1,19 @@
+"use client";
+
+import { useState } from "react";
 import { PageHeader } from "@/components/state/page-header";
+
+export const dynamic = "force-dynamic";
 import { EmptyState } from "@/components/state/empty-state";
 import { mockOrdersWithItems } from "@/lib/mocks/orders";
 import { mockCurrentUser } from "@/lib/mocks/users";
+import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, PaginationInfo } from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = PAGINATION_CONFIG.ORDERS_ITEMS_PER_PAGE;
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -16,10 +25,10 @@ const statusColors = {
 } as const;
 
 export default function OrdersPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Filter orders for current user
-  const userOrders = mockOrdersWithItems.filter(
-    (order) => order.user_id === mockCurrentUser.id
-  );
+  const userOrders = mockOrdersWithItems.filter((order) => order.user_id === mockCurrentUser.id);
 
   if (userOrders.length === 0) {
     return (
@@ -38,6 +47,17 @@ export default function OrdersPage() {
     );
   }
 
+  // Calculate pagination
+  const totalPages = Math.ceil(userOrders.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedOrders = userOrders.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -47,8 +67,17 @@ export default function OrdersPage() {
           breadcrumbs={[{ label: "Home", href: "/" }, { label: "Orders" }]}
         />
 
+        {/* Pagination Info */}
+        <div className="mb-6">
+          <PaginationInfo
+            currentPage={currentPage}
+            pageSize={ITEMS_PER_PAGE}
+            totalItems={userOrders.length}
+          />
+        </div>
+
         <div className="space-y-4">
-          {userOrders.map((order) => (
+          {paginatedOrders.map((order) => (
             <Link
               key={order.id}
               href={`/orders/${order.id}`}
@@ -58,11 +87,7 @@ export default function OrdersPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold">Order #{order.id}</h3>
-                    <Badge
-                      className={
-                        statusColors[order.status as keyof typeof statusColors]
-                      }
-                    >
+                    <Badge className={statusColors[order.status as keyof typeof statusColors]}>
                       {order.status}
                     </Badge>
                   </div>
@@ -79,9 +104,7 @@ export default function OrdersPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-semibold">
-                    £{order.total.toFixed(2)}
-                  </p>
+                  <p className="text-lg font-semibold">£{order.total.toFixed(2)}</p>
                   <p className="text-sm text-muted-foreground capitalize">
                     {order.fulfillment_method}
                   </p>
@@ -90,6 +113,17 @@ export default function OrdersPage() {
             </Link>
           ))}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex flex-col items-center gap-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

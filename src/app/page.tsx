@@ -3,6 +3,8 @@ import { FadeIn } from "@/components/fade-in";
 import { Button } from "@/components/ui/button";
 import { FindUs } from "@/components/find-us";
 import { RecentNews } from "@/components/recent-news";
+import { TestimonialsCarousel } from "@/components/testimonials-carousel";
+import { InstagramFeed } from "@/components/instagram-feed";
 import { SectionDivider } from "@/components/section-divider";
 import { BUSINESS_INFO } from "@/lib/constants/frontend";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
@@ -236,6 +238,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Customer Testimonials */}
+      <SectionDivider variant="subtle" />
+      <section
+        className={DESIGN_TOKENS.sections.padding}
+        style={{
+          backgroundColor: DESIGN_TOKENS.colors.background,
+        }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <FadeIn>
+            <div className="text-center mb-12">
+              <h2
+                className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-4`}
+                style={{
+                  fontFamily: DESIGN_TOKENS.typography.h2.family,
+                  color: DESIGN_TOKENS.colors.text.main,
+                }}
+              >
+                What Our Customers Say
+              </h2>
+              <p
+                className={`${DESIGN_TOKENS.typography.body.lg.size} max-w-2xl mx-auto`}
+                style={{
+                  color: DESIGN_TOKENS.colors.text.muted,
+                }}
+              >
+                Don&apos;t just take our word for it - hear from our happy customers
+              </p>
+            </div>
+            <TestimonialsCarousel />
+          </FadeIn>
+        </div>
+      </section>
+
       {/* Recent News */}
       <SectionDivider variant="subtle" />
       <section
@@ -245,6 +281,21 @@ export default function Home() {
         }}
       >
         <RecentNews />
+      </section>
+
+      {/* Instagram Feed */}
+      <SectionDivider variant="subtle" />
+      <section
+        className={DESIGN_TOKENS.sections.padding}
+        style={{
+          backgroundColor: DESIGN_TOKENS.colors.background,
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <FadeIn>
+            <InstagramFeed />
+          </FadeIn>
+        </div>
       </section>
 
       {/* Find Us Section */}

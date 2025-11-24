@@ -45,6 +45,8 @@ export const BUSINESS_INFO = {
     instagram: "https://www.instagram.com/band_of_bakers/",
     facebook: "https://www.facebook.com/ShrewsburyMarketHall/",
     twitter: "",
+    mixcloud: "",
+    soundcloud: "",
   },
 } as const;
 
@@ -189,6 +191,44 @@ export const FEATURE_FLAGS = {
   PRODUCT_REVIEWS: false,
   /** Enable wishlist feature */
   WISHLIST: false,
+} as const;
+
+// ============================================================================
+// PAYMENT METHOD LOGOS
+// ============================================================================
+
+export const PAYMENT_METHOD_LOGOS = {
+  /** Visa payment method logo URL */
+  VISA: "https://cdn.simpleicons.org/visa",
+  /** Mastercard payment method logo URL */
+  MASTERCARD: "https://cdn.simpleicons.org/mastercard",
+  /** PayPal payment method logo URL */
+  PAYPAL: "https://cdn.simpleicons.org/paypal",
+  /** Apple Pay payment method logo URL */
+  APPLE_PAY: "https://cdn.simpleicons.org/applepay",
+  /** Google Pay payment method logo URL */
+  GOOGLE_PAY: "https://cdn.simpleicons.org/googlepay",
+  /** Cash App payment method logo URL */
+  CASH_APP: "https://cdn.simpleicons.org/cashapp",
+  /** Cash payment method logo URL */
+  CASH: "https://cdn.iconscout.com/icon/free/png-256/free-money-158-444654.png",
+} as const;
+
+// ============================================================================
+// SOCIAL MEDIA LOGOS
+// ============================================================================
+
+export const SOCIAL_MEDIA_LOGOS = {
+  /** Instagram logo URL */
+  INSTAGRAM: "https://cdn.simpleicons.org/instagram",
+  /** Facebook logo URL */
+  FACEBOOK: "https://cdn.simpleicons.org/facebook",
+  /** Twitter logo URL */
+  TWITTER: "https://cdn.simpleicons.org/twitter",
+  /** Mixcloud logo URL */
+  MIXCLOUD: "https://cdn.simpleicons.org/mixcloud",
+  /** Soundcloud logo URL */
+  SOUNDCLOUD: "https://cdn.simpleicons.org/soundcloud",
 } as const;
 
 // ============================================================================

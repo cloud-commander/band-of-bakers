@@ -1,15 +1,55 @@
+"use client";
+
+import { useState } from "react";
 import { PageHeader } from "@/components/state/page-header";
+
+export const dynamic = "force-dynamic";
 import { mockNewsPosts } from "@/lib/mocks/news";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, User } from "lucide-react";
+import { Pagination, PaginationInfo } from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = PAGINATION_CONFIG.NEWS_ITEMS_PER_PAGE;
 
 export default function NewsPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Sort by published date, newest first
   const publishedNews = mockNewsPosts
     .filter((post) => post.is_published)
     .sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime());
+
+  // Calculate pagination
+  const totalPages = Math.ceil(publishedNews.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedNews = publishedNews.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (publishedNews.length === 0) {
+    return (
+      <div className="min-h-screen">
+        <div className={`max-w-7xl mx-auto ${DESIGN_TOKENS.sections.padding}`}>
+          <PageHeader
+            title="News & Updates"
+            description="Stay up to date with the latest from Band of Bakers"
+          />
+          <div className="text-center py-16">
+            <p className={`${DESIGN_TOKENS.typography.body.lg.size} text-muted-foreground`}>
+              No news articles published yet. Check back soon!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -19,8 +59,17 @@ export default function NewsPage() {
           description="Stay up to date with the latest from Band of Bakers"
         />
 
+        {/* Pagination Info */}
+        <div className="mb-6">
+          <PaginationInfo
+            currentPage={currentPage}
+            pageSize={ITEMS_PER_PAGE}
+            totalItems={publishedNews.length}
+          />
+        </div>
+
         <div className={`grid md:grid-cols-2 lg:grid-cols-3 ${DESIGN_TOKENS.sections.gap}`}>
-          {publishedNews.map((post) => (
+          {paginatedNews.map((post) => (
             <article
               key={post.id}
               className={`${DESIGN_TOKENS.cards.base} overflow-hidden group`}
@@ -88,11 +137,14 @@ export default function NewsPage() {
           ))}
         </div>
 
-        {publishedNews.length === 0 && (
-          <div className="text-center py-16">
-            <p className={`${DESIGN_TOKENS.typography.body.lg.size} text-muted-foreground`}>
-              No news articles published yet. Check back soon!
-            </p>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex flex-col items-center gap-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
       </div>

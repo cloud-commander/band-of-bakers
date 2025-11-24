@@ -1,9 +1,13 @@
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { SectionDivider } from "@/components/section-divider";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { BUSINESS_INFO } from "@/lib/constants";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 
 export default function AboutPage() {
   return (
