@@ -10,6 +10,8 @@ export const SHIPPING_COST = 4.99;
 export const MOCK_API_DELAY_MS = 1000;
 export const MOCK_UPLOAD_DELAY_MS = 500;
 export const FORM_SUBMISSION_TIMEOUT_MS = 30000;
+export const ZERO_TIMEOUT_MS = 0; // For immediate execution in setTimeout
+export const QUOTE_ROTATION_INTERVAL_MS = 8000; // 8 seconds
 
 // File Upload Constraints
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB

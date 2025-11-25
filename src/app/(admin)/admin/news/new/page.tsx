@@ -21,6 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Create News Post | Band of Bakers Admin",
+  description: "Create a new news post for the website.",
+};
 
 const WysiwygEditor = dynamic(
   () => import("@/components/admin/wysiwyg-editor").then((mod) => mod.WysiwygEditor),
@@ -74,7 +81,7 @@ export default function NewNewsPostPage() {
       //   body: JSON.stringify(data),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       toast.success(
         data.status === "published" ? "Post published successfully!" : "Draft saved successfully!",

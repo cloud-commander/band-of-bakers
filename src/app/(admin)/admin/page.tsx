@@ -13,6 +13,12 @@ import { TopVouchersList } from "@/components/admin/top-vouchers-list";
 import { Heading } from "@/components/ui/heading";
 import { KPICard } from "@/components/admin/kpi-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard | Band of Bakers Admin",
+  description: "Overview of store performance, orders, and analytics.",
+};
 
 export default function AdminDashboard() {
   const totalOrders = mockOrders.length;

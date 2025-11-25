@@ -18,6 +18,7 @@ import {
   Newspaper,
   HelpCircle,
 } from "lucide-react";
+import { ZERO_TIMEOUT_MS } from "@/lib/constants/app";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
@@ -34,7 +35,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
 
   // Close menu when route changes
   useEffect(() => {
-    const timer = setTimeout(() => setIsOpen(false), 0);
+    const timer = setTimeout(() => setIsOpen(false), ZERO_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [pathname]);
 

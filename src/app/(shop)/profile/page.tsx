@@ -20,6 +20,13 @@ import { Star, Pencil, Trash2, Upload, Quote } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { mockProducts } from "@/lib/mocks/products";
+import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "My Profile | Band of Bakers",
+  description: "Manage your account settings, testimonials, and product reviews.",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +76,7 @@ export default function ProfilePage() {
       //   body: JSON.stringify(data),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       setIsEditing(false);
       toast.success("Profile updated successfully");

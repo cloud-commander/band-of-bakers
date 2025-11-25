@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { ZERO_TIMEOUT_MS } from "@/lib/constants/app";
 // import { toast } from "sonner"; // Will be used later
 
 // Define types
@@ -46,13 +47,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       try {
         const parsedCart = JSON.parse(savedCart);
         // Wrap in setTimeout to avoid synchronous state update warning
-        setTimeout(() => setItems(parsedCart), 0);
+        setTimeout(() => setItems(parsedCart), ZERO_TIMEOUT_MS);
       } catch (e) {
         console.error("Failed to parse cart from localStorage", e);
       }
     }
     // Wrap in setTimeout to avoid synchronous state update warning
-    setTimeout(() => setIsInitialized(true), 0);
+    setTimeout(() => setIsInitialized(true), ZERO_TIMEOUT_MS);
   }, []);
 
   // Save to localStorage whenever items change

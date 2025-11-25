@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { QUOTE_ROTATION_INTERVAL_MS } from "@/lib/constants/app";
 import { quotes } from "@/lib/quotes";
 
 export function QuotesDisplay() {
@@ -13,7 +14,7 @@ export function QuotesDisplay() {
     };
 
     // Change quote every 8 seconds
-    const interval = setInterval(getRandomQuote, 8000);
+    const interval = setInterval(getRandomQuote, QUOTE_ROTATION_INTERVAL_MS);
 
     // Set initial random quote
     getRandomQuote();
