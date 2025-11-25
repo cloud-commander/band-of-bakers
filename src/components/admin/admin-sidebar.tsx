@@ -15,6 +15,9 @@ import {
   Settings,
   Menu,
   X,
+  Ticket,
+  Star,
+  MessageSquareQuote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,7 +27,10 @@ const navigation = [
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Bake Sales", href: "/admin/bake-sales", icon: Calendar },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Vouchers", href: "/admin/vouchers", icon: Ticket },
   { name: "News", href: "/admin/news", icon: Newspaper },
+  { name: "Reviews", href: "/admin/reviews", icon: Star },
+  { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

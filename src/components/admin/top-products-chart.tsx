@@ -2,14 +2,23 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 
 const data = [
-  { name: "Sourdough", sales: 145 },
-  { name: "Croissants", sales: 98 },
-  { name: "Baguette", sales: 87 },
-  { name: "Focaccia", sales: 72 },
-  { name: "Ciabatta", sales: 65 },
+  { name: "Sourdough", sales: 145, color: "#34d399" }, // Green - top seller
+  { name: "Croissants", sales: 98, color: "#60a5fa" }, // Blue
+  { name: "Baguette", sales: 87, color: "#a78bfa" }, // Purple
+  { name: "Focaccia", sales: 72, color: "#fbbf24" }, // Amber
+  { name: "Ciabatta", sales: 65, color: "#f87171" }, // Red - lowest
 ];
 
 export function TopProductsChart() {
@@ -52,7 +61,11 @@ export function TopProductsChart() {
               labelStyle={{ color: "#a8a29e" }}
               cursor={{ fill: "rgba(251, 191, 36, 0.1)" }}
             />
-            <Bar dataKey="sales" fill="#fbbf24" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="sales" radius={[4, 4, 0, 0]} name="Sales">
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

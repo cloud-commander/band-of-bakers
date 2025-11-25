@@ -13,10 +13,53 @@ import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { mockVouchers } from "@/lib/mocks/vouchers";
+import { validateVoucher } from "@/lib/utils/voucher";
+import type { Voucher } from "@/lib/validators/voucher";
+import { toast } from "sonner";
+import { Ticket, X } from "lucide-react";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<"online" | "collection">("online");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+
+  const handleApplyVoucher = () => {
+    if (!voucherCode.trim()) {
+      toast.error("Please enter a voucher code");
+      return;
+    }
+
+    // Find voucher in mock data
+    const voucher = mockVouchers.find((v) => v.code.toUpperCase() === voucherCode.toUpperCase());
+
+    // Validate voucher
+    const validation = validateVoucher(voucher || null, cartTotal);
+
+    if (!validation.valid) {
+      toast.error(validation.error || "Invalid voucher");
+      return;
+    }
+
+    // Apply voucher
+    setAppliedVoucher(voucher || null);
+    setVoucherDiscount(validation.discount || 0);
+    toast.success(`Voucher ${voucher?.code} applied!`, {
+      description: `You saved £${validation.discount?.toFixed(2)}`,
+    });
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherDiscount(0);
+    setVoucherCode("");
+    toast.success("Voucher removed");
+  };
+
+  const finalTotal = cartTotal - voucherDiscount;
 
   if (items.length === 0) {
     return (
@@ -200,18 +243,67 @@ export default function CartPage() {
                 </RadioGroup>
               </div>
 
+              {/* Voucher Code Section */}
+              <div className="mb-6 pb-6 border-b">
+                <label
+                  className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-3`}
+                >
+                  Voucher Code
+                </label>
+                {appliedVoucher ? (
+                  <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Ticket className="h-4 w-4 text-emerald-700" />
+                      <div>
+                        <div className="font-medium text-emerald-900">{appliedVoucher.code}</div>
+                        <div className="text-xs text-emerald-700">
+                          -£{voucherDiscount.toFixed(2)} discount applied
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveVoucher}
+                      className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100 h-auto p-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter code"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyVoucher()}
+                      className="flex-1"
+                    />
+                    <Button onClick={handleApplyVoucher} variant="outline">
+                      Apply
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal ({cartCount} items)</span>
                   <span>£{cartTotal.toFixed(2)}</span>
                 </div>
+                {voucherDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-medium">
+                    <span>Voucher Discount</span>
+                    <span>-£{voucherDiscount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
                   <span>Calculated at checkout</span>
                 </div>
                 <div className="border-t pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>£{cartTotal.toFixed(2)}</span>
+                  <span>£{finalTotal.toFixed(2)}</span>
                 </div>
               </div>
 

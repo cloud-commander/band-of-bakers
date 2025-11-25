@@ -88,6 +88,85 @@ export default function AboutPage() {
         style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
       >
         <div className="max-w-4xl mx-auto">
+          <h2
+            className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}
+            style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
+          >
+            Meet the Team
+          </h2>
+          <div className={`grid md:grid-cols-2 ${DESIGN_TOKENS.sections.gap}`}>
+            {[
+              {
+                name: "Jon Philips",
+                role: "Head Baker & Founder",
+                favorite: "Sourdough Country Loaf",
+                bio: "Jon is the heart and soul of Band of Bakers. With over 20 years of baking experience and a passion for traditional fermentation methods, he's dedicated to bringing authentic artisan bread to Shropshire. When he's not perfecting his sourdough starter, Jon loves experimenting with new grain blends and sharing his knowledge with the community.",
+                image: "/jon.webp",
+              },
+              {
+                name: "Mike Deeble",
+                role: "Manager & Founder",
+                favorite: "Almond Croissant",
+                bio: "Mike is the strategic mind behind Band of Bakers, ensuring every bake sale runs smoothly and every customer has a delightful experience. With a background in hospitality and a love for quality food, Mike combines operational excellence with genuine care for the business and its community. He's passionate about supporting local suppliers and sustainable practices.",
+                image: "/mike.webp",
+              },
+            ].map((member, index) => (
+              <div
+                key={index}
+                className={`${DESIGN_TOKENS.cards.base} overflow-hidden group`}
+                style={{
+                  backgroundColor: DESIGN_TOKENS.colors.card,
+                  border: `1px solid ${DESIGN_TOKENS.colors.border}`,
+                }}
+              >
+                <div className="relative h-80 w-full overflow-hidden">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className={DESIGN_TOKENS.cards.padding}>
+                  <h3
+                    className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-1`}
+                    style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
+                  >
+                    {member.name}
+                  </h3>
+                  <p
+                    className={`${DESIGN_TOKENS.typography.body.sm.size} mb-3 uppercase tracking-wider`}
+                    style={{ color: DESIGN_TOKENS.colors.accent }}
+                  >
+                    {member.role}
+                  </p>
+                  <p
+                    className={`${DESIGN_TOKENS.typography.body.base.size} mb-4 leading-relaxed`}
+                    style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                  >
+                    {member.bio}
+                  </p>
+                  <p
+                    className={DESIGN_TOKENS.typography.body.base.size}
+                    style={{ color: DESIGN_TOKENS.colors.text.muted }}
+                  >
+                    <span className="font-medium text-foreground">Favorite Bake:</span>{" "}
+                    {member.favorite}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What We Stand For */}
+      <SectionDivider variant="medium" />
+      <section
+        className={DESIGN_TOKENS.sections.padding}
+        style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
+      >
+        <div className="max-w-4xl mx-auto">
           <div>
             <h2
               className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}

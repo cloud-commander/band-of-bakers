@@ -1,19 +1,41 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { PageHeader } from "@/components/state/page-header";
 import { mockUsers } from "@/lib/mocks/users";
+import type { User } from "@/lib/validators/user";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
-import { Search, ChevronUp, ChevronDown, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, ChevronUp, ChevronDown, X, Edit } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_USERS_ITEMS_PER_PAGE;
 
 type SortField = "name" | "email" | "created_at" | "phone";
 type SortDirection = "asc" | "desc";
+type BanFilter = "all" | "active" | "banned";
 
 export default function AdminUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,16 +43,35 @@ export default function AdminUsersPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [banFilter, setBanFilter] = useState<BanFilter>("all");
+
+  // Dialog states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    name: "",
+    phone: "",
+    role: "customer" as User["role"],
+    avatar_url: "",
+  });
 
   // Filter and sort users
   const filteredAndSortedUsers = useMemo(() => {
     const filtered = mockUsers.filter((user) => {
       const searchLower = debouncedSearchTerm.toLowerCase();
-      return (
+      const matchesSearch =
         user.name.toLowerCase().includes(searchLower) ||
         user.email.toLowerCase().includes(searchLower) ||
-        (user.phone && user.phone.toLowerCase().includes(searchLower))
-      );
+        (user.phone && user.phone.toLowerCase().includes(searchLower));
+
+      const matchesBanFilter =
+        banFilter === "all" ||
+        (banFilter === "active" && !user.is_banned) ||
+        (banFilter === "banned" && user.is_banned);
+
+      return matchesSearch && matchesBanFilter;
     });
 
     return filtered.sort((a, b) => {
@@ -61,7 +102,7 @@ export default function AdminUsersPage() {
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [debouncedSearchTerm, sortField, sortDirection]);
+  }, [debouncedSearchTerm, sortField, sortDirection, banFilter]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredAndSortedUsers.length / ITEMS_PER_PAGE);
@@ -81,7 +122,7 @@ export default function AdminUsersPage() {
       setSortField(field);
       setSortDirection("asc");
     }
-    setCurrentPage(1); // Reset to first page when sorting
+    setCurrentPage(1);
   };
 
   const clearSearch = () => {
@@ -101,6 +142,19 @@ export default function AdminUsersPage() {
   const getAriaSort = (field: SortField) => {
     if (sortField !== field) return "none";
     return sortDirection === "asc" ? "ascending" : "descending";
+  };
+
+  // Edit user handlers
+  const handleEditSave = () => {
+    if (!selectedUser) return;
+
+    // In Phase 4, this will call an API
+    toast.success(`User ${editForm.name} updated successfully`, {
+      description: "Changes will be reflected in the database",
+    });
+
+    setEditDialogOpen(false);
+    setSelectedUser(null);
   };
 
   return (
@@ -130,6 +184,20 @@ export default function AdminUsersPage() {
             </button>
           )}
         </div>
+
+        {/* Ban Status Filter */}
+        <select
+          value={banFilter}
+          onChange={(e) => {
+            setBanFilter(e.target.value as BanFilter);
+            setCurrentPage(1);
+          }}
+          className="px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
+        >
+          <option value="all">All Users</option>
+          <option value="active">Active Only</option>
+          <option value="banned">Banned Only</option>
+        </select>
       </div>
 
       {/* Pagination Info */}
@@ -148,7 +216,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
       ) : (
-        <div className="border rounded-lg">
+        <div className="border rounded-lg overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
@@ -179,11 +247,18 @@ export default function AdminUsersPage() {
                     Joined {getSortIcon("created_at")}
                   </button>
                 </th>
+                <th className="text-right p-4 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedUsers.map((user) => (
-                <tr key={user.id} className="border-t hover:bg-muted/30">
+                <tr
+                  key={user.id}
+                  className={cn(
+                    "border-t hover:bg-muted/30 transition-colors",
+                    user.is_banned && "bg-red-50/50"
+                  )}
+                >
                   <td className="p-4 font-medium">{user.name}</td>
                   <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
                   <td className="p-4 text-sm text-muted-foreground">{user.phone || "—"}</td>
@@ -193,12 +268,38 @@ export default function AdminUsersPage() {
                     </Badge>
                   </td>
                   <td className="p-4">
-                    <Badge variant={user.email_verified ? "default" : "secondary"}>
-                      {user.email_verified ? "Verified" : "Unverified"}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant={user.email_verified ? "default" : "secondary"}>
+                        {user.email_verified ? "Verified" : "Unverified"}
+                      </Badge>
+                      {user.is_banned && (
+                        <Badge
+                          variant="outline"
+                          className="bg-red-50 text-red-700 border-red-200"
+                          title={user.banned_reason || "No reason provided"}
+                        >
+                          Banned
+                        </Badge>
+                      )}
+                    </div>
                   </td>
                   <td className="p-4 text-sm text-muted-foreground">
                     {new Date(user.created_at).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Link href={`/admin/users/${user.id}`}>
+                          <Edit className="w-4 h-4 mr-1" />
+                          View
+                        </Link>
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -217,6 +318,83 @@ export default function AdminUsersPage() {
           />
         </div>
       )}
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user profile information. Email cannot be changed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                placeholder="Enter name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-email">Email (Read-only)</Label>
+              <Input
+                id="edit-email"
+                value={selectedUser?.email || ""}
+                disabled
+                className="bg-muted cursor-not-allowed"
+              />
+              <p className="text-xs text-muted-foreground">Email addresses cannot be changed</p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-phone">Phone</Label>
+              <Input
+                id="edit-phone"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                placeholder="+447700900000"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-role">Role</Label>
+              <Select
+                value={editForm.role}
+                onValueChange={(value) => setEditForm({ ...editForm, role: value as User["role"] })}
+              >
+                <SelectTrigger id="edit-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="staff">Staff</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-avatar">Avatar URL</Label>
+              <Input
+                id="edit-avatar"
+                value={editForm.avatar_url}
+                onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
+                placeholder="https://example.com/avatar.jpg"
+              />
+              <p className="text-xs text-muted-foreground">
+                In Phase 4, this will be a file upload
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSave}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

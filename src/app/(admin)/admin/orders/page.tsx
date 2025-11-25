@@ -29,6 +29,16 @@ export default function AdminOrdersPage() {
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [bakeSaleFilter, setBakeSaleFilter] = useState<string>("all");
+
+  // Get all unique bake sales from orders
+  const allBakeSales = useMemo(() => {
+    const uniqueBakeSaleIds = [...new Set(mockOrdersWithItems.map((o) => o.bake_sale_id))];
+    return uniqueBakeSaleIds
+      .map((id) => mockBakeSalesWithLocation.find((bs) => bs.id === id))
+      .filter(Boolean)
+      .sort((a, b) => new Date(b!.date).getTime() - new Date(a!.date).getTime());
+  }, []);
 
   // Helper function to get bake sale date
   const getBakeSaleDate = (bakeSaleId: string) => {
@@ -67,6 +77,11 @@ export default function AdminOrdersPage() {
       filtered = filtered.filter((order) => order.status.toLowerCase() === statusFilter);
     }
 
+    // Apply bake sale filter
+    if (bakeSaleFilter !== "all") {
+      filtered = filtered.filter((order) => order.bake_sale_id === bakeSaleFilter);
+    }
+
     // Sort orders
     return filtered.sort((a, b) => {
       let aValue: string | number;
@@ -97,7 +112,7 @@ export default function AdminOrdersPage() {
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [debouncedSearchTerm, statusFilter, sortField, sortDirection]);
+  }, [debouncedSearchTerm, statusFilter, bakeSaleFilter, sortField, sortDirection]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredAndSortedOrders.length / ITEMS_PER_PAGE);
@@ -220,6 +235,27 @@ export default function AdminOrdersPage() {
               </button>
             )}
           </div>
+
+          {/* Bake Sale Filter */}
+          <select
+            value={bakeSaleFilter}
+            onChange={(e) => {
+              setBakeSaleFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
+          >
+            <option value="all">All Bake Sales</option>
+            {allBakeSales.map((bakeSale) => (
+              <option key={bakeSale!.id} value={bakeSale!.id}>
+                {new Date(bakeSale!.date).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </option>
+            ))}
+          </select>
 
           {/* Status Filter */}
           <select

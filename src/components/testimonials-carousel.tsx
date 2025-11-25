@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 export function TestimonialsCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -87,7 +89,13 @@ export function TestimonialsCarousel() {
             </blockquote>
 
             {/* Author */}
-            <div className="text-center">
+            <div className="flex flex-col items-center text-center">
+              {currentTestimonial.avatar && (
+                <Avatar className="w-16 h-16 mb-4 border-2 border-background shadow-sm">
+                  <AvatarImage src={currentTestimonial.avatar} alt={currentTestimonial.name} />
+                  <AvatarFallback>{currentTestimonial.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+              )}
               <p className="font-semibold text-foreground">{currentTestimonial.name}</p>
               {currentTestimonial.role && (
                 <p className="text-sm text-muted-foreground">{currentTestimonial.role}</p>

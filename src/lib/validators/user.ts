@@ -21,6 +21,9 @@ export const userSchema = z.object({
   role: z.enum(userRoles),
   avatar_url: z.string().url().nullable().optional(),
   email_verified: z.boolean(),
+  is_banned: z.boolean().default(false),
+  banned_at: z.string().datetime().nullable().optional(),
+  banned_reason: z.string().nullable().optional(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });
@@ -28,11 +31,7 @@ export const userSchema = z.object({
 // Insert schema (without id and timestamps)
 export const insertUserSchema = z.object({
   email: z.string().email(),
-  password_hash: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .nullable()
-    .optional(),
+  password_hash: z.string().min(8, "Password must be at least 8 characters").nullable().optional(),
   name: z.string().min(1, "Name is required"),
   phone: z
     .string()
@@ -42,6 +41,9 @@ export const insertUserSchema = z.object({
   role: z.enum(userRoles).default("customer"),
   avatar_url: z.string().url().nullable().optional(),
   email_verified: z.boolean().default(false),
+  is_banned: z.boolean().default(false),
+  banned_at: z.string().datetime().nullable().optional(),
+  banned_reason: z.string().nullable().optional(),
 });
 
 // Update schema (partial with id)

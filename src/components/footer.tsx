@@ -38,7 +38,7 @@ export function Footer() {
           </div>
 
           {/* Address */}
-          <div>
+          <div className="text-center">
             <Heading level={4} className="mb-4">
               Address
             </Heading>
@@ -50,7 +50,7 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="text-center">
             <Heading level={4} className="mb-4">
               Quick Links
             </Heading>
@@ -83,7 +83,7 @@ export function Footer() {
           </div>
 
           {/* Legal */}
-          <div>
+          <div className="text-center">
             <Heading level={4} className="mb-4">
               Legal
             </Heading>
@@ -116,12 +116,12 @@ export function Footer() {
           </div>
 
           {/* Social */}
-          <div>
+          <div className="text-center">
             <Heading level={4} className="mb-4">
               Social Media
             </Heading>
             {STORE.social.enabled && (
-              <div className="flex gap-3">
+              <div className="flex gap-3 justify-center">
                 {STORE.social.instagram && (
                   <a
                     href={STORE.social.instagram}
@@ -198,11 +198,11 @@ export function Footer() {
           </div>
 
           {/* Payment Methods */}
-          <div>
+          <div className="text-center">
             <Heading level={4} className="mb-4">
               We Accept
             </Heading>
-            <div className="flex flex-wrap gap-3 items-center">
+            <div className="flex flex-wrap gap-3 items-center justify-center">
               <Image
                 src={PAYMENT_METHOD_LOGOS.VISA}
                 alt="Visa"

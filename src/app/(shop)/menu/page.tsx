@@ -357,6 +357,7 @@ function MenuPageContent() {
                               name: product.name,
                               price: product.base_price,
                               image: product.image_url || undefined,
+                              bakeSaleId: selectedBakeSale,
                             });
                             toast.success(`Added ${product.name} to cart`);
                           }}

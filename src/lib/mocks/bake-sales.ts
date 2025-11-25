@@ -80,6 +80,45 @@ export const mockBakeSalePast: BakeSale = {
   updated_at: "2024-01-15T00:00:00.000Z",
 };
 
+// Past bake sales (for historical data and analytics)
+export const mockPastBakeSales: BakeSale[] = [
+  {
+    id: "bs-past-1",
+    date: "2024-11-10", // 2 weeks ago
+    location_id: mockLocations[0].id, // Station Road, Cressage
+    cutoff_datetime: "2024-11-08T18:00:00.000Z",
+    is_active: false,
+    created_at: "2024-10-01T00:00:00.000Z",
+    updated_at: "2024-11-10T00:00:00.000Z",
+  },
+  {
+    id: "bs-past-2",
+    date: "2024-11-17", // 1 week ago
+    location_id: mockLocations[1].id, // Shrewsbury Town Hall
+    cutoff_datetime: "2024-11-15T18:00:00.000Z",
+    is_active: false,
+    created_at: "2024-10-01T00:00:00.000Z",
+    updated_at: "2024-11-17T00:00:00.000Z",
+  },
+  {
+    id: "bs-past-3",
+    date: "2024-11-24", // 1 day ago
+    location_id: mockLocations[2].id, // Telford Shopping Centre
+    cutoff_datetime: "2024-11-22T18:00:00.000Z",
+    is_active: false,
+    created_at: "2024-10-01T00:00:00.000Z",
+    updated_at: "2024-11-24T00:00:00.000Z",
+  },
+];
+
+// Past bake sales with location data
+export const mockPastBakeSalesWithLocation: BakeSaleWithLocation[] = mockPastBakeSales.map(
+  (bakeSale) => ({
+    ...bakeSale,
+    location: mockLocations.find((loc) => loc.id === bakeSale.location_id)!,
+  })
+);
+
 // Cutoff passed (can't order anymore)
 export const mockBakeSaleCutoffPassed: BakeSale = {
   id: "bs-cutoff",
