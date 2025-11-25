@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/state/page-header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
@@ -28,36 +30,65 @@ const WysiwygEditor = dynamic(
   }
 );
 
+// Form validation schema
+const newsPostFormSchema = z.object({
+  title: z.string().min(1, "Title is required").max(200, "Title is too long"),
+  summary: z.string().min(1, "Summary is required").max(300, "Summary is too long"),
+  content: z.string().min(1, "Content is required"),
+  status: z.enum(["draft", "published"]),
+  publishedAt: z.string().min(1, "Publish date is required"),
+});
+
+type NewsPostForm = z.infer<typeof newsPostFormSchema>;
+
 export default function NewNewsPostPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    summary: "",
-    content: "",
-    status: "draft" as "draft" | "published",
-    publishedAt: new Date().toISOString().split("T")[0],
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<NewsPostForm>({
+    resolver: zodResolver(newsPostFormSchema),
+    defaultValues: {
+      title: "",
+      summary: "",
+      content: "",
+      status: "draft",
+      publishedAt: new Date().toISOString().split("T")[0],
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const status = useWatch({
+    control,
+    name: "status",
+  });
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  const onSubmit = async (data: NewsPostForm) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch("/api/news", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(data),
+      // });
 
-    toast.success(
-      formData.status === "published"
-        ? "Post published successfully!"
-        : "Draft saved successfully!",
-      {
-        description: formData.title,
-      }
-    );
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setIsSubmitting(false);
-    router.push("/admin/news");
+      toast.success(
+        data.status === "published" ? "Post published successfully!" : "Draft saved successfully!",
+        {
+          description: data.title,
+        }
+      );
+
+      router.push("/admin/news");
+    } catch (error) {
+      toast.error("Failed to save post", {
+        description: error instanceof Error ? error.message : "Please try again",
+      });
+    }
   };
 
   return (
@@ -72,7 +103,7 @@ export default function NewNewsPostPage() {
         <PageHeader title="Create New Post" description="Write a new update for your customers" />
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -87,13 +118,8 @@ export default function NewNewsPostPage() {
                   <Label htmlFor="title">
                     Title <span className="text-red-600">*</span>
                   </Label>
-                  <Input
-                    id="title"
-                    required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="e.g., Summer Menu Launch"
-                  />
+                  <Input id="title" {...register("title")} placeholder="e.g., Summer Menu Launch" />
+                  {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -102,22 +128,32 @@ export default function NewNewsPostPage() {
                   </Label>
                   <Input
                     id="summary"
-                    required
-                    value={formData.summary}
-                    onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                    {...register("summary")}
                     placeholder="Brief description for the list view..."
                   />
+                  {errors.summary && (
+                    <p className="text-sm text-red-600">{errors.summary.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="content">
                     Content <span className="text-red-600">*</span>
                   </Label>
-                  <WysiwygEditor
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  <Controller
+                    name="content"
+                    control={control}
+                    render={({ field }) => (
+                      <WysiwygEditor
+                        id="content"
+                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    )}
                   />
+                  {errors.content && (
+                    <p className="text-sm text-red-600">{errors.content.message}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -134,37 +170,36 @@ export default function NewNewsPostPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value: "draft" | "published") =>
-                      setFormData({ ...formData, status: value })
-                    }
-                  >
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="status"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger id="status">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="date">Publish Date</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.publishedAt}
-                    onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
-                  />
+                  <Label htmlFor="publishedAt">Publish Date</Label>
+                  <Input id="publishedAt" type="date" {...register("publishedAt")} />
+                  {errors.publishedAt && (
+                    <p className="text-sm text-red-600">{errors.publishedAt.message}</p>
+                  )}
                 </div>
 
                 <div className="pt-4 flex flex-col gap-2">
                   <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting ? (
                       "Saving..."
-                    ) : formData.status === "published" ? (
+                    ) : status === "published" ? (
                       <>
                         <Send className="w-4 h-4 mr-2" />
                         Publish Post

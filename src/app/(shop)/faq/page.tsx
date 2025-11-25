@@ -1,8 +1,6 @@
 "use client";
 
 import { PageHeader } from "@/components/state/page-header";
-
-export const dynamic = "force-dynamic";
 import {
   mockFAQs,
   mockFAQsByCategory,

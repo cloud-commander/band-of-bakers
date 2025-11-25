@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/state/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,16 +27,38 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Collection checkout validation schema
+const checkoutCollectionSchema = z.object({
+  firstName: z.string().min(1, "First name is required").max(50, "First name is too long"),
+  lastName: z.string().min(1, "Last name is required").max(50, "Last name is too long"),
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(/^(\+44|0)\s?[0-9]{10}$/, "Please enter a valid UK phone number"),
+  note: z.string().optional(),
+});
+
+type CheckoutCollectionForm = z.infer<typeof checkoutCollectionSchema>;
+
 export default function CheckoutCollectionPage() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    note: "",
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CheckoutCollectionForm>({
+    resolver: zodResolver(checkoutCollectionSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      note: "",
+    },
   });
 
   // Group items by bake sale for collection info
@@ -57,32 +81,41 @@ export default function CheckoutCollectionPage() {
 
   const handlePrepopulate = () => {
     const [firstName, ...lastNameParts] = mockCurrentUser.name.split(" ");
-    setFormData({
-      ...formData,
-      firstName: firstName || "",
-      lastName: lastNameParts.join(" ") || "",
-      email: mockCurrentUser.email,
-      phone: mockCurrentUser.phone || "",
-    });
+    setValue("firstName", firstName || "");
+    setValue("lastName", lastNameParts.join(" ") || "");
+    setValue("email", mockCurrentUser.email);
+    setValue("phone", mockCurrentUser.phone || "");
     toast.success("Details filled from profile");
   };
 
-  const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: CheckoutCollectionForm) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch("/api/orders", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     ...data,
+      //     items: items.map(item => ({
+      //       product_id: item.productId,
+      //       variant_id: item.variantId,
+      //       quantity: item.quantity,
+      //     })),
+      //     fulfillment_method: "collection",
+      //     payment_method: "payment_on_collection",
+      //   }),
+      // });
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-      toast.error("Please fill in all required fields");
-      return;
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      clearCart();
+      toast.success("Order placed successfully!");
+      router.push("/checkout/success");
+    } catch (error) {
+      toast.error("Failed to place order", {
+        description: error instanceof Error ? error.message : "Please try again",
+      });
     }
-
-    setIsSubmitting(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    clearCart();
-    toast.success("Order placed successfully!");
-    router.push("/checkout/success");
   };
 
   if (items.length === 0) {
@@ -129,45 +162,36 @@ export default function CheckoutCollectionPage() {
                   Use Profile Details
                 </Button>
               </div>
-              <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-6">
+              <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                      required
-                    />
+                    <Input id="firstName" {...register("firstName")} />
+                    {errors.firstName && (
+                      <p className="text-sm text-red-600">{errors.firstName.message}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                      required
-                    />
+                    <Input id="lastName" {...register("lastName")} />
+                    {errors.lastName && (
+                      <p className="text-sm text-red-600">{errors.lastName.message}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
+                    <Input id="email" type="email" {...register("email")} />
+                    {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
                       type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      required
+                      {...register("phone")}
+                      placeholder="07700 900000"
                     />
+                    {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -175,8 +199,7 @@ export default function CheckoutCollectionPage() {
                   <Textarea
                     id="note"
                     placeholder="Any special requests or notes for collection?"
-                    value={formData.note}
-                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                    {...register("note")}
                     className="min-h-[100px]"
                   />
                 </div>

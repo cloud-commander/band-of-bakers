@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/state/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,28 +21,66 @@ import { ArrowLeft, Save, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
+
+// Form validation schema (simplified for admin form - we'll add user_id server-side)
+const testimonialFormSchema = z.object({
+  content: z
+    .string()
+    .min(10, "Testimonial must be at least 10 characters")
+    .max(500, "Testimonial is too long"),
+  rating: z.number().int().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5"),
+  // These fields are for display purposes (we'll extract from user in real implementation)
+  name: z.string().min(1, "Customer name is required"),
+  role: z.string().min(1, "Role/title is required"),
+  avatar: z.string().url().optional().or(z.literal("")),
+});
+
+type TestimonialForm = z.infer<typeof testimonialFormSchema>;
 
 export default function NewTestimonialPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    role: "",
-    quote: "",
-    rating: "5",
-    avatar: "",
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<TestimonialForm>({
+    resolver: zodResolver(testimonialFormSchema),
+    defaultValues: {
+      name: "",
+      role: "",
+      content: "",
+      rating: 5,
+      avatar: "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const onSubmit = async (data: TestimonialForm) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch("/api/testimonials", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     user_id: currentUser.id,
+      //     content: data.content,
+      //     rating: data.rating,
+      //   }),
+      // });
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    toast.success("Testimonial created successfully!");
-    setIsSubmitting(false);
-    router.push("/admin/testimonials");
+      toast.success("Testimonial created successfully!");
+      router.push("/admin/testimonials");
+    } catch (error) {
+      toast.error("Failed to create testimonial", {
+        description: error instanceof Error ? error.message : "Please try again",
+      });
+    }
   };
 
   // Mock image upload
@@ -52,7 +92,8 @@ export default function NewTestimonialPage() {
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
     ];
     const randomAvatar = mockAvatars[Math.floor(Math.random() * mockAvatars.length)];
-    setFormData({ ...formData, avatar: randomAvatar });
+    setAvatarUrl(randomAvatar);
+    setValue("avatar", randomAvatar);
     toast.success("Image uploaded successfully");
   };
 
@@ -71,7 +112,7 @@ export default function NewTestimonialPage() {
         }
       />
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
@@ -82,25 +123,15 @@ export default function NewTestimonialPage() {
                     <Label htmlFor="name">
                       Customer Name <span className="text-red-600">*</span>
                     </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Sarah Johnson"
-                      required
-                    />
+                    <Input id="name" {...register("name")} placeholder="e.g. Sarah Johnson" />
+                    {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="role">
                       Role / Title <span className="text-red-600">*</span>
                     </Label>
-                    <Input
-                      id="role"
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      placeholder="e.g. Food Blogger"
-                      required
-                    />
+                    <Input id="role" {...register("role")} placeholder="e.g. Food Blogger" />
+                    {errors.role && <p className="text-sm text-red-600">{errors.role.message}</p>}
                   </div>
                 </div>
 
@@ -108,35 +139,43 @@ export default function NewTestimonialPage() {
                   <Label htmlFor="rating">
                     Rating <span className="text-red-600">*</span>
                   </Label>
-                  <Select
-                    value={formData.rating}
-                    onValueChange={(value) => setFormData({ ...formData, rating: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5 Stars</SelectItem>
-                      <SelectItem value="4">4 Stars</SelectItem>
-                      <SelectItem value="3">3 Stars</SelectItem>
-                      <SelectItem value="2">2 Stars</SelectItem>
-                      <SelectItem value="1">1 Star</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="rating"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value.toString()}
+                        onValueChange={(value) => field.onChange(parseInt(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select rating" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 Stars</SelectItem>
+                          <SelectItem value="4">4 Stars</SelectItem>
+                          <SelectItem value="3">3 Stars</SelectItem>
+                          <SelectItem value="2">2 Stars</SelectItem>
+                          <SelectItem value="1">1 Star</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.rating && <p className="text-sm text-red-600">{errors.rating.message}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="quote">
+                  <Label htmlFor="content">
                     Testimonial Quote <span className="text-red-600">*</span>
                   </Label>
                   <Textarea
-                    id="quote"
-                    value={formData.quote}
-                    onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
+                    id="content"
+                    {...register("content")}
                     placeholder="Enter the customer's feedback..."
                     className="min-h-[150px]"
-                    required
                   />
+                  {errors.content && (
+                    <p className="text-sm text-red-600">{errors.content.message}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -151,14 +190,9 @@ export default function NewTestimonialPage() {
                   className="flex flex-col items-center justify-center border-2 border-dashed border-stone-200 rounded-lg p-6 hover:bg-stone-50 transition-colors cursor-pointer"
                   onClick={handleImageUpload}
                 >
-                  {formData.avatar ? (
+                  {avatarUrl ? (
                     <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
-                      <Image
-                        src={formData.avatar}
-                        alt="Avatar preview"
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" />
                     </div>
                   ) : (
                     <div className="w-24 h-24 rounded-full bg-stone-100 flex items-center justify-center mb-4">
@@ -166,7 +200,7 @@ export default function NewTestimonialPage() {
                     </div>
                   )}
                   <p className="text-sm font-medium text-stone-600">
-                    {formData.avatar ? "Click to change" : "Click to upload avatar"}
+                    {avatarUrl ? "Click to change" : "Click to upload avatar"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">JPG, PNG up to 2MB</p>
                 </div>

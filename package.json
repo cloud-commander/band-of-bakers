@@ -11,6 +11,7 @@
     "clean-all": "bash scripts/clean-cache.sh && rm -rf node_modules && pnpm install"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@opennextjs/cloudflare": "^1.13.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -31,7 +32,10 @@
     "next": "15.5.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-hook-form": "^7.66.1",
+    "react-turnstile": "^1.1.4",
     "recharts": "^3.5.0",
+    "rollbar": "^2.26.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",

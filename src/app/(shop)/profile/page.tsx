@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/state/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,24 +23,72 @@ import { mockProducts } from "@/lib/mocks/products";
 
 export const dynamic = "force-dynamic";
 
+// Profile update validation schema
+const profileUpdateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z
+    .string()
+    .regex(/^(\+44|0)\s?[0-9]{10}$/, "Please enter a valid UK phone number")
+    .or(z.literal("")),
+  avatar: z.string().url().optional().or(z.literal("")),
+});
+
+type ProfileUpdateForm = z.infer<typeof profileUpdateSchema>;
+
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: mockCurrentUser.name,
-    email: mockCurrentUser.email,
-    phone: mockCurrentUser.phone || "",
-    avatar: mockCurrentUser.avatar_url || "",
+  const [avatarPreview, setAvatarPreview] = useState(mockCurrentUser.avatar_url || "");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<ProfileUpdateForm>({
+    resolver: zodResolver(profileUpdateSchema),
+    defaultValues: {
+      name: mockCurrentUser.name,
+      email: mockCurrentUser.email,
+      phone: mockCurrentUser.phone || "",
+      avatar: mockCurrentUser.avatar_url || "",
+    },
   });
 
   // Filter content for current user
   const userTestimonials = mockTestimonials.filter((t) => t.user_id === mockCurrentUser.id);
   const userReviews = mockReviews.filter((r) => r.user_id === mockCurrentUser.id);
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, this would save to the backend
+  const onSubmit = async (data: ProfileUpdateForm) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch("/api/users/profile", {
+      //   method: "PATCH",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(data),
+      // });
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      toast.error("Failed to update profile", {
+        description: error instanceof Error ? error.message : "Please try again",
+      });
+    }
+  };
+
+  const handleCancel = () => {
     setIsEditing(false);
-    toast.success("Profile updated successfully");
+    reset({
+      name: mockCurrentUser.name,
+      email: mockCurrentUser.email,
+      phone: mockCurrentUser.phone || "",
+      avatar: mockCurrentUser.avatar_url || "",
+    });
+    setAvatarPreview(mockCurrentUser.avatar_url || "");
   };
 
   const handleAvatarUpload = () => {
@@ -48,7 +99,8 @@ export default function ProfilePage() {
       "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
     ];
     const randomAvatar = mockAvatars[Math.floor(Math.random() * mockAvatars.length)];
-    setFormData({ ...formData, avatar: randomAvatar });
+    setAvatarPreview(randomAvatar);
+    setValue("avatar", randomAvatar);
     toast.success("Avatar uploaded successfully");
   };
 
@@ -83,12 +135,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-6 mb-8">
                 <div className="relative group">
                   <Avatar className="h-24 w-24 border-2 border-stone-100">
-                    <AvatarImage src={formData.avatar} />
+                    <AvatarImage src={avatarPreview} />
                     <AvatarFallback
                       className={`${DESIGN_TOKENS.typography.h2.size}`}
                       style={{ color: DESIGN_TOKENS.colors.text.main }}
                     >
-                      {getInitials(formData.name)}
+                      {getInitials(mockCurrentUser.name)}
                     </AvatarFallback>
                   </Avatar>
                   {isEditing && (
@@ -101,7 +153,7 @@ export default function ProfilePage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-stone-900">{formData.name}</h3>
+                  <h3 className="text-xl font-bold text-stone-900">{mockCurrentUser.name}</h3>
                   <p className="text-stone-500 capitalize">{mockCurrentUser.role}</p>
                   {mockCurrentUser.email_verified && (
                     <p className="text-sm text-green-600 mt-1">✓ Email verified</p>
@@ -109,82 +161,42 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <form onSubmit={handleSave} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      disabled={!isEditing}
-                    />
+                    <Input id="name" {...register("name")} disabled={!isEditing} />
+                    {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={formData.email} disabled={true} />
+                    <Input id="email" type="email" {...register("email")} disabled={true} />
+                    <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
                       type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      {...register("phone")}
                       disabled={!isEditing}
                       placeholder="+44 7700 900000"
                     />
+                    {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
                   </div>
                 </div>
 
                 {isEditing && (
                   <div className="flex gap-3 pt-4 border-t">
-                    <Button type="submit">Save Changes</Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setFormData({
-                          name: mockCurrentUser.name,
-                          email: mockCurrentUser.email,
-                          phone: mockCurrentUser.phone || "",
-                          avatar: mockCurrentUser.avatar_url || "",
-                        });
-                      }}
-                    >
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={handleCancel}>
                       Cancel
                     </Button>
                   </div>
                 )}
               </form>
-            </div>
-
-            {/* Account Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="p-6">
-                  <p className="text-sm text-muted-foreground">Member Since</p>
-                  <p className="text-lg font-medium mt-1">
-                    {new Date(mockCurrentUser.created_at).toLocaleDateString("en-GB", {
-                      year: "numeric",
-                      month: "long",
-                    })}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <p className="text-sm text-muted-foreground">Last Updated</p>
-                  <p className="text-lg font-medium mt-1">
-                    {new Date(mockCurrentUser.updated_at).toLocaleDateString("en-GB", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
@@ -192,54 +204,48 @@ export default function ProfilePage() {
           <TabsContent value="testimonials">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <Heading level={3} className="mb-0">
-                    My Testimonials
-                  </Heading>
-                  <Button size="sm">Add Testimonial</Button>
-                </div>
+                <Heading level={3} className="mb-0">
+                  My Testimonials
+                </Heading>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {userTestimonials.length} testimonial{userTestimonials.length !== 1 && "s"}
+                </p>
               </CardHeader>
               <CardContent>
                 {userTestimonials.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                    <Quote className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>You haven&apos;t submitted any testimonials yet.</p>
+                  <div className="text-center py-12">
+                    <Quote className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+                    <p className="text-muted-foreground">
+                      You haven&apos;t submitted any testimonials yet
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {userTestimonials.map((testimonial) => (
-                      <div
-                        key={testimonial.id}
-                        className="flex items-start gap-4 p-4 border rounded-lg hover:bg-stone-50 transition-colors"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${
-                                    i < testimonial.rating
-                                      ? "fill-bakery-amber-400 text-bakery-amber-400"
-                                      : "text-stone-300"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(testimonial.date).toLocaleDateString()}
-                            </span>
+                      <div key={testimonial.id} className="border rounded-lg p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: testimonial.rating }).map((_, i) => (
+                              <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                            ))}
                           </div>
-                          <p className="text-stone-600 italic">&quot;{testimonial.quote}&quot;</p>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Pencil className="w-4 h-4 text-stone-500" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
+                        <p className="text-stone-700">{testimonial.quote}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(testimonial.date).toLocaleDateString()}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -253,77 +259,76 @@ export default function ProfilePage() {
             <Card>
               <CardHeader>
                 <Heading level={3} className="mb-0">
-                  My Reviews
+                  My Product Reviews
                 </Heading>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {userReviews.length} review{userReviews.length !== 1 && "s"}
+                </p>
               </CardHeader>
               <CardContent>
                 {userReviews.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                    <Star className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>You haven&apos;t reviewed any products yet.</p>
+                  <div className="text-center py-12">
+                    <Star className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+                    <p className="text-muted-foreground">
+                      You haven&apos;t reviewed any products yet
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {userReviews.map((review) => {
                       const product = mockProducts.find((p) => p.id === review.product_id);
                       return (
-                        <div
-                          key={review.id}
-                          className="flex items-start gap-4 p-4 border rounded-lg hover:bg-stone-50 transition-colors"
-                        >
-                          {product?.image_url && (
-                            <div className="relative w-16 h-16 rounded-md overflow-hidden shrink-0 bg-stone-100">
-                              <Image
-                                src={product.image_url}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <h4 className="font-medium text-stone-900">
-                                {product?.name || "Unknown Product"}
-                              </h4>
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full ${
-                                  review.status === "approved"
-                                    ? "bg-green-100 text-green-700"
-                                    : review.status === "rejected"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-yellow-100 text-yellow-700"
-                                }`}
-                              >
-                                {review.status}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="flex">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-3 h-3 ${
-                                      i < review.rating
-                                        ? "fill-bakery-amber-400 text-bakery-amber-400"
-                                        : "text-stone-300"
-                                    }`}
-                                  />
-                                ))}
+                        <div key={review.id} className="border rounded-lg p-4">
+                          <div className="flex items-start gap-4">
+                            {product?.image_url && (
+                              <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0">
+                                <Image
+                                  src={product.image_url}
+                                  alt={product.name}
+                                  fill
+                                  className="object-cover"
+                                />
                               </div>
-                              <span className="text-xs text-muted-foreground">
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between mb-2">
+                                <div>
+                                  <p className="font-medium">
+                                    {product?.name || "Unknown Product"}
+                                  </p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                    {Array.from({ length: review.rating }).map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className="w-4 h-4 fill-amber-400 text-amber-400"
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button variant="ghost" size="sm">
+                                    <Pencil className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              {review.title && (
+                                <p className="font-medium text-sm mb-1">{review.title}</p>
+                              )}
+                              <p className="text-stone-700 text-sm">{review.comment}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
                                 {new Date(review.created_at).toLocaleDateString()}
-                              </span>
+                                {review.status !== "approved" && (
+                                  <span className="ml-2 text-amber-600">• Pending approval</span>
+                                )}
+                              </p>
                             </div>
-                            <p className="text-sm text-stone-600">{review.comment}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Pencil className="w-4 h-4 text-stone-500" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
                           </div>
                         </div>
                       );

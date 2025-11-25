@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { PageHeader } from "@/components/state/page-header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
@@ -11,21 +13,49 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
+// Simplified form schema for demo
+// In production, use insertBakeSaleSchema and location_id from database
+const bakeSaleFormSchema = z
+  .object({
+    date: z.string().min(1, "Date is required"),
+    location: z.string().min(1, "Location name is required"),
+    address: z.string().min(1, "Address is required"),
+    cutoff_datetime: z.string().min(1, "Cutoff date/time is required"),
+    is_active: z.boolean(),
+    notes: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const saleDate = new Date(data.date);
+      const cutoffDate = new Date(data.cutoff_datetime);
+      return cutoffDate <= saleDate;
+    },
+    {
+      message: "Cutoff time must be before bake sale date",
+      path: ["cutoff_datetime"],
+    }
+  );
+
+type BakeSaleForm = z.infer<typeof bakeSaleFormSchema>;
+
 export default function NewBakeSalePage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    date: "",
-    startTime: "09:00",
-    endTime: "13:00",
-    location: "Cressage Village Hall",
-    address: "Cressage, Shropshire, SY5 6AF",
-    maxOrders: "50",
-    cutoffDays: "2",
-    isActive: true,
-    notes: "",
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<BakeSaleForm>({
+    resolver: zodResolver(bakeSaleFormSchema),
+    defaultValues: {
+      date: "",
+      location: "Cressage Village Hall",
+      address: "Cressage, Shropshire, SY5 6AF",
+      cutoff_datetime: "",
+      is_active: true,
+      notes: "",
+    },
   });
 
   const commonLocations = [
@@ -44,37 +74,31 @@ export default function NewBakeSalePage() {
   ];
 
   const handleLocationSelect = (location: (typeof commonLocations)[0]) => {
-    setFormData({
-      ...formData,
-      location: location.name,
-      address: location.address,
-    });
+    setValue("location", location.name);
+    setValue("address", location.address);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const onSubmit = async (data: BakeSaleForm) => {
+    try {
+      // TODO: Replace with actual API call
+      // const response = await fetch("/api/bake-sales", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(data),
+      // });
 
-    // Validate date is in the future
-    const selectedDate = new Date(formData.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    if (selectedDate < today) {
-      toast.error("Bake sale date must be in the future");
-      setIsSubmitting(false);
-      return;
+      toast.success("Bake sale created successfully!", {
+        description: `${data.location} on ${new Date(data.date).toLocaleDateString("en-GB")}`,
+      });
+
+      router.push("/admin/bake-sales");
+    } catch (error) {
+      toast.error("Failed to create bake sale", {
+        description: error instanceof Error ? error.message : "Please try again",
+      });
     }
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast.success("Bake sale created successfully!", {
-      description: `${formData.location} on ${new Date(formData.date).toLocaleDateString("en-GB")}`,
-    });
-
-    setIsSubmitting(false);
-    router.push("/admin/bake-sales");
   };
 
   // Get minimum date (tomorrow)
@@ -97,7 +121,7 @@ export default function NewBakeSalePage() {
         />
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
@@ -118,43 +142,34 @@ export default function NewBakeSalePage() {
                     <Input
                       id="date"
                       type="date"
-                      required
                       min={minDate}
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      {...register("date")}
                       className="pl-10"
                     />
                   </div>
+                  {errors.date && (
+                    <p className="text-sm text-red-600 mt-1">{errors.date.message}</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     Select a future date for your bake sale
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="startTime" className="block text-sm font-medium mb-2">
-                      Start Time <span className="text-red-600">*</span>
-                    </label>
-                    <Input
-                      id="startTime"
-                      type="time"
-                      required
-                      value={formData.startTime}
-                      onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="endTime" className="block text-sm font-medium mb-2">
-                      End Time <span className="text-red-600">*</span>
-                    </label>
-                    <Input
-                      id="endTime"
-                      type="time"
-                      required
-                      value={formData.endTime}
-                      onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    />
-                  </div>
+                <div>
+                  <label htmlFor="cutoff_datetime" className="block text-sm font-medium mb-2">
+                    Order Cutoff Date/Time <span className="text-red-600">*</span>
+                  </label>
+                  <Input
+                    id="cutoff_datetime"
+                    type="datetime-local"
+                    {...register("cutoff_datetime")}
+                  />
+                  {errors.cutoff_datetime && (
+                    <p className="text-sm text-red-600 mt-1">{errors.cutoff_datetime.message}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    When should orders close for this bake sale?
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -177,11 +192,6 @@ export default function NewBakeSalePage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleLocationSelect(loc)}
-                        className={
-                          formData.location === loc.name
-                            ? "bg-bakery-amber-50 border-bakery-amber-300"
-                            : ""
-                        }
                       >
                         {loc.name.split(" ")[0]}
                       </Button>
@@ -195,12 +205,12 @@ export default function NewBakeSalePage() {
                   </label>
                   <Input
                     id="location"
-                    type="text"
-                    required
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    {...register("location")}
                     placeholder="e.g., Cressage Village Hall"
                   />
+                  {errors.location && (
+                    <p className="text-sm text-red-600 mt-1">{errors.location.message}</p>
+                  )}
                 </div>
 
                 <div>
@@ -209,12 +219,12 @@ export default function NewBakeSalePage() {
                   </label>
                   <Input
                     id="address"
-                    type="text"
-                    required
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    {...register("address")}
                     placeholder="Full address including postcode"
                   />
+                  {errors.address && (
+                    <p className="text-sm text-red-600 mt-1">{errors.address.message}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -223,57 +233,24 @@ export default function NewBakeSalePage() {
             <Card>
               <CardHeader>
                 <Heading level={3} className="mb-0">
-                  Order Settings
+                  Additional Settings
                 </Heading>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="maxOrders" className="block text-sm font-medium mb-2">
-                      Max Orders
-                    </label>
-                    <Input
-                      id="maxOrders"
-                      type="number"
-                      min="1"
-                      value={formData.maxOrders}
-                      onChange={(e) => setFormData({ ...formData, maxOrders: e.target.value })}
-                      placeholder="50"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Maximum number of orders accepted
-                    </p>
-                  </div>
-                  <div>
-                    <label htmlFor="cutoffDays" className="block text-sm font-medium mb-2">
-                      Cutoff (days)
-                    </label>
-                    <Input
-                      id="cutoffDays"
-                      type="number"
-                      min="0"
-                      value={formData.cutoffDays}
-                      onChange={(e) => setFormData({ ...formData, cutoffDays: e.target.value })}
-                      placeholder="2"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Days before event to close orders
-                    </p>
-                  </div>
-                </div>
-
                 <div>
                   <label htmlFor="notes" className="block text-sm font-medium mb-2">
                     Notes (Optional)
                   </label>
                   <textarea
                     id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    {...register("notes")}
                     placeholder="Any special notes or instructions for this bake sale..."
                     rows={3}
                     className="w-full px-3 py-2 border border-stone-200 rounded-md focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
                   />
+                  {errors.notes && (
+                    <p className="text-sm text-red-600 mt-1">{errors.notes.message}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -290,63 +267,22 @@ export default function NewBakeSalePage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="isActive" className="text-sm font-medium">
+                    <label htmlFor="is_active" className="text-sm font-medium">
                       Active
                     </label>
                     <input
-                      id="isActive"
+                      id="is_active"
                       type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      {...register("is_active")}
                       className="w-4 h-4 text-bakery-amber-600 border-stone-300 rounded focus:ring-bakery-amber-500"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {formData.isActive
-                      ? "Customers can place orders for this bake sale"
-                      : "Bake sale will be hidden from customers"}
+                    When active, customers can place orders for this bake sale
                   </p>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Preview */}
-            {formData.date && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <Heading level={3} className="mb-0">
-                    Preview
-                  </Heading>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Date</p>
-                    <p className="font-medium">
-                      {new Date(formData.date).toLocaleDateString("en-GB", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Time</p>
-                    <p className="font-medium">
-                      {formData.startTime} - {formData.endTime}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Location</p>
-                    <p className="font-medium">{formData.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Order Cutoff</p>
-                    <p className="font-medium">{formData.cutoffDays} days before event</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Actions */}
             <div className="mt-6 space-y-3">

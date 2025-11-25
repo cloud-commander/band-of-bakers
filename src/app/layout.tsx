@@ -100,6 +100,9 @@ import { CartProvider } from "@/context/cart-context";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
 import { StructuredData } from "@/components/seo/structured-data";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { RollbarProvider } from "@/components/analytics/rollbar-provider";
+import { LogflareProvider } from "@/components/analytics/logflare-provider";
 
 export default function RootLayout({
   children,
@@ -110,6 +113,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${playfairDisplay.variable}`}>
       <head>
         <StructuredData />
+        <GoogleAnalytics />
       </head>
       <body
         className={cn(
@@ -125,6 +129,8 @@ export default function RootLayout({
         />
         <AuthProvider>
           <CartProvider>
+            <RollbarProvider />
+            <LogflareProvider />
             <Navbar />
             {children}
             <Footer />
