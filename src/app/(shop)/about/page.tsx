@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { SectionDivider } from "@/components/section-divider";
@@ -7,8 +5,14 @@ import { FindUs } from "@/components/find-us";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { BUSINESS_INFO } from "@/lib/constants";
 import Link from "next/link";
-
-export const dynamic = "force-dynamic";
+import {
+  ABOUT_HERO_SECTION,
+  ABOUT_STORY_SECTION,
+  ABOUT_TEAM_SECTION,
+  ABOUT_VALUES_SECTION,
+  ABOUT_HOW_WE_WORK_SECTION,
+  ABOUT_CTA_SECTION,
+} from "@/lib/mocks/about";
 
 export default function AboutPage() {
   return (
@@ -17,8 +21,8 @@ export default function AboutPage() {
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full">
           <Image
-            src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072"
-            alt="Artisan baker kneading dough"
+            src={ABOUT_HERO_SECTION.backgroundImage}
+            alt={ABOUT_HERO_SECTION.backgroundAlt}
             fill
             className="object-cover"
             priority
@@ -36,14 +40,13 @@ export default function AboutPage() {
             className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} ${DESIGN_TOKENS.typography.h1.lineHeight} mb-6`}
             style={{ fontFamily: DESIGN_TOKENS.typography.h1.family }}
           >
-            Our Story
+            {ABOUT_HERO_SECTION.heading}
           </h1>
           <p
             className={`${DESIGN_TOKENS.typography.body.lg.size} ${DESIGN_TOKENS.typography.body.lg.lineHeight} max-w-2xl mx-auto`}
             style={{ opacity: DESIGN_TOKENS.opacity.high }}
           >
-            A family tradition of artisan baking, passed down through generations and baked with
-            love in the heart of Shropshire.
+            {ABOUT_HERO_SECTION.description}
           </p>
         </div>
       </section>
@@ -61,21 +64,17 @@ export default function AboutPage() {
               className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} mb-6 text-center`}
               style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
             >
-              Baking with Passion Since Day One
+              {ABOUT_STORY_SECTION.heading}
             </h2>
             <div className="prose prose-lg max-w-none">
-              <p className={`${DESIGN_TOKENS.typography.body.lg.size} mb-4 leading-relaxed`}>
-                Band of Bakers started as a dream in our home kitchen—a vision to bring authentic,
-                handcrafted bread to our local community. What began with a single sourdough starter
-                has grown into a beloved bakery that serves fresh, artisan baked goods throughout
-                Shropshire.
-              </p>
-              <p className={`${DESIGN_TOKENS.typography.body.lg.size} mb-4 leading-relaxed`}>
-                We believe in the simple pleasures of real bread: the aroma of a fresh loaf, the
-                satisfying crunch of a perfectly baked crust, and the soft, airy crumb that comes
-                from time, patience, and traditional techniques. Every product we make is a labor of
-                love, crafted by hand using the finest local ingredients.
-              </p>
+              {ABOUT_STORY_SECTION.paragraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={`${DESIGN_TOKENS.typography.body.lg.size} mb-4 leading-relaxed`}
+                >
+                  {paragraph}
+                </p>
+              ))}
             </div>
           </div>
         </div>
@@ -92,27 +91,12 @@ export default function AboutPage() {
             className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}
             style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
           >
-            Meet the Team
+            {ABOUT_TEAM_SECTION.heading}
           </h2>
           <div className={`grid md:grid-cols-2 ${DESIGN_TOKENS.sections.gap}`}>
-            {[
-              {
-                name: "Jon Philips",
-                role: "Head Baker & Founder",
-                favorite: "Sourdough Country Loaf",
-                bio: "Jon is the heart and soul of Band of Bakers. With over 20 years of baking experience and a passion for traditional fermentation methods, he's dedicated to bringing authentic artisan bread to Shropshire. When he's not perfecting his sourdough starter, Jon loves experimenting with new grain blends and sharing his knowledge with the community.",
-                image: "/jon.webp",
-              },
-              {
-                name: "Mike Deeble",
-                role: "Manager & Founder",
-                favorite: "Almond Croissant",
-                bio: "Mike is the strategic mind behind Band of Bakers, ensuring every bake sale runs smoothly and every customer has a delightful experience. With a background in hospitality and a love for quality food, Mike combines operational excellence with genuine care for the business and its community. He's passionate about supporting local suppliers and sustainable practices.",
-                image: "/mike.webp",
-              },
-            ].map((member, index) => (
+            {ABOUT_TEAM_SECTION.members.map((member) => (
               <div
-                key={index}
+                key={member.id}
                 className={`${DESIGN_TOKENS.cards.base} overflow-hidden group`}
                 style={{
                   backgroundColor: DESIGN_TOKENS.colors.card,
@@ -172,28 +156,12 @@ export default function AboutPage() {
               className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}
               style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
             >
-              What We Stand For
+              {ABOUT_VALUES_SECTION.heading}
             </h2>
             <div className={`grid md:grid-cols-3 ${DESIGN_TOKENS.sections.gap}`}>
-              {[
-                {
-                  title: "Traditional Methods",
-                  description:
-                    "We use time-honored baking techniques, including long fermentation and natural starters, to create bread with superior flavor and texture.",
-                },
-                {
-                  title: "Local Ingredients",
-                  description:
-                    "We source our flour, dairy, and produce from trusted local suppliers, supporting our community and ensuring the freshest ingredients.",
-                },
-                {
-                  title: "Made to Order",
-                  description:
-                    "Every bake sale features fresh batches made specifically for your order, ensuring you receive our products at their absolute best.",
-                },
-              ].map((value, index) => (
+              {ABOUT_VALUES_SECTION.values.map((value) => (
                 <div
-                  key={index}
+                  key={value.id}
                   className={`${DESIGN_TOKENS.cards.base} ${DESIGN_TOKENS.cards.padding} text-center`}
                   style={{
                     backgroundColor: DESIGN_TOKENS.colors.card,
@@ -231,37 +199,24 @@ export default function AboutPage() {
               className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-8 text-center`}
               style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
             >
-              How Our Bake Sales Work
+              {ABOUT_HOW_WE_WORK_SECTION.heading}
             </h2>
             <div className="prose prose-lg max-w-none">
               <p className={`${DESIGN_TOKENS.typography.body.base.size} mb-4 leading-relaxed`}>
-                We operate through a unique bake sale model that allows us to guarantee freshness
-                and reduce waste. Here&apos;s how it works:
+                {ABOUT_HOW_WE_WORK_SECTION.introText}
               </p>
               <ol className="space-y-3 ml-6">
-                <li className={DESIGN_TOKENS.typography.body.base.size}>
-                  <strong>Browse our menu</strong> and select your favorite baked goods
-                </li>
-                <li className={DESIGN_TOKENS.typography.body.base.size}>
-                  <strong>Choose a bake sale date</strong> that works for you
-                </li>
-                <li className={DESIGN_TOKENS.typography.body.base.size}>
-                  <strong>Place your order</strong> before the cutoff date (typically 2 days before)
-                </li>
-                <li className={DESIGN_TOKENS.typography.body.base.size}>
-                  <strong>We bake fresh</strong> based on confirmed orders
-                </li>
-                <li className={DESIGN_TOKENS.typography.body.base.size}>
-                  <strong>Collect or receive delivery</strong> on your chosen bake sale day
-                </li>
+                {ABOUT_HOW_WE_WORK_SECTION.steps.map((step) => (
+                  <li key={step.id} className={DESIGN_TOKENS.typography.body.base.size}>
+                    <strong>{step.title}</strong> {step.description}
+                  </li>
+                ))}
               </ol>
               <p
                 className={`${DESIGN_TOKENS.typography.body.base.size} mt-6 leading-relaxed`}
                 style={{ color: DESIGN_TOKENS.colors.text.muted }}
               >
-                This approach means every loaf, pastry, and cake is made specifically for you,
-                ensuring maximum freshness and allowing us to minimize waste while supporting
-                sustainable practices.
+                {ABOUT_HOW_WE_WORK_SECTION.closingText}
               </p>
             </div>
           </div>
@@ -298,13 +253,13 @@ export default function AboutPage() {
             className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-4`}
             style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
           >
-            Ready to Try Our Bakes?
+            {ABOUT_CTA_SECTION.heading}
           </h2>
           <p
             className={`${DESIGN_TOKENS.typography.body.lg.size} mb-8`}
             style={{ color: DESIGN_TOKENS.colors.text.muted }}
           >
-            Browse our menu and place your order for the next bake sale.
+            {ABOUT_CTA_SECTION.description}
           </p>
           <Button
             asChild
@@ -312,7 +267,7 @@ export default function AboutPage() {
             className={DESIGN_TOKENS.buttons.primary}
             style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
           >
-            <Link href="/menu">View Our Menu</Link>
+            <Link href={ABOUT_CTA_SECTION.ctaLink}>{ABOUT_CTA_SECTION.ctaText}</Link>
           </Button>
         </div>
       </section>

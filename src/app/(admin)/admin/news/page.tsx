@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { mockNewsPosts } from "@/lib/mocks/news";
@@ -37,13 +38,19 @@ export default function AdminNewsPage() {
         <PageHeader
           title="News Posts"
           description="Manage news articles and announcements"
-          actions={<Button>Create New Post</Button>}
+          actions={
+            <Button asChild>
+              <Link href="/admin/news/new">Create New Post</Link>
+            </Button>
+          }
         />
         <div className="text-center py-16 border rounded-lg">
           <p className={`${DESIGN_TOKENS.typography.body.lg.size} text-muted-foreground mb-4`}>
             No news posts yet
           </p>
-          <Button>Create Your First Post</Button>
+          <Button asChild>
+            <Link href="/admin/news/new">Create Your First Post</Link>
+          </Button>
         </div>
       </div>
     );
@@ -54,7 +61,11 @@ export default function AdminNewsPage() {
       <PageHeader
         title="News Posts"
         description="Manage news articles and announcements"
-        actions={<Button>Create New Post</Button>}
+        actions={
+          <Button asChild>
+            <Link href="/admin/news/new">Create New Post</Link>
+          </Button>
+        }
       />
 
       {/* Pagination Info */}

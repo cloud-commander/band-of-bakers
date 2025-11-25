@@ -1,4 +1,12 @@
-// FAQ Mock Data
+/**
+ * FAQ Page Mock Data
+ * Centralized content for frequently asked questions organized by category
+ */
+
+// ============================================================================
+// INTERFACES
+// ============================================================================
+
 export interface FAQ {
   id: string;
   question: string;
@@ -6,6 +14,32 @@ export interface FAQ {
   category: "ordering" | "delivery" | "products" | "general";
   sort_order: number;
 }
+
+export interface FAQCategory {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+// ============================================================================
+// PAGE HEADER
+// ============================================================================
+
+export const FAQ_PAGE_HEADER = {
+  title: "Frequently Asked Questions",
+  description: "Find answers to common questions about ordering, delivery, and our products",
+} as const;
+
+// ============================================================================
+// PAGE CTA SECTION
+// ============================================================================
+
+export const FAQ_CTA_SECTION = {
+  heading: "Still Have Questions?",
+  description: "We're here to help! Get in touch with us directly.",
+  ctaText: "Contact Us",
+  ctaEmail: "hello@bandofbakers.co.uk",
+} as const;
 
 export const mockFAQs: FAQ[] = [
   // ORDERING
@@ -145,9 +179,9 @@ export const mockFAQsByCategory = {
   general: mockFAQs.filter((faq) => faq.category === "general"),
 };
 
-export const FAQ_CATEGORIES = [
+export const FAQ_CATEGORIES: FAQCategory[] = [
   { id: "ordering", label: "Ordering", icon: "🛒" },
   { id: "delivery", label: "Delivery & Collection", icon: "🚚" },
   { id: "products", label: "Products", icon: "🍞" },
   { id: "general", label: "General", icon: "❓" },
-] as const;
+];

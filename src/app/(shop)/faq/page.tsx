@@ -3,7 +3,13 @@
 import { PageHeader } from "@/components/state/page-header";
 
 export const dynamic = "force-dynamic";
-import { mockFAQs, mockFAQsByCategory, FAQ_CATEGORIES } from "@/lib/mocks/faq";
+import {
+  mockFAQs,
+  mockFAQsByCategory,
+  FAQ_CATEGORIES,
+  FAQ_PAGE_HEADER,
+  FAQ_CTA_SECTION,
+} from "@/lib/mocks/faq";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import {
   Accordion,
@@ -25,10 +31,7 @@ export default function FAQPage() {
   return (
     <div className="min-h-screen">
       <div className={`max-w-4xl mx-auto ${DESIGN_TOKENS.sections.padding}`}>
-        <PageHeader
-          title="Frequently Asked Questions"
-          description="Find answers to common questions about ordering, delivery, and our products"
-        />
+        <PageHeader title={FAQ_PAGE_HEADER.title} description={FAQ_PAGE_HEADER.description} />
 
         {/* Category Filter */}
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
@@ -77,20 +80,20 @@ export default function FAQPage() {
             className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-2`}
             style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
           >
-            Still Have Questions?
+            {FAQ_CTA_SECTION.heading}
           </h3>
           <p
             className={`${DESIGN_TOKENS.typography.body.base.size} mb-4`}
             style={{ color: DESIGN_TOKENS.colors.text.muted }}
           >
-            We&apos;re here to help! Get in touch with us directly.
+            {FAQ_CTA_SECTION.description}
           </p>
           <a
-            href="mailto:hello@bandofbakers.co.uk"
+            href={`mailto:${FAQ_CTA_SECTION.ctaEmail}`}
             className="inline-block px-6 py-2 rounded-full font-medium text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
           >
-            Contact Us
+            {FAQ_CTA_SECTION.ctaText}
           </a>
         </div>
       </div>

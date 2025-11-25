@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Send } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { WysiwygEditor } from "@/components/admin/wysiwyg-editor";
+import dynamic from "next/dynamic";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { EditorProvider } from "react-simple-wysiwyg";
+
+const WysiwygEditor = dynamic(
+  () => import("@/components/admin/wysiwyg-editor").then((mod) => mod.WysiwygEditor),
+  {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full border rounded-lg bg-muted/20 animate-pulse" />,
+  }
+);
 
 export default function NewNewsPostPage() {
   const router = useRouter();
@@ -106,12 +113,11 @@ export default function NewNewsPostPage() {
                   <Label htmlFor="content">
                     Content <span className="text-red-600">*</span>
                   </Label>
-                  <EditorProvider>
-                    <WysiwygEditor
-                      value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    />
-                  </EditorProvider>
+                  <WysiwygEditor
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  />
                 </div>
               </CardContent>
             </Card>
