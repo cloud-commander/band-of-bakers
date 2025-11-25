@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Extract field-level errors from Zod validation result
  */
-export function getFieldErrors<T>(result: z.SafeParseReturnType<T, T>) {
+export function getFieldErrors<T>(result: z.ZodSafeParseSuccess<T> | z.ZodSafeParseError<T>) {
   if (!result.success) {
     return result.error.flatten().fieldErrors;
   }
@@ -24,7 +24,7 @@ export function getFirstError(
  * Check if validation passed
  */
 export function isValidationSuccess<T>(
-  result: z.SafeParseReturnType<T, T>
-): result is z.SafeParseSuccess<T> {
+  result: z.ZodSafeParseSuccess<T> | z.ZodSafeParseError<T>
+): result is z.ZodSafeParseSuccess<T> {
   return result.success;
 }

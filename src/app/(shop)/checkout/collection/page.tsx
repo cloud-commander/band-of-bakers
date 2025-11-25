@@ -24,6 +24,13 @@ import {
   CreditCard,
   Banknote,
 } from "lucide-react";
+import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Checkout - Collection | Band of Bakers",
+  description: "Complete your order for collection at one of our bake sale locations.",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +113,7 @@ export default function CheckoutCollectionPage() {
       //   }),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS * 1.5));
 
       clearCart();
       toast.success("Order placed successfully!");

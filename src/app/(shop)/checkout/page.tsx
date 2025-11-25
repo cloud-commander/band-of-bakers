@@ -13,6 +13,13 @@ import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { ArrowRight, CreditCard, ShoppingBag, Truck } from "lucide-react";
+import { SHIPPING_COST, MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Checkout - Delivery | Band of Bakers",
+  description: "Complete your order with home delivery. Fresh baked goods delivered to your door.",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -73,8 +80,7 @@ export default function CheckoutPage() {
     },
   });
 
-  const shippingCost = 4.99;
-  const totalToPay = cartTotal + shippingCost;
+  const totalToPay = cartTotal + SHIPPING_COST;
 
   const onSubmit = async (data: CheckoutDeliveryForm) => {
     try {
@@ -95,7 +101,7 @@ export default function CheckoutPage() {
       // });
 
       // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS * 2));
 
       clearCart();
       toast.success("Payment successful! Order placed.");
@@ -266,7 +272,7 @@ export default function CheckoutPage() {
                     <Truck className="w-4 h-4" />
                     <span>Delivery</span>
                   </div>
-                  <span>£{shippingCost.toFixed(2)}</span>
+                  <span>£{SHIPPING_COST.toFixed(2)}</span>
                 </div>
                 <div className="border-t pt-3 flex justify-between font-bold text-lg">
                   <span>Total to Pay</span>
