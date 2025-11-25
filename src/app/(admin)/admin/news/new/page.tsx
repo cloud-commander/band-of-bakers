@@ -22,12 +22,6 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Create News Post | Band of Bakers Admin",
-  description: "Create a new news post for the website.",
-};
 
 const WysiwygEditor = dynamic(
   () => import("@/components/admin/wysiwyg-editor").then((mod) => mod.WysiwygEditor),

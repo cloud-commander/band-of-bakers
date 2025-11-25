@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
 
 // Form validation schema (simplified for admin form - we'll add user_id server-side)
 const testimonialFormSchema = z.object({
@@ -72,7 +73,7 @@ export default function NewTestimonialPage() {
       //   }),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       toast.success("Testimonial created successfully!");
       router.push("/admin/testimonials");

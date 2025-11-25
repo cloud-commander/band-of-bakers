@@ -21,12 +21,6 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { mockProducts } from "@/lib/mocks/products";
 import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "My Profile | Band of Bakers",
-  description: "Manage your account settings, testimonials, and product reviews.",
-};
 
 export const dynamic = "force-dynamic";
 

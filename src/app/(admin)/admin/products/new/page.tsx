@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
 
 // Simplified product form validation schema
 const productFormSchema = z.object({
@@ -76,7 +77,7 @@ export default function NewProductPage() {
       //   body: JSON.stringify(data),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       toast.success("Product created successfully!", {
         description: data.name,

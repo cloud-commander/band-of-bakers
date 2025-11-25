@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
 
 // Simplified form schema for demo
 // In production, use insertBakeSaleSchema and location_id from database
@@ -87,7 +88,7 @@ export default function NewBakeSalePage() {
       //   body: JSON.stringify(data),
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       toast.success("Bake sale created successfully!", {
         description: `${data.location} on ${new Date(data.date).toLocaleDateString("en-GB")}`,
