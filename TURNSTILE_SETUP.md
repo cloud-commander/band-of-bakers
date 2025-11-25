@@ -33,10 +33,10 @@ Update your `.env.local` file:
 
 ```env
 # Turnstile Widget (Public - used in browser)
-NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY=your_site_key_here
+NEXT_PUBLIC_BANDOFBAKERS_TURNSTILE_SITEKEY=your_site_key_here
 
 # Turnstile Secret (Private - server-side verification only)
-CLOUDFLARE_TURNSTILE_SECRET_KEY=your_secret_key_here
+BANDOFBAKERS_TURNSTILE_SECRET_KEY=your_secret_key_here
 ```
 
 ## How It Works
@@ -162,7 +162,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 ### Development Mode
 
-In development, if `CLOUDFLARE_TURNSTILE_SECRET_KEY` is not set:
+In development, if `BANDOFBAKERS_TURNSTILE_SECRET_KEY` is not set:
 
 - Widget still appears (with test credentials if available)
 - Verification always succeeds
@@ -246,7 +246,7 @@ If verification fails, check `error_codes`:
 
 **Check:**
 
-- `NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY` is set
+- `NEXT_PUBLIC_BANDOFBAKERS_TURNSTILE_SITEKEY` is set
 - Sitekey is correct format
 - Browser console for errors
 
@@ -254,7 +254,7 @@ If verification fails, check `error_codes`:
 
 **Check:**
 
-- `CLOUDFLARE_TURNSTILE_SECRET_KEY` is set correctly
+- `BANDOFBAKERS_TURNSTILE_SECRET_KEY` is set correctly
 - Server can reach `challenges.cloudflare.com`
 - Token isn't expired (5 minutes max)
 
@@ -290,13 +290,13 @@ If verification fails, check `error_codes`:
 **Temporary disable:**
 
 ```env
-NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY=
+NEXT_PUBLIC_BANDOFBAKERS_TURNSTILE_SITEKEY=
 ```
 
 **Conditional disable (per-form):**
 
 ```typescript
-if (!process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY) {
+if (!process.env.NEXT_PUBLIC_BANDOFBAKERS_TURNSTILE_SITEKEY) {
   // Skip widget and verification
   return;
 }

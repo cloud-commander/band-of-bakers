@@ -20,7 +20,7 @@ export async function verifyTurnstileToken(token: string): Promise<{
     };
   }
 
-  const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+  const secretKey = process.env.BANDOFBAKERS_TURNSTILE_SECRET_KEY;
 
   if (!secretKey) {
     // Log this but don't fail - Turnstile is optional

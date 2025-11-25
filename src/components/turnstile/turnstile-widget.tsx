@@ -17,7 +17,7 @@ export function TurnstileWidget({
   theme = "light",
   size = "normal",
 }: TurnstileWidgetProps) {
-  const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY;
+  const siteKey = process.env.NEXT_PUBLIC_BANDOFBAKERS_TURNSTILE_SITEKEY;
 
   if (!siteKey) {
     return null; // Widget disabled if sitekey not configured

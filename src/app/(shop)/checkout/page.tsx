@@ -14,12 +14,6 @@ import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { ArrowRight, CreditCard, ShoppingBag, Truck } from "lucide-react";
 import { SHIPPING_COST, MOCK_API_DELAY_MS } from "@/lib/constants/app";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Checkout - Delivery | Band of Bakers",
-  description: "Complete your order with home delivery. Fresh baked goods delivered to your door.",
-};
 
 export const dynamic = "force-dynamic";
 
