@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { signOut } from "next-auth/react";
 import {
   Menu,
   X,
@@ -179,7 +180,10 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
                           <span>{item.label}</span>
                         </Link>
                       ))}
-                      <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left">
+                      <button
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left"
+                        onClick={() => signOut()}
+                      >
                         <LogOut className="h-5 w-5" />
                         <span>Log Out</span>
                       </button>
@@ -191,7 +195,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
                       </Button>
                       <p className="text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{" "}
-                        <Link href="/auth/register" className="underline hover:text-foreground">
+                        <Link href="/auth/signup" className="underline hover:text-foreground">
                           Sign up
                         </Link>
                       </p>

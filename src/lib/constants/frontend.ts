@@ -176,8 +176,6 @@ export const API_ENDPOINTS = {
   ORDERS: "/api/orders",
   /** Users endpoint */
   USERS: "/api/users",
-  /** Auth endpoint */
-  AUTH: "/api/auth",
 } as const;
 
 // ============================================================================

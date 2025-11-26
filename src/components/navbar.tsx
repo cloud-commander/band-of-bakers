@@ -26,6 +26,7 @@ import {
 import { UI_THRESHOLDS, BUSINESS_INFO } from "@/lib/constants/frontend";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { useCart } from "@/context/cart-context";
+import { useSession, signOut } from "next-auth/react";
 
 import { MobileMenu } from "@/components/mobile-menu";
 import { CartPreview } from "@/components/cart-preview";
@@ -36,9 +37,8 @@ import { Suspense } from "react";
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { cartCount } = useCart();
-
-  // Mock user state - in Phase 4, this will come from auth context
-  const isLoggedIn = false; // Change to true to see logged-in state
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -192,7 +192,10 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="flex items-center cursor-pointer">
+                  <DropdownMenuItem
+                    className="flex items-center cursor-pointer"
+                    onClick={() => signOut()}
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>

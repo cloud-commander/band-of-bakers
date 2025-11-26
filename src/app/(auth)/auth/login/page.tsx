@@ -10,15 +10,14 @@ import { useState } from "react";
 import { QuotesDisplay } from "@/components/quotes-display";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { initiateGoogleSignIn } from "@/lib/google-identity";
-import { useAuth } from "@/context/auth-context";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { z } from "zod";
+import { signIn } from "next-auth/react";
 
 export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,8 +37,18 @@ export default function LoginPage() {
 
       const validatedData = loginSchema.parse(formData);
 
-      await login(validatedData.email, validatedData.password);
+      const result = await signIn("credentials", {
+        email: validatedData.email,
+        password: validatedData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error("Invalid email or password");
+      }
+
       router.push("/");
+      router.refresh();
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Handle Zod validation errors

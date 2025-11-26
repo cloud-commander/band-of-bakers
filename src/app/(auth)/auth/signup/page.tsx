@@ -10,15 +10,14 @@ import { useState } from "react";
 import { QuotesDisplay } from "@/components/quotes-display";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { initiateGoogleSignIn } from "@/lib/google-identity";
-import { useAuth } from "@/context/auth-context";
 import { signupSchema, type SignupFormData } from "@/lib/validators/auth";
 import { z } from "zod";
+import { registerUser } from "@/actions/auth";
 
 export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,8 +43,20 @@ export default function SignupPage() {
 
       const validatedData = signupSchema.parse(formData);
 
-      await signup(validatedData.email, validatedData.password, validatedData.name);
+      const submitData = new FormData();
+      submitData.append("name", validatedData.name);
+      submitData.append("email", validatedData.email);
+      submitData.append("phone", validatedData.phone);
+      submitData.append("password", validatedData.password);
+
+      const result = await registerUser(submitData);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
       router.push("/");
+      router.refresh();
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Handle Zod validation errors
