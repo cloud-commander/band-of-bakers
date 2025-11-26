@@ -2,21 +2,33 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   pages: {
-    signIn: "/login",
+    signIn: "/auth/login",
   },
   callbacks: {
+    // This session callback runs in middleware context and must be lightweight
+    // It maps token properties to the session object for use in authorized()
+    async session({ session, token }) {
+      if (token.role) {
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard =
-        nextUrl.pathname.startsWith("/dashboard") || nextUrl.pathname.startsWith("/admin");
-      if (isOnDashboard) {
+      const isOnAdmin = nextUrl.pathname.startsWith("/admin");
+
+      if (isOnAdmin) {
         if (isLoggedIn) {
-          // Optional: Add role check here if needed
-          // const user = auth.user as any;
-          // if (nextUrl.pathname.startsWith("/admin") && user.role !== "owner" && user.role !== "manager") {
-          //   return false;
-          // }
-          return true;
+          // Check for admin roles
+          const user = auth.user as { role?: string };
+          const allowedRoles = ["owner", "manager", "staff"];
+
+          if (user.role && allowedRoles.includes(user.role)) {
+            return true;
+          }
+
+          // Redirect unauthorized users to home
+          return Response.redirect(new URL("/", nextUrl));
         }
         return false; // Redirect unauthenticated users to login page
       }

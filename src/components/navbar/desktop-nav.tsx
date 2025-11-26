@@ -81,7 +81,7 @@ export const DesktopNav = memo(function DesktopNav({ session }: DesktopNavProps)
       {/* Admin Link */}
       {isAdmin && (
         <Link
-          href="/dashboard"
+          href="/admin"
           className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group text-red-700"
         >
           <FlourIcon
