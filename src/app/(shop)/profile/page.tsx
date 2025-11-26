@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,7 +20,9 @@ import { Star, Pencil, Trash2, Upload, Quote } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { mockProducts } from "@/lib/mocks/products";
-import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { updateProfile } from "@/actions/profile";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -32,45 +34,85 @@ const profileUpdateSchema = z.object({
     .string()
     .regex(/^(\+44|0)\s?[0-9]{10}$/, "Please enter a valid UK phone number")
     .or(z.literal("")),
-  avatar: z.string().url().optional().or(z.literal("")),
+  avatar: z.any().optional(), // Allow file or string
 });
 
 type ProfileUpdateForm = z.infer<typeof profileUpdateSchema>;
 
 export default function ProfilePage() {
+  const { data: session, update: updateSession } = useSession();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(mockCurrentUser.avatar_url || "");
+
+  // Use session user or fallback to mock (for development/demo if not logged in)
+  // Normalize data to handle both session user and mock user structures
+  const profile = {
+    id: session?.user?.id || mockCurrentUser.id,
+    name: session?.user?.name || mockCurrentUser.name,
+    email: session?.user?.email || mockCurrentUser.email,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    phone: (session?.user as any)?.phone || mockCurrentUser.phone || "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    role: (session?.user as any)?.role || mockCurrentUser.role || "customer",
+    image: session?.user?.image || mockCurrentUser.avatar_url || "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    email_verified:
+      (session?.user as any)?.emailVerified || mockCurrentUser.email_verified || false,
+  };
+
+  const [avatarPreview, setAvatarPreview] = useState(profile.image || "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProfileUpdateForm>({
     resolver: zodResolver(profileUpdateSchema),
     defaultValues: {
-      name: mockCurrentUser.name,
-      email: mockCurrentUser.email,
-      phone: mockCurrentUser.phone || "",
-      avatar: mockCurrentUser.avatar_url || "",
+      name: profile.name || "",
+      email: profile.email || "",
+      phone: profile.phone || "",
+      avatar: profile.image || "",
     },
   });
 
+  // Update form defaults when session loads
+  useEffect(() => {
+    if (profile.id) {
+      reset({
+        name: profile.name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        avatar: profile.image || "",
+      });
+      setAvatarPreview(profile.image || "");
+    }
+  }, [profile.id, profile.name, profile.email, profile.phone, profile.image, reset]);
+
   // Filter content for current user
-  const userTestimonials = mockTestimonials.filter((t) => t.user_id === mockCurrentUser.id);
-  const userReviews = mockReviews.filter((r) => r.user_id === mockCurrentUser.id);
+  const userTestimonials = mockTestimonials.filter((t) => t.user_id === profile.id);
+  const userReviews = mockReviews.filter((r) => r.user_id === profile.id);
 
   const onSubmit = async (data: ProfileUpdateForm) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/users/profile", {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("phone", data.phone || "");
+      if (selectedFile) {
+        formData.append("avatar", selectedFile);
+      }
 
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
+      const result = await updateProfile(formData);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      await updateSession(); // Refresh session to get new avatar
+      router.refresh(); // Refresh server components
 
       setIsEditing(false);
       toast.success("Profile updated successfully");
@@ -84,25 +126,36 @@ export default function ProfilePage() {
   const handleCancel = () => {
     setIsEditing(false);
     reset({
-      name: mockCurrentUser.name,
-      email: mockCurrentUser.email,
-      phone: mockCurrentUser.phone || "",
-      avatar: mockCurrentUser.avatar_url || "",
+      name: profile.name || "",
+      email: profile.email || "",
+      phone: profile.phone || "",
+      avatar: profile.image || "",
     });
-    setAvatarPreview(mockCurrentUser.avatar_url || "");
+    setAvatarPreview(profile.image || "");
+    setSelectedFile(null);
   };
 
-  const handleAvatarUpload = () => {
-    // Mock upload
-    const mockAvatars = [
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-      "https://images.unsplash.com/photo-1599566150163-29194dcaad36",
-      "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
-    ];
-    const randomAvatar = mockAvatars[Math.floor(Math.random() * mockAvatars.length)];
-    setAvatarPreview(randomAvatar);
-    setValue("avatar", randomAvatar);
-    toast.success("Avatar uploaded successfully");
+  const handleAvatarClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast.error("File too large. Max size is 5MB.");
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -110,7 +163,8 @@ export default function ProfilePage() {
       .split(" ")
       .map((n) => n[0])
       .join("")
-      .toUpperCase();
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -136,27 +190,34 @@ export default function ProfilePage() {
               <div className="flex items-center gap-6 mb-8">
                 <div className="relative group">
                   <Avatar className="h-24 w-24 border-2 border-stone-100">
-                    <AvatarImage src={avatarPreview} />
+                    <AvatarImage src={avatarPreview} className="object-cover" />
                     <AvatarFallback
                       className={`${DESIGN_TOKENS.typography.h2.size}`}
                       style={{ color: DESIGN_TOKENS.colors.text.main }}
                     >
-                      {getInitials(mockCurrentUser.name)}
+                      {getInitials(profile.name || "User")}
                     </AvatarFallback>
                   </Avatar>
                   {isEditing && (
                     <div
                       className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                      onClick={handleAvatarUpload}
+                      onClick={handleAvatarClick}
                     >
                       <Upload className="w-6 h-6 text-white" />
                     </div>
                   )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-stone-900">{mockCurrentUser.name}</h3>
-                  <p className="text-stone-500 capitalize">{mockCurrentUser.role}</p>
-                  {mockCurrentUser.email_verified && (
+                  <h3 className="text-xl font-bold text-stone-900">{profile.name}</h3>
+                  <p className="text-stone-500 capitalize">{profile.role || "Customer"}</p>
+                  {profile.email_verified && (
                     <p className="text-sm text-green-600 mt-1">✓ Email verified</p>
                   )}
                 </div>

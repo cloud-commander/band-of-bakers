@@ -76,7 +76,8 @@ export default function CheckoutPage() {
 
   const totalToPay = cartTotal + SHIPPING_COST;
 
-  const onSubmit = async (data: CheckoutDeliveryForm) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onSubmit = async (_data: CheckoutDeliveryForm) => {
     try {
       // TODO: Replace with actual API call
       // const response = await fetch("/api/orders", {

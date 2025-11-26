@@ -60,7 +60,8 @@ export default function NewTestimonialPage() {
     },
   });
 
-  const onSubmit = async (data: TestimonialForm) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onSubmit = async (_data: TestimonialForm) => {
     try {
       // TODO: Replace with actual API call
       // const response = await fetch("/api/testimonials", {

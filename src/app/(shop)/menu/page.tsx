@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X, Calendar } from "lucide-react";
+import { SearchBar } from "@/components/search-bar";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.MENU_ITEMS_PER_PAGE;
 
@@ -150,7 +151,7 @@ function MenuPageContent() {
         />
 
         {/* Filters and Sort */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Bake Sale Filter */}
           <div>
             <label
@@ -218,6 +219,18 @@ function MenuPageContent() {
                 <SelectItem value="rating">Rating (High to Low)</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Search */}
+          <div>
+            <label
+              className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-2`}
+            >
+              Search
+            </label>
+            <div className="w-full">
+              <SearchBar />
+            </div>
           </div>
         </div>
 

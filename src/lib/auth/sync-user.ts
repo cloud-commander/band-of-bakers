@@ -2,7 +2,18 @@ import { getDb } from "@/lib/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function syncUser(authData: any) {
+interface AuthData {
+  email?: string | null | undefined;
+  name?: string | null;
+  displayName?: string | null;
+  picture?: string | null;
+  photoURL?: string | null;
+  image?: string | null;
+  emailVerified?: boolean | Date | null;
+  phone?: string;
+}
+
+export async function syncUser(authData: AuthData) {
   const db = await getDb();
   const email = authData.email;
 
@@ -22,8 +33,9 @@ export async function syncUser(authData: any) {
     id: crypto.randomUUID(),
     email: email,
     name: authData.name || authData.displayName || "User",
+    phone: authData.phone,
     avatar_url: authData.picture || authData.photoURL || authData.image,
-    email_verified: authData.emailVerified || false,
+    email_verified: Boolean(authData.emailVerified),
     role: "customer" as const,
   };
 

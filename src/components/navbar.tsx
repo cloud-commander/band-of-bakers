@@ -30,9 +30,7 @@ import { useSession, signOut } from "next-auth/react";
 
 import { MobileMenu } from "@/components/mobile-menu";
 import { CartPreview } from "@/components/cart-preview";
-import { SearchBar } from "@/components/search-bar";
 import { FlourIcon } from "@/components/ui/flour-icon";
-import { Suspense } from "react";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -148,17 +146,21 @@ export function Navbar() {
               />
               FAQ
             </Link>
-          </div>
-
-          {/* Search Bar (Desktop) */}
-          <div className="hidden lg:flex items-center justify-end">
-            <div className="w-80">
-              <Suspense
-                fallback={<div className="w-full h-10 bg-gray-200 rounded animate-pulse" />}
+            {/* Admin Link */}
+            {session?.user?.role && ["owner", "manager", "staff"].includes(session.user.role) && (
+              <Link
+                href="/dashboard"
+                className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group text-red-700"
               >
-                <SearchBar />
-              </Suspense>
-            </div>
+                <FlourIcon
+                  icon={UserCircle}
+                  size="sm"
+                  variant="award"
+                  className="group-hover:scale-110 transition-transform"
+                />
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Right: Cart + User Menu (Desktop) */}

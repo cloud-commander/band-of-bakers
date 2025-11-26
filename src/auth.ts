@@ -59,7 +59,10 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       expiresAt: Date.now() + parseInt(refreshedTokens.expires_in) * 1000,
     };
   } catch (error) {
-    console.error("Error refreshing access token", error);
+    // Only log in development
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error refreshing access token", error);
+    }
     return {
       ...token,
       error: "RefreshAccessTokenError",
@@ -88,26 +91,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const apiKey = process.env.GCP_IDENTITY_PLATFORM_API_KEY;
 
         if (!apiKey || !tenantId) {
-          console.error("Missing GCP configuration");
-          console.error("API Key present:", !!apiKey);
-          console.error("Tenant ID present:", !!tenantId);
+          if (process.env.NODE_ENV === "development") {
+            console.error("Missing GCP configuration - check environment variables");
+          }
           return null;
         }
 
-        console.log("Attempting GCP login with:");
-        console.log("API Key length:", apiKey.length);
-        console.log("Tenant ID:", tenantId);
-        console.log("Email:", email);
-
         const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
-
-        const requestBody = {
-          email,
-          password: "[REDACTED]",
-          tenantId,
-          returnSecureToken: true,
-        };
-        console.log("Request payload:", JSON.stringify(requestBody, null, 2));
 
         const response = await fetch(url, {
           method: "POST",
@@ -123,18 +113,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const data = await response.json();
 
         if (!response.ok) {
-          // SAFE LOGGING: Only log error code/message, NEVER the full data object which might contain sensitive info
-          console.error("Credentials login failed:", {
-            status: response.status,
-            code: data?.error?.code,
-            message: data?.error?.message,
-            email: email, // Safe to log email for debugging
-          });
-          console.error("Full error details:", JSON.stringify(data, null, 2)); // Temporary debug
+          // Only log in development
+          if (process.env.NODE_ENV === "development") {
+            console.error("Credentials login failed:", {
+              status: response.status,
+              code: data?.error?.code,
+              message: data?.error?.message,
+            });
+          }
           return null;
         }
-
-        console.log("✅ GCP login successful for:", email); // Temporary debug
 
         // Return an object that looks like a user, but contains the tokens
         // This object will be passed to the `jwt` callback as the `user` argument
@@ -177,9 +165,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const data = await response.json();
 
           if (!response.ok) {
-            console.error("Google token exchange error:", data);
-            // Fallback? Or fail?
-            // For now, let's just return the original token but log error
+            if (process.env.NODE_ENV === "development") {
+              console.error("Google token exchange error:", data);
+            }
+            // Return original token on error
             return token;
           }
 
@@ -192,7 +181,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             refreshToken: data.refreshToken,
             expiresAt: Date.now() + parseInt(data.expiresIn) * 1000,
             tenantId: tenantId,
-            userId: data.localId,
+            userId: dbUser?.id || data.localId, // Use DB ID if available
             role: dbUser?.role,
           };
         } else if (account.provider === "credentials") {
@@ -207,7 +196,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             refreshToken: user.refreshToken,
             expiresAt: Date.now() + parseInt(user.expiresIn!) * 1000,
             tenantId: process.env.GCP_IDENTITY_PLATFORM_TENANT_ID,
-            userId: user.id,
+            userId: dbUser?.id || user.id, // Use DB ID if available
             role: dbUser?.role,
           };
         }
@@ -223,11 +212,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       // Pass properties to the client
-      if (token.idToken) {
+      if (token.idToken && token.userId) {
         session.user.id = token.userId as string;
         session.user.role = token.role as string;
-        // We can expose the token if needed, but usually we just want the user info
-        // session.accessToken = token.idToken as string
+
+        // Fetch latest user data from DB to ensure updates (avatar, name, etc.) are reflected
+        try {
+          // We need to dynamically import getDb to avoid circular dependencies or context issues
+          // if auth.ts is used in places where getDb might not be ready.
+          // However, standard import should be fine if structured correctly.
+          // Let's use the imported getDb.
+          const { getDb } = await import("@/lib/db");
+          const { users } = await import("@/db/schema");
+          const { eq } = await import("drizzle-orm");
+
+          const db = await getDb();
+          let dbUser = await db.query.users.findFirst({
+            where: eq(users.id, token.userId as string),
+          });
+
+          // Fallback: If user not found by ID (e.g. token has GCP ID but DB has UUID), try email
+          if (!dbUser && session.user.email) {
+            console.log("User not found by ID, trying email:", session.user.email);
+            dbUser = await db.query.users.findFirst({
+              where: eq(users.email, session.user.email),
+            });
+          }
+
+          console.log(
+            "Session callback - Fetched user:",
+            dbUser ? { id: dbUser.id, name: dbUser.name } : "Not found"
+          );
+
+          if (dbUser) {
+            session.user.id = dbUser.id; // Ensure session has the correct DB ID
+            session.user.name = dbUser.name;
+            session.user.image = dbUser.avatar_url;
+            session.user.role = dbUser.role;
+            // @ts-expect-error: Custom session property
+            session.user.phone = dbUser.phone;
+            // @ts-expect-error: Custom session property
+            session.user.emailVerified = dbUser.email_verified;
+          }
+        } catch (error) {
+          console.error("Error fetching user in session callback:", error);
+        }
       }
       return session;
     },

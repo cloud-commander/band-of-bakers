@@ -89,7 +89,8 @@ export default function CheckoutCollectionPage() {
     toast.success("Details filled from profile");
   };
 
-  const onSubmit = async (data: CheckoutCollectionForm) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onSubmit = async (_data: CheckoutCollectionForm) => {
     try {
       // TODO: Replace with actual API call
       // const response = await fetch("/api/orders", {
