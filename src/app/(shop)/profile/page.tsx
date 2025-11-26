@@ -46,18 +46,27 @@ export default function ProfilePage() {
 
   // Use session user or fallback to mock (for development/demo if not logged in)
   // Normalize data to handle both session user and mock user structures
+  // Extended user type to include custom fields
+  interface ExtendedUser {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    phone?: string;
+    role?: string;
+    emailVerified?: boolean;
+  }
+
+  const user = session?.user as ExtendedUser | undefined;
+
   const profile = {
-    id: session?.user?.id || mockCurrentUser.id,
-    name: session?.user?.name || mockCurrentUser.name,
-    email: session?.user?.email || mockCurrentUser.email,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    phone: (session?.user as any)?.phone || mockCurrentUser.phone || "",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    role: (session?.user as any)?.role || mockCurrentUser.role || "customer",
-    image: session?.user?.image || mockCurrentUser.avatar_url || "",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    email_verified:
-      (session?.user as any)?.emailVerified || mockCurrentUser.email_verified || false,
+    id: user?.id || mockCurrentUser.id,
+    name: user?.name || mockCurrentUser.name,
+    email: user?.email || mockCurrentUser.email,
+    phone: user?.phone || mockCurrentUser.phone || "",
+    role: user?.role || mockCurrentUser.role || "customer",
+    image: user?.image || mockCurrentUser.avatar_url || "",
+    email_verified: user?.emailVerified || mockCurrentUser.email_verified || false,
   };
 
   const [avatarPreview, setAvatarPreview] = useState(profile.image || "");

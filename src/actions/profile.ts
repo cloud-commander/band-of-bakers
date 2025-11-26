@@ -1,9 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { getDb } from "@/lib/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { userRepository } from "@/lib/repositories";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
 
@@ -23,6 +21,7 @@ export async function updateProfile(formData: FormData) {
     type: typeof avatarFile,
     isInstanceFile: avatarFile instanceof File,
     constructor: avatarFile?.constructor?.name,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     size: (avatarFile as any)?.size,
   });
 
@@ -30,12 +29,12 @@ export async function updateProfile(formData: FormData) {
     userId,
     name,
     phone,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     avatarFileName: (avatarFile as any)?.name,
   });
 
   try {
-    const db = await getDb();
-    let avatarUrl = undefined;
+    let avatarUrl: string | undefined = undefined;
 
     // Handle Avatar Upload to R2
     if (avatarFile && avatarFile instanceof File && avatarFile.size > 0) {
@@ -63,21 +62,6 @@ export async function updateProfile(formData: FormData) {
           },
         });
 
-        // Store the URL path that matches our route handler: /images/avatars/...
-        // The route handler is at /images/[...path], so we want /images/avatars/filename
-        // But wait, the route handler prepends "images/".
-        // If URL is /images/avatars/foo.jpg
-        // Route params: avatars/foo.jpg
-        // Route looks for: images/avatars/foo.jpg (Correct)
-
-        // So the URL stored in DB should be /images/avatars/... (relative to domain root)
-        // But wait, if I store /images/avatars/foo.jpg, Next.js Image will fetch it.
-        // But the route handler is at /images.
-        // So the URL should be /images/avatars/foo.jpg.
-        // But wait, the file name I constructed includes "images/".
-        // So fileName = "images/avatars/..."
-        // So avatarUrl = "/" + fileName;
-
         avatarUrl = `/${fileName}`;
         console.log("Uploaded avatar to R2:", fileName);
         console.log("Setting avatarUrl:", avatarUrl);
@@ -86,16 +70,12 @@ export async function updateProfile(formData: FormData) {
 
     console.log("Updating user in DB with:", { name, phone, avatarUrl });
 
-    // Update User in DB
-    await db
-      .update(users)
-      .set({
-        name,
-        phone,
-        ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
-        updated_at: new Date().toISOString(),
-      })
-      .where(eq(users.id, userId));
+    // Update User in DB using repository pattern
+    await userRepository.updateProfile(userId, {
+      name,
+      phone,
+      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+    });
 
     revalidatePath("/profile");
     return { success: true };
