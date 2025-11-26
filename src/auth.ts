@@ -8,7 +8,7 @@ import { JWT } from "next-auth/jwt";
 declare module "next-auth" {
   interface Session {
     user: {
-      id: string;
+      role?: string;
     } & DefaultSession["user"];
   }
 
@@ -16,6 +16,7 @@ declare module "next-auth" {
     idToken?: string;
     refreshToken?: string;
     expiresIn?: string;
+    role?: string;
   }
 }
 
@@ -27,12 +28,13 @@ declare module "next-auth/jwt" {
     tenantId?: string;
     userId?: string;
     error?: string;
+    role?: string;
   }
 }
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
-    const url = `https://securetoken.googleapis.com/v1/token?key=${process.env.GCP_API_KEY}`;
+    const url = `https://securetoken.googleapis.com/v1/token?key=${process.env.GCP_IDENTITY_PLATFORM_API_KEY}`;
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -83,9 +85,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         const { email, password } = credentials;
         const tenantId = process.env.GCP_IDENTITY_PLATFORM_TENANT_ID;
-        const apiKey = process.env.GCP_API_KEY;
+        const apiKey = process.env.GCP_IDENTITY_PLATFORM_API_KEY;
+
+        if (!apiKey || !tenantId) {
+          console.error("Missing GCP configuration");
+          console.error("API Key present:", !!apiKey);
+          console.error("Tenant ID present:", !!tenantId);
+          return null;
+        }
+
+        console.log("Attempting GCP login with:");
+        console.log("API Key length:", apiKey.length);
+        console.log("Tenant ID:", tenantId);
+        console.log("Email:", email);
 
         const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+
+        const requestBody = {
+          email,
+          password: "[REDACTED]",
+          tenantId,
+          returnSecureToken: true,
+        };
+        console.log("Request payload:", JSON.stringify(requestBody, null, 2));
 
         const response = await fetch(url, {
           method: "POST",
@@ -101,9 +123,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const data = await response.json();
 
         if (!response.ok) {
-          console.error("Credentials login error:", data);
+          // SAFE LOGGING: Only log error code/message, NEVER the full data object which might contain sensitive info
+          console.error("Credentials login failed:", {
+            status: response.status,
+            code: data?.error?.code,
+            message: data?.error?.message,
+            email: email, // Safe to log email for debugging
+          });
+          console.error("Full error details:", JSON.stringify(data, null, 2)); // Temporary debug
           return null;
         }
+
+        console.log("✅ GCP login successful for:", email); // Temporary debug
 
         // Return an object that looks like a user, but contains the tokens
         // This object will be passed to the `jwt` callback as the `user` argument
@@ -126,7 +157,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // If provider is Google, exchange token
         if (account.provider === "google") {
           const tenantId = process.env.GCP_IDENTITY_PLATFORM_TENANT_ID;
-          const apiKey = process.env.GCP_API_KEY;
+          const apiKey = process.env.GCP_IDENTITY_PLATFORM_API_KEY;
 
           // Exchange Google ID Token for Firebase/GCP Token
           const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${apiKey}`;
@@ -153,7 +184,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
 
           // Sync user to D1
-          await syncUser(user);
+          const dbUser = await syncUser(user);
 
           return {
             ...token,
@@ -162,12 +193,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             expiresAt: Date.now() + parseInt(data.expiresIn) * 1000,
             tenantId: tenantId,
             userId: data.localId,
+            role: dbUser?.role,
           };
         } else if (account.provider === "credentials") {
           // Credentials provider already returns the correct shape in `authorize`
           // But `user` object here comes from `authorize` return
 
-          await syncUser(user);
+          const dbUser = await syncUser(user);
 
           return {
             ...token,
@@ -176,6 +208,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             expiresAt: Date.now() + parseInt(user.expiresIn!) * 1000,
             tenantId: process.env.GCP_IDENTITY_PLATFORM_TENANT_ID,
             userId: user.id,
+            role: dbUser?.role,
           };
         }
       }
@@ -192,6 +225,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Pass properties to the client
       if (token.idToken) {
         session.user.id = token.userId as string;
+        session.user.role = token.role as string;
         // We can expose the token if needed, but usually we just want the user info
         // session.accessToken = token.idToken as string
       }

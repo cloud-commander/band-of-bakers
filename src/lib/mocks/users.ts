@@ -8,7 +8,7 @@ import type { User, PublicUser, UserRole } from "@/lib/validators/user";
 export const mockUsers: User[] = [
   {
     id: "user-owner",
-    email: "owner@bandofbakers.co.uk",
+    email: "admin@bandofbakers.co.uk",
     password_hash: "$2a$10$mockhashedpassword1", // Mock bcrypt hash
     name: "Gandalf Greyhame",
     phone: "+447700900123",

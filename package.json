@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "clean-cache": "bash scripts/clean-cache.sh",
-    "clean-all": "bash scripts/clean-cache.sh && rm -rf node_modules && pnpm install"
+    "clean-all": "bash scripts/clean-cache.sh && rm -rf node_modules && pnpm install",
+    "seed": "npx tsx scripts/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -26,6 +27,7 @@
     "@tinymce/tinymce-react": "^6.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
     "framer-motion": "^12.23.24",
     "jose": "^6.1.2",
@@ -38,6 +40,7 @@
     "react-turnstile": "^1.1.4",
     "recharts": "^3.5.0",
     "rollbar": "^2.26.0",
+    "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",

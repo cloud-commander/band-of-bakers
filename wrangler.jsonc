@@ -7,19 +7,21 @@
     {
       "binding": "DB",
       "database_name": "bandofbakers-db",
-      "database_id": "placeholder-id"
+      "database_id": "6f8424bd-f96f-493f-9f42-2b8ec5262454"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "placeholder-id"
+      "id": "4d25b8936ea643a08e49af105979512e",
+      "preview_id": "8915e216f6dc4e6f8d2f4cd6ca8a0138"
     }
   ],
   "r2_buckets": [
     {
       "binding": "R2",
-      "bucket_name": "bandofbakers-assets"
+      "bucket_name": "bandofbakers-assets",
+      "preview_bucket_name": "bandofbakers-assets"
     }
   ]
 }
