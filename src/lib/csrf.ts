@@ -3,15 +3,15 @@
  * Validates request origin to prevent Cross-Site Request Forgery attacks
  */
 
-import { headers } from 'next/headers';
+import { headers } from "next/headers";
 
 /**
  * CSRF Error - thrown when origin validation fails
  */
 export class CsrfError extends Error {
-  constructor(message: string = 'Invalid request origin') {
+  constructor(message: string = "Invalid request origin") {
     super(message);
-    this.name = 'CsrfError';
+    this.name = "CsrfError";
   }
 }
 
@@ -19,16 +19,14 @@ export class CsrfError extends Error {
  * Get allowed origins for CSRF validation
  */
 function getAllowedOrigins(): string[] {
-  const origins = [
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://bandofbakers.co.uk',
-  ];
+  const origins = [process.env.NEXT_PUBLIC_SITE_URL || "https://bandofbakers.co.uk"];
 
   // Add localhost for development
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     origins.push(
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://localhost:8788', // Wrangler dev server
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:8788" // Wrangler dev server
     );
   }
 
@@ -40,21 +38,19 @@ function getAllowedOrigins(): string[] {
  * @returns true if request is valid, false otherwise
  */
 export async function validateCsrf(): Promise<boolean> {
-  const headersList = headers();
-  const origin = headersList.get('origin');
-  const referer = headersList.get('referer');
+  const headersList = await headers();
+  const origin = headersList.get("origin");
+  const referer = headersList.get("referer");
 
   const allowedOrigins = getAllowedOrigins();
 
   // Check origin header (preferred)
   if (origin) {
-    const isAllowed = allowedOrigins.some(allowed =>
-      origin.startsWith(allowed)
-    );
+    const isAllowed = allowedOrigins.some((allowed) => origin.startsWith(allowed));
 
     if (!isAllowed) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('CSRF validation failed - invalid origin:', origin);
+      if (process.env.NODE_ENV === "development") {
+        console.error("CSRF validation failed - invalid origin:", origin);
       }
       return false;
     }
@@ -64,13 +60,11 @@ export async function validateCsrf(): Promise<boolean> {
 
   // Fallback to referer header
   if (referer) {
-    const isAllowed = allowedOrigins.some(allowed =>
-      referer.startsWith(allowed)
-    );
+    const isAllowed = allowedOrigins.some((allowed) => referer.startsWith(allowed));
 
     if (!isAllowed) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('CSRF validation failed - invalid referer:', referer);
+      if (process.env.NODE_ENV === "development") {
+        console.error("CSRF validation failed - invalid referer:", referer);
       }
       return false;
     }
@@ -79,8 +73,8 @@ export async function validateCsrf(): Promise<boolean> {
   }
 
   // No origin or referer header - suspicious
-  if (process.env.NODE_ENV === 'development') {
-    console.error('CSRF validation failed - missing origin and referer headers');
+  if (process.env.NODE_ENV === "development") {
+    console.error("CSRF validation failed - missing origin and referer headers");
   }
 
   return false;

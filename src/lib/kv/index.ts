@@ -28,7 +28,8 @@ export interface RateLimitData {
 export class KVService {
   private async getKV() {
     const { env } = await getCloudflareContext();
-    return env.KV;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (env as any).KV;
   }
 
   // ==========================================
@@ -37,7 +38,7 @@ export class KVService {
 
   async getSession(sessionId: string): Promise<SessionData | null> {
     const kv = await this.getKV();
-    const data = await kv.get(`session:${sessionId}`, 'json');
+    const data = await kv.get(`session:${sessionId}`, "json");
     return data as SessionData | null;
   }
 
@@ -47,11 +48,7 @@ export class KVService {
     ttl: number = 86400 // 24 hours default
   ): Promise<void> {
     const kv = await this.getKV();
-    await kv.put(
-      `session:${sessionId}`,
-      JSON.stringify(data),
-      { expirationTtl: ttl }
-    );
+    await kv.put(`session:${sessionId}`, JSON.stringify(data), { expirationTtl: ttl });
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -63,13 +60,10 @@ export class KVService {
   // RATE LIMITING
   // ==========================================
 
-  async getRateLimit(
-    action: string,
-    identifier: string
-  ): Promise<RateLimitData | null> {
+  async getRateLimit(action: string, identifier: string): Promise<RateLimitData | null> {
     const kv = await this.getKV();
     const key = `ratelimit:${action}:${identifier}`;
-    const data = await kv.get(key, 'json');
+    const data = await kv.get(key, "json");
     return data as RateLimitData | null;
   }
 
@@ -95,7 +89,7 @@ export class KVService {
 
   async getCached<T>(key: string): Promise<T | null> {
     const kv = await this.getKV();
-    const data = await kv.get(`cache:${key}`, 'json');
+    const data = await kv.get(`cache:${key}`, "json");
     return data as T | null;
   }
 
@@ -105,11 +99,7 @@ export class KVService {
     ttl: number = 300 // 5 minutes default
   ): Promise<void> {
     const kv = await this.getKV();
-    await kv.put(
-      `cache:${key}`,
-      JSON.stringify(data),
-      { expirationTtl: ttl }
-    );
+    await kv.put(`cache:${key}`, JSON.stringify(data), { expirationTtl: ttl });
   }
 
   async invalidateCache(key: string): Promise<void> {
@@ -134,18 +124,9 @@ export class KVService {
   // TOKENS (Verification, Reset, etc.)
   // ==========================================
 
-  async setToken(
-    type: string,
-    token: string,
-    value: string,
-    ttl: number
-  ): Promise<void> {
+  async setToken(type: string, token: string, value: string, ttl: number): Promise<void> {
     const kv = await this.getKV();
-    await kv.put(
-      `token:${type}:${token}`,
-      value,
-      { expirationTtl: ttl }
-    );
+    await kv.put(`token:${type}:${token}`, value, { expirationTtl: ttl });
   }
 
   async getToken(type: string, token: string): Promise<string | null> {
@@ -165,12 +146,12 @@ export class KVService {
   async getFeatureFlag(name: string): Promise<boolean> {
     const kv = await this.getKV();
     const value = await kv.get(`feature:${name}`);
-    return value === 'true';
+    return value === "true";
   }
 
   async setFeatureFlag(name: string, enabled: boolean): Promise<void> {
     const kv = await this.getKV();
-    await kv.put(`feature:${name}`, enabled ? 'true' : 'false');
+    await kv.put(`feature:${name}`, enabled ? "true" : "false");
   }
 
   // ==========================================
@@ -180,7 +161,8 @@ export class KVService {
   async listKeys(prefix: string): Promise<string[]> {
     const kv = await this.getKV();
     const list = await kv.list({ prefix });
-    return list.keys.map(k => k.name);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return list.keys.map((k: any) => k.name);
   }
 
   async deleteAllByPrefix(prefix: string): Promise<void> {

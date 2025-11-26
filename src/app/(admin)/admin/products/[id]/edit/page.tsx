@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,11 +18,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ImageGallery } from "@/components/admin/image-gallery";
-import { createProduct } from "@/actions/products";
+import { getProductById, updateProduct, deleteProduct } from "@/actions/products";
 import { mockProductCategories } from "@/lib/mocks/products";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 // Validation schema
@@ -33,14 +44,16 @@ const productFormSchema = z.object({
   category_id: z.string().min(1, "Category is required"),
   base_price: z.string().min(1, "Price is required"),
   is_active: z.boolean(),
-  image_url: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productFormSchema>;
 
-export default function NewProductPage() {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
@@ -49,6 +62,7 @@ export default function NewProductPage() {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
@@ -58,6 +72,44 @@ export default function NewProductPage() {
   });
 
   const isActive = watch("is_active");
+
+  // Load product data
+  useEffect(() => {
+    async function loadProduct() {
+      try {
+        const product = await getProductById(id);
+
+        if (!product) {
+          toast.error("Product not found");
+          router.push("/admin/products");
+          return;
+        }
+
+        // Set form values
+        reset({
+          name: product.name,
+          slug: product.slug,
+          description: product.description || "",
+          category_id: product.category_id,
+          base_price: product.base_price.toString(),
+          is_active: product.is_active,
+        });
+
+        // Set image and category
+        if (product.image_url) {
+          setSelectedImage(product.image_url);
+        }
+        setSelectedCategory(product.category_id);
+      } catch (error) {
+        console.error("Failed to load product:", error);
+        toast.error("Failed to load product");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProduct();
+  }, [id, reset, router]);
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +125,6 @@ export default function NewProductPage() {
     setIsSubmitting(true);
 
     try {
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("slug", data.slug);
@@ -82,46 +133,106 @@ export default function NewProductPage() {
       formData.append("base_price", data.base_price);
       formData.append("is_active", data.is_active.toString());
 
-      // If an image was selected from gallery, we need to handle it differently
-      // For now, we'll create a mock File from the URL
+      // Handle image if changed
       if (selectedImage) {
-        // Fetch the image and convert to File
         const response = await fetch(selectedImage);
         const blob = await response.blob();
         const file = new File([blob], "product-image.jpg", { type: blob.type });
         formData.append("image", file);
       }
 
-      const result = await createProduct(formData);
+      const result = await updateProduct(id, formData);
 
       if (result.success) {
-        toast.success("Product created successfully");
+        toast.success("Product updated successfully");
         router.push("/admin/products");
         router.refresh();
       } else {
-        toast.error(result.error || "Failed to create product");
+        toast.error(result.error || "Failed to update product");
       }
     } catch (error) {
-      console.error("Create product error:", error);
+      console.error("Update product error:", error);
       toast.error("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+
+    try {
+      const result = await deleteProduct(id);
+
+      if (result.success) {
+        toast.success("Product deleted successfully");
+        router.push("/admin/products");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Delete product error:", error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader
-        title="Create Product"
-        description="Add a new product to your catalog"
-        breadcrumbs={[{ label: "Products", href: "/admin/products" }, { label: "New Product" }]}
+        title="Edit Product"
+        description="Update product details"
+        breadcrumbs={[{ label: "Products", href: "/admin/products" }, { label: "Edit Product" }]}
         actions={
-          <Button variant="outline" asChild>
-            <Link href="/admin/products">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Product?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the product and
+                    remove it from the catalog.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <Button variant="outline" asChild>
+              <Link href="/admin/products">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -169,6 +280,7 @@ export default function NewProductPage() {
             <div className="space-y-2">
               <Label htmlFor="category_id">Category *</Label>
               <Select
+                value={watch("category_id")}
                 onValueChange={(value) => {
                   setValue("category_id", value);
                   setSelectedCategory(value);
@@ -232,7 +344,7 @@ export default function NewProductPage() {
         {/* Actions */}
         <div className="flex gap-4">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Product"}
+            {isSubmitting ? "Updating..." : "Update Product"}
           </Button>
           <Button
             type="button"

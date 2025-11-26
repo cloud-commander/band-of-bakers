@@ -3,7 +3,7 @@
  * Protects against XSS and other injection attacks
  */
 
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from "isomorphic-dompurify";
 
 /**
  * Allowed HTML tags for different security levels
@@ -13,19 +13,38 @@ const ALLOWED_TAGS = {
    * Basic: Only simple text formatting
    * Use for: User names, short descriptions, comments
    */
-  basic: ['b', 'i', 'em', 'strong', 'u', 'p', 'br'],
+  basic: ["b", "i", "em", "strong", "u", "p", "br"],
 
   /**
    * Rich: Full content editing
    * Use for: News posts, testimonials, product descriptions
    */
   rich: [
-    'b', 'i', 'em', 'strong', 'u', 'p', 'br',
-    'ul', 'ol', 'li',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'blockquote', 'a',
-    'img',
-    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    "b",
+    "i",
+    "em",
+    "strong",
+    "u",
+    "p",
+    "br",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "blockquote",
+    "a",
+    "img",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
   ],
 };
 
@@ -33,11 +52,8 @@ const ALLOWED_TAGS = {
  * Allowed HTML attributes for different security levels
  */
 const ALLOWED_ATTR = {
-  basic: {},
-  rich: {
-    'a': ['href', 'title', 'target', 'rel'],
-    'img': ['src', 'alt', 'title', 'width', 'height'],
-  },
+  basic: [] as string[],
+  rich: ["href", "title", "target", "rel", "src", "alt", "width", "height"],
 };
 
 /**
@@ -46,13 +62,10 @@ const ALLOWED_ATTR = {
  * @param level - Security level: 'basic' or 'rich'
  * @returns Sanitized HTML safe for rendering
  */
-export function sanitizeHtml(
-  dirty: string,
-  level: 'basic' | 'rich' = 'basic'
-): string {
+export function sanitizeHtml(dirty: string, level: "basic" | "rich" = "basic"): string {
   return DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS: ALLOWED_TAGS[level],
-    ALLOWED_ATTR: level === 'rich' ? ALLOWED_ATTR.rich : ALLOWED_ATTR.basic,
+    ALLOWED_ATTR: ALLOWED_ATTR[level],
     ALLOW_DATA_ATTR: false,
     ALLOW_UNKNOWN_PROTOCOLS: false,
     SAFE_FOR_TEMPLATES: true,
@@ -76,17 +89,19 @@ export function sanitizeText(input: string): string {
  * @returns Safe filename with dangerous characters removed
  */
 export function sanitizeFileName(filename: string): string {
-  return filename
-    // Remove path traversal attempts
-    .replace(/\.\./g, '')
-    // Remove directory separators
-    .replace(/[/\\]/g, '')
-    // Replace special characters with underscores
-    .replace(/[^a-zA-Z0-9._-]/g, '_')
-    // Limit length to 255 characters
-    .substring(0, 255)
-    // Remove leading/trailing dots and spaces
-    .replace(/^[.\s]+|[.\s]+$/g, '');
+  return (
+    filename
+      // Remove path traversal attempts
+      .replace(/\.\./g, "")
+      // Remove directory separators
+      .replace(/[/\\]/g, "")
+      // Replace special characters with underscores
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      // Limit length to 255 characters
+      .substring(0, 255)
+      // Remove leading/trailing dots and spaces
+      .replace(/^[.\s]+|[.\s]+$/g, "")
+  );
 }
 
 /**
@@ -97,19 +112,19 @@ export function sanitizeFileName(filename: string): string {
  */
 export function sanitizeUrl(
   url: string,
-  allowedProtocols: string[] = ['http', 'https']
+  allowedProtocols: string[] = ["http", "https"]
 ): string | null {
   try {
     const parsed = new URL(url);
 
     // Check if protocol is allowed
-    const protocol = parsed.protocol.replace(':', '');
+    const protocol = parsed.protocol.replace(":", "");
     if (!allowedProtocols.includes(protocol)) {
       return null;
     }
 
     // Prevent javascript: and data: URLs
-    if (['javascript', 'data', 'vbscript'].includes(protocol)) {
+    if (["javascript", "data", "vbscript"].includes(protocol)) {
       return null;
     }
 
@@ -137,8 +152,8 @@ export function sanitizeEmail(email: string): string | null {
 
   // Additional checks
   if (trimmed.length > 254) return null; // Email too long
-  if (trimmed.includes('..')) return null; // Consecutive dots
-  if (trimmed.startsWith('.') || trimmed.endsWith('.')) return null; // Leading/trailing dot
+  if (trimmed.includes("..")) return null; // Consecutive dots
+  if (trimmed.startsWith(".") || trimmed.endsWith(".")) return null; // Leading/trailing dot
 
   return trimmed;
 }
@@ -150,7 +165,7 @@ export function sanitizeEmail(email: string): string | null {
  */
 export function sanitizePhone(phone: string): string | null {
   // Remove all non-digit characters except +
-  const cleaned = phone.replace(/[^\d+]/g, '');
+  const cleaned = phone.replace(/[^\d+]/g, "");
 
   // UK phone number validation (basic)
   // Accepts: +44, 0, or 7/8 prefix

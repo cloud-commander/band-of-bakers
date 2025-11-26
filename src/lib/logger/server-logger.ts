@@ -6,6 +6,14 @@ interface LogEntry {
   timestamp?: Date;
 }
 
+export interface LogContext {
+  requestId?: string;
+  userId?: string;
+  action?: string;
+  duration?: number;
+  [key: string]: unknown;
+}
+
 async function sendToLogflare(entry: LogEntry): Promise<void> {
   const apiKey = process.env.BANDOFBAKERS_LOGFLARE_API_KEY;
   const sourceId = process.env.BANDOFBAKERS_LOGFLARE_SOURCE_ID;
@@ -64,9 +72,12 @@ export async function logDebug(message: string, metadata?: Record<string, unknow
 }
 
 // Export all at once for convenience
-export const serverLogger = {
+const serverLogger = {
   info: logInfo,
   warn: logWarn,
   error: logError,
   debug: logDebug,
 };
+
+export default serverLogger;
+export { serverLogger as logger };

@@ -43,6 +43,40 @@ async function main() {
   }
 
   try {
+    // 0. Clear R2 if requested
+    if (args.includes("--clear")) {
+      console.log("\n🧹 Clearing R2 bucket...");
+      try {
+        const listOutput = execSync(`npx wrangler r2 object list ${R2_BUCKET} --local`, {
+          encoding: "utf-8",
+          stdio: ["ignore", "pipe", "ignore"], // Suppress stderr
+        });
+
+        const objects = JSON.parse(listOutput);
+        if (Array.isArray(objects) && objects.length > 0) {
+          console.log(`   Found ${objects.length} objects to delete.`);
+          for (const obj of objects) {
+            try {
+              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key} --local`, {
+                stdio: "ignore",
+              });
+              process.stdout.write("."); // Progress indicator
+            } catch {
+              // Ignore deletion errors
+            }
+          }
+          console.log("\n   ✅ Bucket cleared.");
+        } else {
+          console.log("   Bucket is already empty.");
+        }
+      } catch (error) {
+        console.warn(
+          "   ⚠️ Failed to list/clear bucket (it might be empty or not exist):",
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
     // 1. Generate SQL
     console.log("\n📝 Generating SQL...");
     const sqlStatements: string[] = [];
@@ -216,6 +250,20 @@ async function main() {
       const processImage = async (primaryUrl: string, r2Path: string) => {
         if (!primaryUrl || !primaryUrl.startsWith("http")) return;
 
+        // Check if image already exists in R2
+        try {
+          const checkResult = execSync(
+            `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --local`,
+            { stdio: "pipe" }
+          );
+          if (checkResult) {
+            console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping...`);
+            return;
+          }
+        } catch (error) {
+          // Image doesn't exist, continue with upload
+        }
+
         // Try primary URL first, then fallbacks
         const sources = [primaryUrl, ...FALLBACK_IMAGES];
         let downloaded = false;
@@ -279,7 +327,10 @@ async function main() {
       // Products
       for (const prod of mockProducts) {
         if (prod.image_url) {
-          await processImage(prod.image_url, `images/products/${prod.slug}.jpg`);
+          await processImage(
+            prod.image_url,
+            `images/products/${prod.category_id}/${prod.slug}.jpg`
+          );
         }
       }
 

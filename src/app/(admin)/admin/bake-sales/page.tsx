@@ -1,24 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/state/page-header";
-import { mockBakeSalesWithLocation, mockPastBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
+import { getBakeSales, deleteBakeSale } from "@/actions/bake-sales";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BakeSaleDialog } from "@/components/admin/bake-sale-dialog";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_BAKE_SALES_ITEMS_PER_PAGE;
 
-export const dynamic = "force-dynamic";
+// Define type locally since we don't have it exported from schema yet in a way client can use easily without imports
+type BakeSale = {
+  id: string;
+  date: string;
+  location_id: string;
+  cutoff_datetime: string;
+  is_active: boolean;
+  location: {
+    name: string;
+  };
+};
 
 export default function AdminBakeSalesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [archivedPage, setArchivedPage] = useState(1);
+  const [upcomingBakeSales, setUpcomingBakeSales] = useState<BakeSale[]>([]);
+  const [archivedBakeSales, setArchivedBakeSales] = useState<BakeSale[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingBakeSale, setEditingBakeSale] = useState<BakeSale | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const upcomingBakeSales = mockBakeSalesWithLocation;
-  const archivedBakeSales = mockPastBakeSalesWithLocation;
+  // Fetch bake sales
+  const fetchBakeSales = async () => {
+    setLoading(true);
+    try {
+      const { upcoming, archived } = await getBakeSales();
+      setUpcomingBakeSales(upcoming as any); // Type assertion needed due to serialization
+      setArchivedBakeSales(archived as any);
+    } catch (error) {
+      console.error("Failed to fetch bake sales:", error);
+      toast.error("Failed to load bake sales");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBakeSales();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const result = await deleteBakeSale(id);
+      if (result.success) {
+        toast.success("Bake sale deleted successfully");
+        fetchBakeSales(); // Refresh list
+      } else {
+        toast.error(result.error || "Failed to delete bake sale");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Calculate pagination for upcoming
   const totalUpcomingPages = Math.ceil(upcomingBakeSales.length / ITEMS_PER_PAGE);
@@ -51,7 +115,6 @@ export default function AdminBakeSalesPage() {
             <th className="text-left p-4 font-medium">Location</th>
             <th className="text-left p-4 font-medium">Cutoff</th>
             {!isArchived && <th className="text-left p-4 font-medium">Status</th>}
-            {isArchived && <th className="text-left p-4 font-medium">Orders</th>}
             <th className="text-right p-4 font-medium">Actions</th>
           </tr>
         </thead>
@@ -68,7 +131,12 @@ export default function AdminBakeSalesPage() {
               </td>
               <td className="p-4 text-sm">{bakeSale.location.name}</td>
               <td className="p-4 text-sm text-muted-foreground">
-                {new Date(bakeSale.cutoff_datetime).toLocaleDateString("en-GB")}
+                {new Date(bakeSale.cutoff_datetime).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </td>
               {!isArchived && (
                 <td className="p-4">
@@ -77,15 +145,53 @@ export default function AdminBakeSalesPage() {
                   </Badge>
                 </td>
               )}
-              {isArchived && (
-                <td className="p-4 text-sm text-muted-foreground">
-                  {/* In Phase 4, this will show actual order count */}-
-                </td>
-              )}
               <td className="p-4 text-right">
-                <Button variant="ghost" size="sm">
-                  {isArchived ? "View" : "Edit"}
-                </Button>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingBakeSale(bakeSale);
+                      setIsEditDialogOpen(true);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Bake Sale?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the bake sale
+                          scheduled for {new Date(bakeSale.date).toLocaleDateString()}.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(bakeSale.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {deletingId === bakeSale.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "Delete"
+                          )}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </td>
             </tr>
           ))}
@@ -94,12 +200,43 @@ export default function AdminBakeSalesPage() {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader
         title="Bake Sales"
         description="Manage upcoming and archived bake sale dates"
-        actions={<Button>Add Bake Sale</Button>}
+        actions={
+          <BakeSaleDialog
+            mode="create"
+            trigger={
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> Add Bake Sale
+              </Button>
+            }
+            onOpenChange={(open) => !open && fetchBakeSales()}
+          />
+        }
+      />
+
+      <BakeSaleDialog
+        mode="edit"
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setEditingBakeSale(null);
+            fetchBakeSales();
+          }
+        }}
+        bakeSale={editingBakeSale || undefined}
       />
 
       <Tabs defaultValue="upcoming" className="w-full">
@@ -118,16 +255,24 @@ export default function AdminBakeSalesPage() {
             />
           </div>
 
-          {renderBakeSalesTable(paginatedUpcoming, false)}
+          {upcomingBakeSales.length > 0 ? (
+            <>
+              {renderBakeSalesTable(paginatedUpcoming, false)}
 
-          {/* Pagination Controls */}
-          {totalUpcomingPages > 1 && (
-            <div className="mt-8 flex flex-col items-center gap-6">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalUpcomingPages}
-                onPageChange={handleUpcomingPageChange}
-              />
+              {/* Pagination Controls */}
+              {totalUpcomingPages > 1 && (
+                <div className="mt-8 flex flex-col items-center gap-6">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalUpcomingPages}
+                    onPageChange={handleUpcomingPageChange}
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="border rounded-lg p-12 text-center text-muted-foreground">
+              <p>No upcoming bake sales scheduled.</p>
             </div>
           )}
         </TabsContent>
