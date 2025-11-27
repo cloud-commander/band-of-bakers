@@ -1,8 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
-import { getDb } from "@/lib/db";
-import { images } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { getCachedImages } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -25,32 +23,16 @@ export async function GET(request: NextRequest) {
     // 2. Validate params
     // (Optional: add zod validation here)
 
-    // 3. Query DB
+    // 3. Query DB (Cached)
     console.log(`[API] list-images: Fetching for category=${category}, tag=${tag}`);
-    const db = await getDb();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (db as any).select().from(images).orderBy(desc(images.created_at));
+    // Use the cached function
+    const filteredImages = await getCachedImages(
+      category !== "all" ? category : undefined,
+      tag !== "all" ? tag : undefined
+    );
 
-    if (category !== "all") {
-      // dynamic query building
-      query = query.where(eq(images.category, category));
-    }
-
-    const allImages = (await query) as (typeof images.$inferSelect)[];
-    console.log(`[API] list-images: Found ${allImages.length} images`);
-
-    let filteredImages = allImages;
-    if (tag !== "all") {
-      filteredImages = allImages.filter((img) => {
-        // Parse tags if they are stored as string (JSON) or array
-        // The schema says text with mode: "json" -> string[]?
-        // Let's check schema. If it's json mode, drizzle handles it.
-        // But let's be safe.
-        const tags = Array.isArray(img.tags) ? img.tags : [];
-        return tags.includes(tag);
-      });
-    }
+    console.log(`[API] list-images: Found ${filteredImages.length} images`);
 
     const imageUrls = filteredImages.map((img) => img.url);
 

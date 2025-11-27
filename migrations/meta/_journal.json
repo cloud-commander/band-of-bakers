@@ -22,6 +22,13 @@
       "when": 1764222178690,
       "tag": "0002_sloppy_diamondback",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1764232216892,
+      "tag": "0003_giant_johnny_storm",
+      "breakpoints": true
     }
   ]
 }

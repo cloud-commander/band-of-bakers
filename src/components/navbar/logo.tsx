@@ -11,7 +11,7 @@ export function NavbarLogo() {
         className="flex items-center gap-3 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md transition-colors"
       >
         <Image
-          src="/Bandofbakers-logo-removebg-preview.png"
+          src="/images_logos/bandofbakers-256.png"
           alt="Band of Bakers Logo"
           width={40}
           height={40}

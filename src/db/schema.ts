@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 // Helper for timestamps
@@ -15,18 +15,24 @@ const timestamps = {
 // USERS
 // ============================================================================
 
-export const users = sqliteTable("users", {
-  id: text("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  password_hash: text("password_hash"), // Nullable for OAuth-only users
-  name: text("name").notNull(),
-  phone: text("phone"),
-  role: text("role").notNull().default("customer"), // customer, staff, manager, owner
-  avatar_url: text("avatar_url"),
-  email_verified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
-  is_banned: integer("is_banned", { mode: "boolean" }).notNull().default(false),
-  ...timestamps,
-});
+export const users = sqliteTable(
+  "users",
+  {
+    id: text("id").primaryKey(),
+    email: text("email").notNull().unique(),
+    password_hash: text("password_hash"), // Nullable for OAuth-only users
+    name: text("name").notNull(),
+    phone: text("phone"),
+    role: text("role").notNull().default("customer"), // customer, staff, manager, owner
+    avatar_url: text("avatar_url"),
+    email_verified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+    is_banned: integer("is_banned", { mode: "boolean" }).notNull().default(false),
+    ...timestamps,
+  },
+  (table) => ({
+    roleIdx: index("idx_users_role").on(table.role),
+  })
+);
 
 // ============================================================================
 // PRODUCT CATEGORIES
@@ -45,19 +51,26 @@ export const productCategories = sqliteTable("product_categories", {
 // PRODUCTS
 // ============================================================================
 
-export const products = sqliteTable("products", {
-  id: text("id").primaryKey(),
-  category_id: text("category_id")
-    .notNull()
-    .references(() => productCategories.id),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description"),
-  base_price: real("base_price").notNull(), // GBP
-  image_url: text("image_url"),
-  is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  ...timestamps,
-});
+export const products = sqliteTable(
+  "products",
+  {
+    id: text("id").primaryKey(),
+    category_id: text("category_id")
+      .notNull()
+      .references(() => productCategories.id),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    base_price: real("base_price").notNull(), // GBP
+    image_url: text("image_url"),
+    is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    categoryIdIdx: index("idx_products_category_id").on(table.category_id),
+    isActiveIdx: index("idx_products_is_active").on(table.is_active),
+  })
+);
 
 // ============================================================================
 // PRODUCT VARIANTS
@@ -110,37 +123,45 @@ export const bakeSales = sqliteTable("bake_sales", {
 // ORDERS
 // ============================================================================
 
-export const orders = sqliteTable("orders", {
-  id: text("id").primaryKey(),
-  user_id: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  bake_sale_id: text("bake_sale_id")
-    .notNull()
-    .references(() => bakeSales.id),
-  status: text("status").notNull().default("pending"), // pending, processing, ready, fulfilled, cancelled, refunded
-  fulfillment_method: text("fulfillment_method").notNull().default("collection"), // collection, delivery
-  payment_method: text("payment_method").notNull().default("payment_on_collection"), // stripe, paypal, bank_transfer, payment_on_collection
-  payment_status: text("payment_status").notNull().default("pending"), // pending, completed, failed, refunded
-  payment_intent_id: text("payment_intent_id"), // Stripe PaymentIntent ID
-  subtotal: real("subtotal").notNull(),
-  delivery_fee: real("delivery_fee").notNull().default(0),
-  voucher_discount: real("voucher_discount").notNull().default(0),
-  total: real("total").notNull(),
-  // Shipping address (required if delivery)
-  shipping_address_line1: text("shipping_address_line1"),
-  shipping_address_line2: text("shipping_address_line2"),
-  shipping_city: text("shipping_city"),
-  shipping_postcode: text("shipping_postcode"),
-  // Billing address (always required)
-  billing_address_line1: text("billing_address_line1").notNull(),
-  billing_address_line2: text("billing_address_line2"),
-  billing_city: text("billing_city").notNull(),
-  billing_postcode: text("billing_postcode").notNull(),
-  voucher_id: text("voucher_id").references(() => vouchers.id),
-  notes: text("notes"),
-  ...timestamps,
-});
+export const orders = sqliteTable(
+  "orders",
+  {
+    id: text("id").primaryKey(),
+    user_id: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    bake_sale_id: text("bake_sale_id")
+      .notNull()
+      .references(() => bakeSales.id),
+    status: text("status").notNull().default("pending"), // pending, processing, ready, fulfilled, cancelled, refunded
+    fulfillment_method: text("fulfillment_method").notNull().default("collection"), // collection, delivery
+    payment_method: text("payment_method").notNull().default("payment_on_collection"), // stripe, paypal, bank_transfer, payment_on_collection
+    payment_status: text("payment_status").notNull().default("pending"), // pending, completed, failed, refunded
+    payment_intent_id: text("payment_intent_id"), // Stripe PaymentIntent ID
+    subtotal: real("subtotal").notNull(),
+    delivery_fee: real("delivery_fee").notNull().default(0),
+    voucher_discount: real("voucher_discount").notNull().default(0),
+    total: real("total").notNull(),
+    // Shipping address (required if delivery)
+    shipping_address_line1: text("shipping_address_line1"),
+    shipping_address_line2: text("shipping_address_line2"),
+    shipping_city: text("shipping_city"),
+    shipping_postcode: text("shipping_postcode"),
+    // Billing address (always required)
+    billing_address_line1: text("billing_address_line1").notNull(),
+    billing_address_line2: text("billing_address_line2"),
+    billing_city: text("billing_city").notNull(),
+    billing_postcode: text("billing_postcode").notNull(),
+    voucher_id: text("voucher_id").references(() => vouchers.id),
+    notes: text("notes"),
+    ...timestamps,
+  },
+  (table) => ({
+    userIdIdx: index("idx_orders_user_id").on(table.user_id),
+    statusIdx: index("idx_orders_status").on(table.status),
+    createdAtIdx: index("idx_orders_created_at").on(table.created_at),
+  })
+);
 
 // ============================================================================
 // ORDER ITEMS
@@ -186,35 +207,48 @@ export const vouchers = sqliteTable("vouchers", {
 // NEWS POSTS
 // ============================================================================
 
-export const newsPosts = sqliteTable("news_posts", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  content: text("content").notNull(), // HTML or Markdown
-  excerpt: text("excerpt"),
-  image_url: text("image_url"),
-  author_id: text("author_id")
-    .notNull()
-    .references(() => users.id),
-  is_published: integer("is_published", { mode: "boolean" }).notNull().default(false),
-  published_at: text("published_at"), // ISO datetime
-  ...timestamps,
-});
+export const newsPosts = sqliteTable(
+  "news_posts",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull().unique(),
+    content: text("content").notNull(), // HTML or Markdown
+    excerpt: text("excerpt"),
+    image_url: text("image_url"),
+    author_id: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    is_published: integer("is_published", { mode: "boolean" }).notNull().default(false),
+    published_at: text("published_at"), // ISO datetime
+    ...timestamps,
+  },
+  (table) => ({
+    isPublishedIdx: index("idx_news_posts_is_published").on(table.is_published),
+  })
+);
 
 // ============================================================================
 // IMAGES
 // ============================================================================
 
-export const images = sqliteTable("images", {
-  id: text("id").primaryKey(),
-  url: text("url").notNull().unique(),
-  filename: text("filename").notNull(),
-  category: text("category"),
-  tags: text("tags", { mode: "json" }).$type<string[]>(), // Store as JSON array
-  size: integer("size"),
-  uploaded_by: text("uploaded_by").references(() => users.id),
-  ...timestamps,
-});
+export const images = sqliteTable(
+  "images",
+  {
+    id: text("id").primaryKey(),
+    url: text("url").notNull().unique(),
+    filename: text("filename").notNull(),
+    category: text("category"),
+    tags: text("tags", { mode: "json" }).$type<string[]>(), // Store as JSON array
+    size: integer("size"),
+    uploaded_by: text("uploaded_by").references(() => users.id),
+    ...timestamps,
+  },
+  (table) => ({
+    categoryIdx: index("idx_images_category").on(table.category),
+    uploadedByIdx: index("idx_images_uploaded_by").on(table.uploaded_by),
+  })
+);
 
 // ============================================================================
 // SETTINGS

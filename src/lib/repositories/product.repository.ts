@@ -1,6 +1,6 @@
-import { products, productVariants } from '@/db/schema';
-import { BaseRepository } from './base.repository';
-import { eq, and } from 'drizzle-orm';
+import { products, productVariants } from "@/db/schema";
+import { BaseRepository } from "./base.repository";
+import { eq, and } from "drizzle-orm";
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
@@ -21,11 +21,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
    */
   async findBySlug(slug: string): Promise<Product | null> {
     const db = await this.getDatabase();
-    const results = await db
-      .select()
-      .from(products)
-      .where(eq(products.slug, slug))
-      .limit(1);
+    const results = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
     return results[0] || null;
   }
 
@@ -34,10 +30,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
    */
   async findByCategoryId(categoryId: string): Promise<Product[]> {
     const db = await this.getDatabase();
-    return await db
-      .select()
-      .from(products)
-      .where(eq(products.category_id, categoryId));
+    return await db.select().from(products).where(eq(products.category_id, categoryId));
   }
 
   /**
@@ -45,10 +38,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
    */
   async findActiveProducts(): Promise<Product[]> {
     const db = await this.getDatabase();
-    return await db
-      .select()
-      .from(products)
-      .where(eq(products.is_active, true));
+    return await db.select().from(products).where(eq(products.is_active, true));
   }
 
   /**
@@ -59,10 +49,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
     return await db
       .select()
       .from(products)
-      .where(and(
-        eq(products.category_id, categoryId),
-        eq(products.is_active, true)
-      ));
+      .where(and(eq(products.category_id, categoryId), eq(products.is_active, true)));
   }
 
   /**
@@ -75,16 +62,13 @@ export class ProductRepository extends BaseRepository<typeof products> {
     const db = await this.getDatabase();
 
     // Use transaction to ensure data consistency
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx: typeof db) => {
       // Create product
-      const [newProduct] = await tx
-        .insert(products)
-        .values(product)
-        .returning();
+      const [newProduct] = await tx.insert(products).values(product).returning();
 
       // Create variants if provided
       if (variants.length > 0) {
-        const variantsWithProductId = variants.map(v => ({
+        const variantsWithProductId = variants.map((v) => ({
           ...v,
           product_id: newProduct.id,
         }));
@@ -103,10 +87,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
    */
   async getVariants(productId: string): Promise<ProductVariant[]> {
     const db = await this.getDatabase();
-    return await db
-      .select()
-      .from(productVariants)
-      .where(eq(productVariants.product_id, productId));
+    return await db.select().from(productVariants).where(eq(productVariants.product_id, productId));
   }
 
   /**
@@ -117,10 +98,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
     return await db
       .select()
       .from(productVariants)
-      .where(and(
-        eq(productVariants.product_id, productId),
-        eq(productVariants.is_active, true)
-      ));
+      .where(and(eq(productVariants.product_id, productId), eq(productVariants.is_active, true)));
   }
 
   /**
@@ -154,7 +132,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
     const allProducts = await db.select().from(products);
 
     // Simple case-insensitive search
-    return allProducts.filter(p =>
+    return allProducts.filter((p: Product) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }

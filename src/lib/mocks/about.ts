@@ -64,7 +64,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Head Baker & Founder",
     favorite: "Sourdough Country Loaf",
     bio: "Jon is the heart and soul of Band of Bakers. With over 15 years of baking experience and a passion for traditional fermentation methods, he's dedicated to bringing authentic artisan bread to Shropshire. When he's not perfecting his sourdough starter, Jon loves experimenting with new grain blends and sharing his knowledge with the community.",
-    image: "/jon.webp",
+    image: "/team-images_team/jon.webp",
   },
   {
     id: "team-2",
@@ -72,7 +72,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Manager & Founder",
     favorite: "Almond Croissant",
     bio: "Mike is the strategic mind behind Band of Bakers, ensuring every bake sale runs smoothly and every customer has a delightful experience. With a background in hospitality and a love for quality food, Mike combines operational excellence with genuine care for the business and its community. He's passionate about supporting local suppliers and sustainable practices.",
-    image: "/mike.webp",
+    image: "/team-images_team/mike.webp",
   },
 ];
 

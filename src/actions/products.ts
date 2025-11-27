@@ -249,7 +249,8 @@ export async function getProducts() {
 
     // Fetch variants for each product
     const productsWithVariants = await Promise.all(
-      products.map(async (product) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      products.map(async (product: any) => {
         const variants = await productRepository.getVariants(product.id);
         return {
           ...product,

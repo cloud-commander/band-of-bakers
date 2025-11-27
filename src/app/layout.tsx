@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/logo.ico",
-    apple: "/Bandofbakers-logo.png",
+    apple: "/images_logos/bandofbakers-256.png",
   },
   openGraph: {
     type: "website",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
       "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
     images: [
       {
-        url: "/Bandofbakers-logo.png",
+        url: "/images_logos/bandofbakers-256.png",
         width: 1200,
         height: 630,
         alt: "Band of Bakers - Artisan Bakery",
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     title: "Band of Bakers | Artisan Bakery in Shropshire",
     description:
       "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
-    images: ["/Bandofbakers-logo.png"],
+    images: ["/images_logos/bandofbakers-256.png"],
     creator: "@bandofbakers",
   },
   robots: {
@@ -101,9 +101,11 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import { StructuredData } from "@/components/seo/structured-data";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
-import { RollbarProvider } from "@/components/analytics/rollbar-provider";
-import { LogflareProvider } from "@/components/analytics/logflare-provider";
-import { WebVitalsProvider } from "@/components/analytics/web-vitals-provider";
+import {
+  LazyRollbarProvider,
+  LazyLogflareProvider,
+  LazyWebVitalsProvider,
+} from "@/components/analytics/lazy-providers";
 
 export default function RootLayout({
   children,
@@ -130,9 +132,9 @@ export default function RootLayout({
         />
         <SessionProvider>
           <CartProvider>
-            <RollbarProvider />
-            <LogflareProvider />
-            <WebVitalsProvider />
+            <LazyRollbarProvider />
+            <LazyLogflareProvider />
+            <LazyWebVitalsProvider />
             <Navbar />
             {children}
             <Footer />

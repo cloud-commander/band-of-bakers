@@ -22,10 +22,12 @@ export class BakeSaleRepository extends BaseRepository<typeof bakeSales> {
       .innerJoin(locations, eq(bakeSales.location_id, locations.id))
       .orderBy(desc(bakeSales.date));
 
-    return results.map(({ bake_sales, locations }) => ({
-      ...bake_sales,
-      location: locations,
-    }));
+    return results.map(
+      ({ bake_sales, locations }: { bake_sales: BakeSale; locations: Location }) => ({
+        ...bake_sales,
+        location: locations,
+      })
+    );
   }
 
   /**
@@ -42,10 +44,12 @@ export class BakeSaleRepository extends BaseRepository<typeof bakeSales> {
       .where(gte(bakeSales.date, today))
       .orderBy(bakeSales.date);
 
-    return results.map(({ bake_sales, locations }) => ({
-      ...bake_sales,
-      location: locations,
-    }));
+    return results.map(
+      ({ bake_sales, locations }: { bake_sales: BakeSale; locations: Location }) => ({
+        ...bake_sales,
+        location: locations,
+      })
+    );
   }
 
   /**
@@ -62,10 +66,12 @@ export class BakeSaleRepository extends BaseRepository<typeof bakeSales> {
       .where(lt(bakeSales.date, today))
       .orderBy(desc(bakeSales.date));
 
-    return results.map(({ bake_sales, locations }) => ({
-      ...bake_sales,
-      location: locations,
-    }));
+    return results.map(
+      ({ bake_sales, locations }: { bake_sales: BakeSale; locations: Location }) => ({
+        ...bake_sales,
+        location: locations,
+      })
+    );
   }
 
   /**
