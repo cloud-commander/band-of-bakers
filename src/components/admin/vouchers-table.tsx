@@ -267,12 +267,16 @@ export function VouchersTable({ vouchers }: VouchersTableProps) {
               {paginatedVouchers.map((voucher) => (
                 <tr key={voucher.id} className="border-t hover:bg-muted/30 transition-colors">
                   <td className="p-4 font-mono font-medium">{voucher.code}</td>
-                  <td className="p-4 text-sm">{formatVoucherType(voucher.type)}</td>
-                  <td className="p-4 text-sm font-medium">{formatVoucherValue(voucher)}</td>
+                  <td className="p-4 text-sm">
+                    {formatVoucherType(voucher.type as "percentage" | "fixed_amount")}
+                  </td>
+                  <td className="p-4 text-sm font-medium">{formatVoucherValue(voucher as any)}</td>
                   <td className="p-4 text-sm text-muted-foreground">
                     £{voucher.min_order_value.toFixed(2)}
                   </td>
-                  <td className="p-4 text-sm text-muted-foreground">{formatUsage(voucher)}</td>
+                  <td className="p-4 text-sm text-muted-foreground">
+                    {formatUsage(voucher as any)}
+                  </td>
                   <td className="p-4 text-sm text-muted-foreground">
                     {new Date(voucher.valid_until).toLocaleDateString("en-GB", {
                       day: "numeric",

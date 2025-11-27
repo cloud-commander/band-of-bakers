@@ -7,15 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -24,19 +15,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Ban, ShieldCheck, Save } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 interface UserDetailClientProps {
   user: User | null;
 }
 
 export function UserDetailClient({ user }: UserDetailClientProps) {
-  const [banDialogOpen, setBanDialogOpen] = useState(false);
-  const [banReason, setBanReason] = useState("");
-
   // Edit form state
   const [editForm, setEditForm] = useState({
     name: user?.name || "",
@@ -65,15 +52,6 @@ export function UserDetailClient({ user }: UserDetailClientProps) {
     toast.success(`User ${editForm.name} updated successfully`, {
       description: "Changes will be saved to the database",
     });
-  };
-
-  const handleBanConfirm = () => {
-    toast.success(`User action completed`, {
-      description: "User status has been updated",
-    });
-
-    setBanDialogOpen(false);
-    setBanReason("");
   };
 
   return (

@@ -246,10 +246,17 @@ async function main() {
         : [...mockBakeSales, ...mockPastBakeSales];
 
       for (const sale of bakeSalesToSeed) {
+        // Calculate cutoff datetime: Noon the day before the bake sale
+        const saleDate = new Date(sale.date);
+        const cutoffDate = new Date(saleDate);
+        cutoffDate.setDate(saleDate.getDate() - 1);
+        cutoffDate.setHours(12, 0, 0, 0);
+        const cutoffDatetime = cutoffDate.toISOString();
+
         sqlStatements.push(
           `INSERT OR REPLACE INTO bake_sales (id, date, location_id, cutoff_datetime, is_active, created_at, updated_at) VALUES ('${
             sale.id
-          }', '${sale.date}', '${sale.location_id}', '${sale.cutoff_datetime}', ${
+          }', '${sale.date}', '${sale.location_id}', '${cutoffDatetime}', ${
             sale.is_active ? 1 : 0
           }, '${sale.created_at}', '${sale.updated_at}');`
         );
@@ -411,19 +418,23 @@ async function main() {
     fs.writeFileSync(phase1File, phase1Statements.join("\n"));
     console.log("   Phase 1: Base data (users, locations, vouchers, news)");
 
-    try {
-      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase1File}`, {
-        stdio: "pipe",
-        encoding: "utf-8",
-      });
-      console.log("   ✅ Phase 1 complete");
-    } catch (e: unknown) {
-      console.error("\n❌ Phase 1 failed:");
-      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
-        console.error(e.stdout);
-        console.error(e.stderr);
+    if (phase1Statements.length > 0) {
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase1File}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        console.log("   ✅ Phase 1 complete");
+      } catch (e: unknown) {
+        console.error("\n❌ Phase 1 failed:");
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error(e.stdout);
+          console.error(e.stderr);
+        }
+        throw e;
       }
-      throw e;
+    } else {
+      console.log("   ℹ️  Phase 1 skipped (no data)");
     }
 
     // Phase 2: Products (Categories, Products, Variants)
@@ -442,19 +453,23 @@ async function main() {
     fs.writeFileSync(phase2File, phase2Statements.join("\n"));
     console.log("   Phase 2: Products (categories, products, variants)");
 
-    try {
-      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase2File}`, {
-        stdio: "pipe",
-        encoding: "utf-8",
-      });
-      console.log("   ✅ Phase 2 complete");
-    } catch (e: unknown) {
-      console.error("\n❌ Phase 2 failed:");
-      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
-        console.error(e.stdout);
-        console.error(e.stderr);
+    if (phase2Statements.length > 0) {
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase2File}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        console.log("   ✅ Phase 2 complete");
+      } catch (e: unknown) {
+        console.error("\n❌ Phase 2 failed:");
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error(e.stdout);
+          console.error(e.stderr);
+        }
+        throw e;
       }
-      throw e;
+    } else {
+      console.log("   ℹ️  Phase 2 skipped (no data)");
     }
 
     // Phase 3a: Bake Sales
@@ -467,19 +482,23 @@ async function main() {
     fs.writeFileSync(phase3aFile, phase3aStatements.join("\n"));
     console.log("   Phase 3a: Bake sales");
 
-    try {
-      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3aFile}`, {
-        stdio: "pipe",
-        encoding: "utf-8",
-      });
-      console.log("   ✅ Phase 3a complete");
-    } catch (e: unknown) {
-      console.error("\n❌ Phase 3a failed:");
-      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
-        console.error(e.stdout);
-        console.error(e.stderr);
+    if (phase3aStatements.length > 0) {
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3aFile}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        console.log("   ✅ Phase 3a complete");
+      } catch (e: unknown) {
+        console.error("\n❌ Phase 3a failed:");
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error(e.stdout);
+          console.error(e.stderr);
+        }
+        throw e;
       }
-      throw e;
+    } else {
+      console.log("   ℹ️  Phase 3a skipped (no data)");
     }
 
     // Phase 3b: Orders (split into batches to avoid FK constraints)
@@ -526,19 +545,23 @@ async function main() {
     fs.writeFileSync(phase3cFile, phase3cStatements.join("\n"));
     console.log("   Phase 3c: Order items");
 
-    try {
-      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3cFile}`, {
-        stdio: "pipe",
-        encoding: "utf-8",
-      });
-      console.log("   ✅ Phase 3c complete");
-    } catch (e: unknown) {
-      console.error("\n❌ Phase 3c failed:");
-      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
-        console.error(e.stdout);
-        console.error(e.stderr);
+    if (phase3cStatements.length > 0) {
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3cFile}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        console.log("   ✅ Phase 3c complete");
+      } catch (e: unknown) {
+        console.error("\n❌ Phase 3c failed:");
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error(e.stdout);
+          console.error(e.stderr);
+        }
+        throw e;
       }
-      throw e;
+    } else {
+      console.log("   ℹ️  Phase 3c skipped (no data)");
     }
 
     // Phase 3d: Reviews and Testimonials
@@ -554,21 +577,25 @@ async function main() {
     fs.writeFileSync(phase3dFile, phase3dStatements.join("\n"));
     console.log("   Phase 3d: Reviews and testimonials");
 
-    try {
-      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3dFile}`, {
-        stdio: "pipe",
-        encoding: "utf-8",
-      });
-      console.log("   ✅ Phase 3d complete");
-      console.log("\n✅ All phases executed successfully!");
-    } catch (e: unknown) {
-      console.error("\n❌ Phase 3d failed:");
-      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
-        console.error(e.stdout);
-        console.error(e.stderr);
+    if (phase3dStatements.length > 0) {
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3dFile}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        console.log("   ✅ Phase 3d complete");
+      } catch (e: unknown) {
+        console.error("\n❌ Phase 3d failed:");
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error(e.stdout);
+          console.error(e.stderr);
+        }
+        throw e;
       }
-      throw e;
+    } else {
+      console.log("   ℹ️  Phase 3d skipped (no data)");
     }
+    console.log("\n✅ All phases executed successfully!");
 
     // 3. R2 Population
     if (!skipR2 && !isAdminOnly) {
