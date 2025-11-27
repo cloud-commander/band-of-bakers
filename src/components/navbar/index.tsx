@@ -39,7 +39,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Menu */}
-          <MobileMenu isLoggedIn={!!session?.user} cartItemCount={cartCount} />
+          <MobileMenu isLoggedIn={!!session?.user} cartItemCount={cartCount} session={session} />
         </div>
       </div>
     </nav>

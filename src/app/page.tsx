@@ -90,13 +90,23 @@ export default async function Home() {
               <FadeIn key={category.id} delay={index * 0.1}>
                 <Link href={`/menu?category=${category.slug}`}>
                   <div
-                    className={`${DESIGN_TOKENS.cards.base} cursor-pointer hover:shadow-lg transition-shadow`}
+                    className={`${DESIGN_TOKENS.cards.base} cursor-pointer hover:shadow-lg transition-shadow overflow-hidden`}
                     style={{
                       backgroundColor: DESIGN_TOKENS.colors.card,
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                     }}
                   >
-                    {/* Text Only - No image URL in DB */}
+                    {/* Category image */}
+                    {category.image_url && (
+                      <div className="relative w-full h-48">
+                        <Image
+                          src={category.image_url}
+                          alt={category.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
                     <div className={DESIGN_TOKENS.cards.padding}>
                       <h3
                         className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-2 text-center`}

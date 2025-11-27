@@ -222,10 +222,22 @@ All major entities have comprehensive Zod schemas with type exports.
 
 ## 📚 Documentation
 
-- [Architecture Overview](./ARCHITECTURE.md) - Detailed architecture documentation
-- [Validation Guide](./docs/FORM_VALIDATION_INTEGRATION_GUIDE.md) - Form validation patterns
-- [Spec](./SPEC.md) - Product specification and requirements
-- [Phase Planning](./project-phases.md) - Development phases
+Documentation is organized according to the [Diátaxis framework](https://diataxis.fr/) for better discoverability:
+
+### 🎯 [Tutorials](docs/tutorials/) - Step-by-step learning guides for beginners
+
+### 🛠️ [How-to Guides](docs/how-to-guides/) - Practical guides for specific tasks
+
+### 📚 [Reference](docs/reference/) - Technical specifications and constants
+
+### 💡 [Explanation](docs/explanation/) - Architecture and design decisions
+
+**Quick Start:**
+
+- [Getting Started](docs/tutorials/getting-started.md) - Complete project setup
+- [Local Development](docs/tutorials/local-development-setup.md) - Development environment
+- [Project Overview](docs/explanation/project-overview.md) - Understanding the architecture
+- [Constants Reference](docs/reference/constants-reference.md) - Application configuration
 
 ## 🤝 Contributing
 

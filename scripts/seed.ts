@@ -154,25 +154,50 @@ async function main() {
       const products = useRealProducts ? realProducts : mockProducts;
       const productVariants = useRealProducts ? realProductVariants : mockProductVariants;
 
-      // Categories
+      // Categories - use first product image from each category as category image
       for (const cat of productCategories) {
+        // Find first product in this category to use its image
+        const firstProduct = products.find((p) => p.category_id === cat.id);
+        let categoryImageUrl = "NULL";
+
+        if (!skipR2 && firstProduct?.image_url) {
+          if (useRealProducts) {
+            categoryImageUrl = `/images/products/${cat.slug}/${firstProduct.slug}-card.webp`;
+          } else {
+            categoryImageUrl = `/images/products/${firstProduct.slug}.jpg`;
+          }
+        }
+
+        const imageVal = categoryImageUrl === "NULL" ? "NULL" : `'${categoryImageUrl}'`;
+
         sqlStatements.push(
-          `INSERT OR REPLACE INTO product_categories (id, name, slug, description, sort_order, created_at, updated_at) VALUES ('${
+          `INSERT OR REPLACE INTO product_categories (id, name, slug, description, image_url, sort_order, created_at, updated_at) VALUES ('${
             cat.id
           }', '${cat.name.replace(/'/g, "''")}', '${cat.slug}', '${(cat.description || "").replace(
             /'/g,
             "''"
-          )}', ${cat.sort_order}, '${cat.created_at}', '${cat.updated_at}');`
+          )}', ${imageVal}, ${cat.sort_order}, '${cat.created_at}', '${cat.updated_at}');`
         );
       }
 
       // Products
       for (const prod of products) {
-        const imageUrl = skipR2
-          ? prod.image_url
-          : prod.image_url
-          ? `/images/products/${prod.slug}.jpg`
-          : "NULL";
+        let imageUrl = "NULL";
+
+        if (!skipR2 && prod.image_url) {
+          if (useRealProducts) {
+            // For real products, use category subdirectory structure
+            const category = productCategories.find((c) => c.id === prod.category_id);
+            const categorySlug = category?.slug || "uncategorized";
+            imageUrl = `/images/products/${categorySlug}/${prod.slug}-card.webp`;
+          } else {
+            // For mock products, use old structure
+            imageUrl = `/images/products/${prod.slug}.jpg`;
+          }
+        } else if (skipR2) {
+          imageUrl = prod.image_url || "NULL";
+        }
+
         const imageVal = imageUrl === "NULL" ? "NULL" : `'${imageUrl}'`;
 
         sqlStatements.push(

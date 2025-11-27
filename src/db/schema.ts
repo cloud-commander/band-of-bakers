@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 
 // Helper for timestamps
 const timestamps = {
@@ -43,6 +43,7 @@ export const productCategories = sqliteTable("product_categories", {
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
+  image_url: text("image_url"),
   sort_order: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -362,3 +363,41 @@ export type InsertReview = typeof reviews.$inferInsert;
 
 export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;
+
+// ============================================================================
+// Relations
+// ============================================================================
+
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  user: one(users, {
+    fields: [orders.user_id],
+    references: [users.id],
+  }),
+  bakeSale: one(bakeSales, {
+    fields: [orders.bake_sale_id],
+    references: [bakeSales.id],
+  }),
+  items: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.order_id],
+    references: [orders.id],
+  }),
+  product: one(products, {
+    fields: [orderItems.product_id],
+    references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [orderItems.product_variant_id],
+    references: [productVariants.id],
+  }),
+}));
+
+export const bakeSalesRelations = relations(bakeSales, ({ one }) => ({
+  location: one(locations, {
+    fields: [bakeSales.location_id],
+    references: [locations.id],
+  }),
+}));

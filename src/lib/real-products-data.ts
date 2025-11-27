@@ -272,18 +272,6 @@ export const realProducts: InsertProduct[] = [
 
   // Cakes & Slices
   {
-    id: "prod_cake_slice",
-    category_id: "cat_cakes_slices",
-    name: "Cake Slice",
-    slug: "cake_slice",
-    description: "Individual slice of delicious cake",
-    base_price: 2.5,
-    image_url: "/images/products/cakes-slices/frangipane_slice-card.webp",
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
     id: "prod_tiffin_slice",
     category_id: "cat_cakes_slices",
     name: "Tiffin Slice",
@@ -291,6 +279,18 @@ export const realProducts: InsertProduct[] = [
     description: "Rich chocolate tiffin slice",
     base_price: 2.5,
     image_url: "/images/products/cakes-slices/tiffin_cake_slice-card.webp",
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "prod_cake_slice",
+    category_id: "cat_cakes_slices",
+    name: "Cake Slice",
+    slug: "cake_slice",
+    description: "Individual slice of delicious cake",
+    base_price: 2.5,
+    image_url: "/images/products/cakes-slices/frangipane_slice-card.webp",
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

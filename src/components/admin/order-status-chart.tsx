@@ -30,12 +30,12 @@ export function OrderStatusChart() {
         <p className="text-sm text-muted-foreground mt-1">Next Bake Sale: {nextBakeSaleDate}</p>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={340}>
           <PieChart>
             <Pie
               data={data}
               cx="50%"
-              cy="50%"
+              cy="45%"
               innerRadius={60}
               outerRadius={90}
               paddingAngle={2}
@@ -58,7 +58,7 @@ export function OrderStatusChart() {
             />
             <Legend
               verticalAlign="bottom"
-              height={36}
+              height={50}
               iconType="circle"
               formatter={(value: string, entry: { payload?: { value?: number } }) => (
                 <span className="text-sm text-stone-700">

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 import {
   Menu,
   X,
@@ -19,6 +20,7 @@ import {
   Info,
   Newspaper,
   HelpCircle,
+  Shield,
 } from "lucide-react";
 import { ZERO_TIMEOUT_MS } from "@/lib/constants/app";
 import { Button } from "@/components/ui/button";
@@ -29,9 +31,11 @@ import { BUSINESS_INFO } from "@/lib/constants/frontend";
 interface MobileMenuProps {
   isLoggedIn: boolean;
   cartItemCount: number;
+  session: Session | null;
 }
 
-export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
+export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuProps) {
+  const isAdmin = session?.user?.role && ["owner", "manager", "staff"].includes(session.user.role);
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -192,6 +196,16 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
                               <span>{item.label}</span>
                             </Link>
                           ))}
+                          {isAdmin && (
+                            <Link
+                              href="/admin"
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-red-700 font-medium"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              <Shield className="h-5 w-5" />
+                              <span>Admin Panel</span>
+                            </Link>
+                          )}
                           <button
                             className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left"
                             onClick={() => signOut()}
