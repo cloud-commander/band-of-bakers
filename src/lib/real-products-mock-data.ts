@@ -269,66 +269,66 @@ export const realPastBakeSales: InsertBakeSale[] = [
 export const realFutureBakeSales: InsertBakeSale[] = [
   {
     id: "rbs-future-1",
-    date: "2024-12-08",
+    date: "2025-12-13", // Saturday
     location_id: mockLocations[0].id,
-    cutoff_datetime: "2024-12-06T18:00:00.000Z",
+    cutoff_datetime: "2025-12-11T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
   {
     id: "rbs-future-2",
-    date: "2024-12-15",
+    date: "2025-12-21", // Sunday (Holiday Exception)
     location_id: mockLocations[1].id,
-    cutoff_datetime: "2024-12-13T18:00:00.000Z",
+    cutoff_datetime: "2025-12-19T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
   {
     id: "rbs-future-3",
-    date: "2024-12-22",
+    date: "2026-01-10", // Saturday
     location_id: mockLocations[2].id,
-    cutoff_datetime: "2024-12-20T18:00:00.000Z",
+    cutoff_datetime: "2026-01-08T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
   {
     id: "rbs-future-4",
-    date: "2024-12-29",
+    date: "2026-02-07", // Saturday
     location_id: mockLocations[0].id,
-    cutoff_datetime: "2024-12-27T18:00:00.000Z",
+    cutoff_datetime: "2026-02-05T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
   {
     id: "rbs-future-5",
-    date: "2025-01-05",
+    date: "2026-03-07", // Saturday
     location_id: mockLocations[1].id,
-    cutoff_datetime: "2025-01-03T18:00:00.000Z",
+    cutoff_datetime: "2026-03-05T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
   {
     id: "rbs-future-6",
-    date: "2025-01-12",
+    date: "2026-04-04", // Saturday
     location_id: mockLocations[2].id,
-    cutoff_datetime: "2025-01-10T18:00:00.000Z",
+    cutoff_datetime: "2026-04-02T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
   {
     id: "rbs-future-7",
-    date: "2025-01-19",
+    date: "2026-05-02", // Saturday
     location_id: mockLocations[0].id,
-    cutoff_datetime: "2025-01-17T18:00:00.000Z",
+    cutoff_datetime: "2026-04-30T18:00:00.000Z",
     is_active: true,
-    created_at: "2024-11-01T00:00:00.000Z",
-    updated_at: "2024-11-01T00:00:00.000Z",
+    created_at: "2025-11-01T00:00:00.000Z",
+    updated_at: "2025-11-01T00:00:00.000Z",
   },
 ];
 
@@ -443,7 +443,7 @@ function createOrder(
 }
 
 // Generate orders for each past bake sale
-realPastBakeSales.forEach((bakeSale, index) => {
+realPastBakeSales.forEach((bakeSale) => {
   const ordersForThisSale = Math.floor(Math.random() * 4) + 2; // 2-5 orders per sale
 
   for (let i = 0; i < ordersForThisSale; i++) {

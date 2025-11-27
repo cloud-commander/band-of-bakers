@@ -305,7 +305,8 @@ export default function AdminProductsPage() {
             />
           </div>
 
-          <div className="border rounded-lg">
+          {/* Desktop Table View */}
+          <div className="hidden lg:block border rounded-lg">
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
@@ -374,6 +375,67 @@ export default function AdminProductsPage() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {paginatedProducts.map((product) => {
+              const category = categories.find((c) => c.id === product.category_id);
+              const variantCount = product.variants?.length || 0;
+              const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
+
+              return (
+                <Link
+                  key={product.id}
+                  href={`/admin/products/${product.id}/edit`}
+                  className="block border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-base mb-1">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground">{category?.name}</p>
+                    </div>
+                    <Badge
+                      variant={
+                        upcomingBakeSales.length === 0
+                          ? "destructive"
+                          : product.is_active
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
+                      {upcomingBakeSales.length === 0
+                        ? "Unavailable"
+                        : product.is_active
+                        ? "Active"
+                        : "Inactive"}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Base Price</p>
+                      <p className="font-serif font-bold text-lg">
+                        £{product.base_price.toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Variants</p>
+                      {variantCount > 0 ? (
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          {activeVariants} / {variantCount}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No variants</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Pagination Controls */}

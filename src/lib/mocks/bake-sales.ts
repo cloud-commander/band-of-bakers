@@ -9,48 +9,48 @@ import { mockLocations, mockDefaultLocation } from "./locations";
 export const mockBakeSales: BakeSale[] = [
   {
     id: "bs-1",
-    date: "2024-12-08", // 1 week from Dec 1
-    location_id: mockLocations[0].id, // Station Road, Cressage
-    cutoff_datetime: "2024-12-06T18:00:00.000Z", // 2 days before at 6pm
+    date: "2025-12-13", // Saturday
+    location_id: mockLocations[0].id,
+    cutoff_datetime: "2025-12-11T18:00:00.000Z", // Thursday 6pm
     is_active: true,
-    created_at: "2024-01-01T00:00:00.000Z",
-    updated_at: "2024-01-01T00:00:00.000Z",
+    created_at: "2025-01-01T00:00:00.000Z",
+    updated_at: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "bs-2",
-    date: "2024-12-15", // 2 weeks from Dec 1
+    date: "2025-12-21", // Sunday (Holiday Exception)
     location_id: mockLocations[0].id,
-    cutoff_datetime: "2024-12-13T18:00:00.000Z",
+    cutoff_datetime: "2025-12-19T18:00:00.000Z", // Friday 6pm
     is_active: true,
-    created_at: "2024-01-01T00:00:00.000Z",
-    updated_at: "2024-01-01T00:00:00.000Z",
+    created_at: "2025-01-01T00:00:00.000Z",
+    updated_at: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "bs-3",
-    date: "2024-12-22", // 3 weeks from Dec 1
-    location_id: mockLocations[1].id, // Shrewsbury Town Hall
-    cutoff_datetime: "2024-12-20T18:00:00.000Z",
+    date: "2026-01-10", // Saturday
+    location_id: mockLocations[1].id,
+    cutoff_datetime: "2026-01-08T18:00:00.000Z", // Thursday 6pm
     is_active: true,
-    created_at: "2024-01-01T00:00:00.000Z",
-    updated_at: "2024-01-01T00:00:00.000Z",
+    created_at: "2025-01-01T00:00:00.000Z",
+    updated_at: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "bs-4",
-    date: "2024-12-29", // 4 weeks from Dec 1
-    location_id: mockLocations[2].id, // Telford Shopping Centre
-    cutoff_datetime: "2024-12-27T18:00:00.000Z",
+    date: "2026-02-07", // Saturday
+    location_id: mockLocations[2].id,
+    cutoff_datetime: "2026-02-05T18:00:00.000Z", // Thursday 6pm
     is_active: true,
-    created_at: "2024-01-01T00:00:00.000Z",
-    updated_at: "2024-01-01T00:00:00.000Z",
+    created_at: "2025-01-01T00:00:00.000Z",
+    updated_at: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "bs-5",
-    date: "2025-01-05", // 5 weeks from Dec 1
+    date: "2026-03-07", // Saturday
     location_id: mockLocations[0].id,
-    cutoff_datetime: "2025-01-03T18:00:00.000Z",
+    cutoff_datetime: "2026-03-05T18:00:00.000Z", // Thursday 6pm
     is_active: true,
-    created_at: "2024-01-01T00:00:00.000Z",
-    updated_at: "2024-01-01T00:00:00.000Z",
+    created_at: "2025-01-01T00:00:00.000Z",
+    updated_at: "2025-01-01T00:00:00.000Z",
   },
 ];
 

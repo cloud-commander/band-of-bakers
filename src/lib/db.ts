@@ -49,6 +49,13 @@ export async function getDb() {
       const d1Dir = path.join(process.cwd(), ".wrangler/state/v3/d1/miniflare-D1DatabaseObject");
       if (fs.existsSync(d1Dir)) {
         const files = fs.readdirSync(d1Dir).filter((f) => f.endsWith(".sqlite"));
+        // Sort by modification time to get the most recent one
+        files.sort((a, b) => {
+          const statA = fs.statSync(path.join(d1Dir, a));
+          const statB = fs.statSync(path.join(d1Dir, b));
+          return statB.mtime.getTime() - statA.mtime.getTime();
+        });
+
         if (files.length > 0) {
           const dbPath = path.join(d1Dir, files[0]);
           console.log(`[DB] Connecting to local SQLite: ${dbPath}`);
@@ -76,17 +83,9 @@ export async function getDb() {
                     },
                   };
                 } else {
-                  // all, get, values
-                  const rows = stmt.all(params);
-                  // D1 result shape for queries usually just needs rows, but proxy expects { rows }
-                  // Drizzle D1 adapter expects array of arrays for 'values' method?
-                  // Let's check drizzle-orm/sqlite-proxy types.
-                  // Actually, for D1 compatibility, we should return what D1 returns?
-                  // No, proxy callback expects { rows: any[][] | any[] }
-
-                  if (method === "values") {
-                    return { rows: stmt.raw().all(params) };
-                  }
+                  // Force raw arrays for everything to see if Drizzle handles it
+                  const rows = stmt.raw().all(params);
+                  console.log("[DB] Proxy result (raw):", JSON.stringify(rows).slice(0, 200));
                   return { rows: rows };
                 }
               } catch (e) {

@@ -43,14 +43,6 @@ interface OrdersTableProps {
 }
 
 export function OrdersTable({ initialOrders }: OrdersTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const [sortField, setSortField] = useState<SortField>("created_at");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [bakeSaleFilter, setBakeSaleFilter] = useState<string>("all");
-
   // Get all unique bake sales from orders
   const allBakeSales = useMemo(() => {
     const uniqueBakeSales = new Map();
@@ -68,6 +60,23 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
       .map(([id, bakeSale]) => ({ id, ...bakeSale }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [initialOrders]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [bakeSaleFilter, setBakeSaleFilter] = useState<string>("");
+
+  // Determine the active bake sale filter
+  // If a user has selected a filter, use it. Otherwise, default to the first available bake sale.
+  const activeBakeSaleId = useMemo(() => {
+    if (bakeSaleFilter && allBakeSales.some((bs) => bs.id === bakeSaleFilter)) {
+      return bakeSaleFilter;
+    }
+    return allBakeSales.length > 0 ? allBakeSales[0].id : "";
+  }, [bakeSaleFilter, allBakeSales]);
 
   // Helper function to get bake sale date
   const getBakeSaleDate = (order: OrderWithRelations) => {
@@ -106,8 +115,8 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
     }
 
     // Apply bake sale filter
-    if (bakeSaleFilter !== "all") {
-      filtered = filtered.filter((order) => order.bake_sale_id === bakeSaleFilter);
+    if (activeBakeSaleId) {
+      filtered = filtered.filter((order) => order.bake_sale_id === activeBakeSaleId);
     }
 
     // Sort orders
@@ -140,7 +149,14 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [initialOrders, debouncedSearchTerm, statusFilter, bakeSaleFilter, sortField, sortDirection]);
+  }, [
+    initialOrders,
+    debouncedSearchTerm,
+    statusFilter,
+    activeBakeSaleId,
+    sortField,
+    sortDirection,
+  ]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredAndSortedOrders.length / ITEMS_PER_PAGE);
@@ -240,40 +256,39 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
     <div>
       {/* Search and Filters */}
       <div className="mb-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search orders..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-9 pr-9"
-            />
-            {searchTerm && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+        {/* Search */}
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search orders..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-9 pr-9 w-full"
+          />
+          {searchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Bake Sale Filter */}
           <select
-            value={bakeSaleFilter}
+            value={activeBakeSaleId}
             onChange={(e) => {
               setBakeSaleFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
+            className="w-full px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
           >
-            <option value="all">All Bake Sales</option>
             {allBakeSales.map((bakeSale) => (
               <option key={bakeSale.id} value={bakeSale.id}>
                 {new Date(bakeSale.date).toLocaleDateString("en-GB", {
@@ -292,7 +307,7 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
               setStatusFilter(e.target.value as StatusFilter);
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
+            className="w-full px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -313,7 +328,8 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
         />
       </div>
 
-      <div className="border rounded-lg overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block border rounded-lg overflow-x-auto">
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
@@ -406,6 +422,72 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {paginatedOrders.map((order) => (
+          <Link
+            key={order.id}
+            href={`/admin/orders/${order.id}`}
+            className="block border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Order #{order.id.slice(0, 8)}</p>
+                <p className="font-medium text-sm">{getCustomerName(order)}</p>
+              </div>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "capitalize",
+                  order.status.toLowerCase() === "pending" &&
+                    "bg-amber-50 text-amber-700 border-amber-200",
+                  order.status.toLowerCase() === "processing" &&
+                    "bg-blue-50 text-blue-700 border-blue-200",
+                  order.status.toLowerCase() === "ready" &&
+                    "bg-indigo-50 text-indigo-700 border-indigo-200",
+                  order.status.toLowerCase() === "completed" &&
+                    "bg-emerald-50 text-emerald-700 border-emerald-200",
+                  order.status.toLowerCase() === "cancelled" &&
+                    "bg-red-50 text-red-700 border-red-200"
+                )}
+              >
+                {order.status}
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+              <div>
+                <p className="text-xs text-muted-foreground">Order Date</p>
+                <p className="font-medium">
+                  {new Date(order.created_at).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Bake Sale</p>
+                <p className="font-medium">
+                  {order.bakeSale
+                    ? new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t">
+              <span className="font-serif font-bold text-lg">£{order.total.toFixed(2)}</span>
+              <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                {getQuickAction(order)}
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
 
       {/* Pagination Controls */}
