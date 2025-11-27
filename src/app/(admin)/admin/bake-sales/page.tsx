@@ -107,97 +107,190 @@ export default function AdminBakeSalesPage() {
   };
 
   const renderBakeSalesTable = (bakeSales: typeof paginatedUpcoming, isArchived = false) => (
-    <div className="border rounded-lg">
-      <table className="w-full">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="text-left p-4 font-medium">Date</th>
-            <th className="text-left p-4 font-medium">Location</th>
-            <th className="text-left p-4 font-medium">Cutoff</th>
-            {!isArchived && <th className="text-left p-4 font-medium">Status</th>}
-            <th className="text-right p-4 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bakeSales.map((bakeSale) => (
-            <tr key={bakeSale.id} className="border-t hover:bg-muted/30">
-              <td className="p-4 font-medium">
-                {new Date(bakeSale.date).toLocaleDateString("en-GB", {
-                  weekday: "short",
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </td>
-              <td className="p-4 text-sm">{bakeSale.location.name}</td>
-              <td className="p-4 text-sm text-muted-foreground">
+    <>
+      {/* Desktop Table View */}
+      <div className="hidden lg:block border rounded-lg">
+        <table className="w-full">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="text-left p-4 font-medium">Date</th>
+              <th className="text-left p-4 font-medium">Location</th>
+              <th className="text-left p-4 font-medium">Cutoff</th>
+              {!isArchived && <th className="text-left p-4 font-medium">Status</th>}
+              <th className="text-right p-4 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bakeSales.map((bakeSale) => (
+              <tr key={bakeSale.id} className="border-t hover:bg-muted/30">
+                <td className="p-4 font-medium">
+                  {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                <td className="p-4 text-sm">{bakeSale.location.name}</td>
+                <td className="p-4 text-sm text-muted-foreground">
+                  {new Date(bakeSale.cutoff_datetime).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
+                {!isArchived && (
+                  <td className="p-4">
+                    <Badge variant={bakeSale.is_active ? "default" : "secondary"}>
+                      {bakeSale.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </td>
+                )}
+                <td className="p-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditingBakeSale(bakeSale);
+                        setIsEditDialogOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Bake Sale?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the bake sale
+                            scheduled for {new Date(bakeSale.date).toLocaleDateString()}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(bakeSale.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            {deletingId === bakeSale.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Delete"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {bakeSales.map((bakeSale) => (
+          <div
+            key={bakeSale.id}
+            className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="font-medium text-sm">
+                  {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">{bakeSale.location.name}</p>
+              </div>
+              {!isArchived && (
+                <Badge variant={bakeSale.is_active ? "default" : "secondary"}>
+                  {bakeSale.is_active ? "Active" : "Inactive"}
+                </Badge>
+              )}
+            </div>
+
+            <div className="text-sm mb-4">
+              <p className="text-xs text-muted-foreground">Cutoff</p>
+              <p className="font-medium">
                 {new Date(bakeSale.cutoff_datetime).toLocaleDateString("en-GB", {
                   day: "numeric",
                   month: "short",
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </td>
-              {!isArchived && (
-                <td className="p-4">
-                  <Badge variant={bakeSale.is_active ? "default" : "secondary"}>
-                    {bakeSale.is_active ? "Active" : "Inactive"}
-                  </Badge>
-                </td>
-              )}
-              <td className="p-4 text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingBakeSale(bakeSale);
-                      setIsEditDialogOpen(true);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
+              </p>
+            </div>
 
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Bake Sale?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the bake sale
-                          scheduled for {new Date(bakeSale.date).toLocaleDateString()}.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(bakeSale.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          {deletingId === bakeSale.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            "Delete"
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            <div className="flex items-center justify-end gap-2 pt-3 border-t">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditingBakeSale(bakeSale);
+                  setIsEditDialogOpen(true);
+                }}
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Bake Sale?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the bake sale
+                      scheduled for {new Date(bakeSale.date).toLocaleDateString()}.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(bakeSale.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deletingId === bakeSale.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Delete"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 
   if (loading) {

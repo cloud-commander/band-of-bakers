@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/state/page-header";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { MESSAGES } from "@/lib/constants/frontend";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import Image from "next/image";
 import Link from "next/link";
@@ -152,6 +153,41 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
       day: "numeric",
     });
   };
+
+  if (upcomingBakeSales.length === 0) {
+    return (
+      <div
+        className={`min-h-screen ${DESIGN_TOKENS.sections.padding} flex items-center justify-center`}
+      >
+        <div className="max-w-2xl mx-auto text-center">
+          <PageHeader
+            title="Our Menu"
+            description="Freshly baked goods, available for collection or delivery"
+            breadcrumbs={[{ label: "Home", href: "/" }, { label: "Menu" }]}
+          />
+          <div className="mt-12 flex flex-col items-center justify-center">
+            <div className="relative w-64 h-64 mb-8 rounded-full overflow-hidden border-4 border-bakery-amber-100 shadow-lg">
+              <Image
+                src="/images/bakers-away.png"
+                alt="Bakers Away"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-serif text-bakery-amber-800 mb-4">
+              We&apos;re Taking a Short Break
+            </h2>
+            <p className="text-lg text-stone-600 max-w-lg mx-auto leading-relaxed">
+              {MESSAGES.BAKERS_AWAY}
+            </p>
+            <Button asChild className="mt-8 bg-bakery-amber-700 hover:bg-bakery-amber-800">
+              <Link href="/">Return Home</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${DESIGN_TOKENS.sections.padding}`}>

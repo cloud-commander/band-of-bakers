@@ -3,16 +3,19 @@
 import { orderRepository } from "@/lib/repositories/order.repository";
 import { productRepository } from "@/lib/repositories/product.repository";
 import { userRepository } from "@/lib/repositories/user.repository";
+import { bakeSaleRepository } from "@/lib/repositories/bake-sale.repository";
 
 export async function getDashboardStats() {
   try {
-    const [totalOrders, totalRevenue, totalProducts, totalUsers, recentOrders] = await Promise.all([
-      orderRepository.count(),
-      orderRepository.sumTotal(),
-      productRepository.countActive(),
-      userRepository.countCustomers(),
-      orderRepository.findRecent(5),
-    ]);
+    const [totalOrders, totalRevenue, totalProducts, totalUsers, recentOrders, upcomingBakeSales] =
+      await Promise.all([
+        orderRepository.count(),
+        orderRepository.sumTotal(),
+        productRepository.countActive(),
+        userRepository.countCustomers(),
+        orderRepository.findRecent(5),
+        bakeSaleRepository.findUpcoming(),
+      ]);
 
     return {
       totalOrders,
@@ -20,6 +23,7 @@ export async function getDashboardStats() {
       totalProducts,
       totalUsers,
       recentOrders,
+      upcomingBakeSalesCount: upcomingBakeSales.length,
       // Trends are still hardcoded for now as we don't have historical data logic yet
       trends: {
         orders: 12.5,
@@ -36,6 +40,7 @@ export async function getDashboardStats() {
       totalProducts: 0,
       totalUsers: 0,
       recentOrders: [],
+      upcomingBakeSalesCount: 0,
       trends: {
         orders: 0,
         revenue: 0,

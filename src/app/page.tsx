@@ -9,6 +9,7 @@ import { InstagramFeed } from "@/components/instagram-feed";
 import { SectionDivider } from "@/components/section-divider";
 import { Heading } from "@/components/ui/heading";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { MESSAGES } from "@/lib/constants/frontend";
 import {
   HERO_SECTION,
   SIGNATURE_BAKES_SECTION,
@@ -161,50 +162,68 @@ export default async function Home() {
             <Heading level={2} className="mb-8">
               {CTA_SECTION.heading}
             </Heading>
-            {/* Upcoming Bake Sales */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {upcomingBakeSales.slice(0, 3).map((bakeSale, index) => (
-                <FadeIn key={bakeSale.id} delay={index * 0.1}>
-                  <Link href={`/menu?bakeSale=${bakeSale.id}`}>
-                    <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">
-                          {new Date(bakeSale.date).toLocaleDateString("en-GB", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
-                          })}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          {bakeSale.location.name}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </FadeIn>
-              ))}
-            </div>
+            {/* Upcoming Bake Sales or Bakers Away Message */}
+            {upcomingBakeSales.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                {upcomingBakeSales.slice(0, 3).map((bakeSale, index) => (
+                  <FadeIn key={bakeSale.id} delay={index * 0.1}>
+                    <Link href={`/menu?bakeSale=${bakeSale.id}`}>
+                      <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">
+                            {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                            })}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                            {bakeSale.location.name}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </FadeIn>
+                ))}
+              </div>
+            ) : (
+              <FadeIn>
+                <div className="flex flex-col items-center justify-center text-center mb-12">
+                  <div className="relative w-64 h-64 mb-6 rounded-full overflow-hidden border-4 border-bakery-amber-100 shadow-lg">
+                    <Image
+                      src="/images/bakers-away.png"
+                      alt="Bakers Away"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-xl md:text-2xl font-serif text-bakery-amber-800 max-w-lg mx-auto leading-relaxed">
+                    {MESSAGES.BAKERS_AWAY}
+                  </p>
+                </div>
+              </FadeIn>
+            )}
             <p
               className={`${DESIGN_TOKENS.typography.body.lg.size} mb-8`}
               style={{

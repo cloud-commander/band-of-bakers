@@ -242,4 +242,6 @@ export const MESSAGES = {
   LOADING: "Loading...",
   /** No data message */
   NO_DATA: "No data available",
+  /** Bakers away message */
+  BAKERS_AWAY: "The bakers are away at the moment, please come check back again soon! 🥖",
 } as const;

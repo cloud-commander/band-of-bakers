@@ -21,9 +21,29 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+
+interface DashboardOrder {
+  id: string;
+  created_at: string | number | Date;
+  status: string;
+  total: number;
+  user: {
+    name: string | null;
+  } | null;
+}
+
 export default async function AdminDashboard() {
-  const { totalOrders, totalRevenue, totalProducts, totalUsers, recentOrders, trends } =
-    await getDashboardStats();
+  const {
+    totalOrders,
+    totalRevenue,
+    totalProducts,
+    totalUsers,
+    recentOrders,
+    trends,
+    upcomingBakeSalesCount,
+  } = await getDashboardStats();
   const topVouchers = await getTopVouchers(5);
 
   return (
@@ -32,6 +52,22 @@ export default async function AdminDashboard() {
         title="Dashboard"
         description="Overview of your store performance and analytics"
       />
+
+      {upcomingBakeSalesCount === 0 && (
+        <Alert variant="destructive" className="mb-8 bg-red-50 border-red-200 text-red-800">
+          <AlertTriangle className="h-4 w-4 text-red-800" />
+          <AlertTitle>Action Required: No Upcoming Bake Sales</AlertTitle>
+          <AlertDescription>
+            There are no future bake sales scheduled. Customers will not be able to place orders.
+            <Link
+              href="/admin/bake-sales"
+              className="font-medium underline ml-1 hover:text-red-900"
+            >
+              Schedule a bake sale now &rarr;
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* KPI Cards with Trends */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -98,7 +134,7 @@ export default async function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {recentOrders.map((order: any) => {
+                    {recentOrders.map((order: DashboardOrder) => {
                       return (
                         <Link
                           key={order.id}
