@@ -1,15 +1,16 @@
-import { mockNewsPostsPublished } from "@/lib/mocks/news";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import type { NewsPost } from "@/db/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function RecentNews() {
-  // Get 3 most recent published news posts
-  const recentPosts = mockNewsPostsPublished
-    .sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime())
-    .slice(0, 3);
+interface RecentNewsProps {
+  posts: NewsPost[];
+}
+
+export function RecentNews({ posts }: RecentNewsProps) {
+  const recentPosts = posts;
 
   if (recentPosts.length === 0) {
     return null;
@@ -52,10 +53,10 @@ export function RecentNews() {
                   }}
                 >
                   {/* Featured Image */}
-                  {post.featured_image && (
+                  {post.image_url && (
                     <div className="relative w-full h-48 overflow-hidden">
                       <Image
-                        src={post.featured_image}
+                        src={post.image_url}
                         alt={post.title}
                         fill
                         className="object-cover transition-transform group-hover:scale-105 duration-300"

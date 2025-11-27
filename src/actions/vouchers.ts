@@ -46,3 +46,20 @@ export async function getVouchers() {
     return [];
   }
 }
+
+/**
+ * Get top vouchers by usage (admin only)
+ */
+export async function getTopVouchers(limit: number = 5) {
+  try {
+    const session = await auth();
+    if (!session?.user?.role || !["owner", "manager", "staff"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+    const vouchers = await voucherRepository.findAll();
+    return [...vouchers].sort((a, b) => b.current_uses - a.current_uses).slice(0, limit);
+  } catch (error) {
+    console.error("Failed to fetch top vouchers:", error);
+    return [];
+  }
+}

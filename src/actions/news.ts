@@ -57,6 +57,19 @@ export async function getPublishedNewsPosts() {
 }
 
 /**
+ * Get recent published news posts (public)
+ */
+export async function getRecentNewsPosts(limit: number = 3) {
+  try {
+    const posts = await newsRepository.findPublished();
+    return posts.slice(0, limit);
+  } catch (error) {
+    console.error("Failed to fetch recent news posts:", error);
+    return [];
+  }
+}
+
+/**
  * Create a new news post
  */
 export async function createNewsPost(formData: FormData): Promise<ActionResult<{ id: string }>> {

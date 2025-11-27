@@ -15,16 +15,18 @@ import {
   STORY_SECTION,
   CTA_SECTION,
 } from "@/constants/homepage";
-import { mockProductCategories } from "@/lib/mocks/products";
+import { getCategories } from "@/actions/categories";
 import { getActiveTestimonials } from "@/actions/testimonials";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
+import { getRecentNewsPosts } from "@/actions/news";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const categories = mockProductCategories;
+  const categories = await getCategories();
   const testimonials = await getActiveTestimonials();
   const upcomingBakeSales = await getUpcomingBakeSales();
+  const recentNews = await getRecentNewsPosts(3);
 
   return (
     <>
@@ -84,7 +86,7 @@ export default async function Home() {
           </FadeIn>
 
           <div className={`grid grid-cols-1 md:grid-cols-3 ${DESIGN_TOKENS.sections.gap}`}>
-            {categories.map((category, index) => (
+            {categories.slice(0, 6).map((category, index) => (
               <FadeIn key={category.id} delay={index * 0.1}>
                 <Link href={`/menu?category=${category.slug}`}>
                   <div
@@ -94,22 +96,7 @@ export default async function Home() {
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                     }}
                   >
-                    {/* Image - 60% of card */}
-                    <div
-                      className="relative w-full"
-                      style={{
-                        paddingBottom: "60%",
-                      }}
-                    >
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-
-                    {/* Text - 40% of card */}
+                    {/* Text Only - No image URL in DB */}
                     <div className={DESIGN_TOKENS.cards.padding}>
                       <h3
                         className={`${DESIGN_TOKENS.typography.h4.size} ${DESIGN_TOKENS.typography.h4.weight} mb-2 text-center`}
@@ -247,7 +234,7 @@ export default async function Home() {
           backgroundColor: DESIGN_TOKENS.colors.background,
         }}
       >
-        <RecentNews />
+        <RecentNews posts={recentNews} />
       </section>
 
       {/* Instagram Feed */}

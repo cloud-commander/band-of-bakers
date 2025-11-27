@@ -1,12 +1,13 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockVouchers } from "@/lib/mocks/vouchers";
+import type { Voucher } from "@/db/schema";
 import { Ticket } from "lucide-react";
 
-export function TopVouchersList() {
-  // Sort vouchers by usage and take top 5
-  const topVouchers = [...mockVouchers].sort((a, b) => b.current_uses - a.current_uses).slice(0, 5);
+interface TopVouchersListProps {
+  vouchers: Voucher[];
+}
+
+export function TopVouchersList({ vouchers }: TopVouchersListProps) {
+  const topVouchers = vouchers;
 
   return (
     <Card className="col-span-1 border border-stone-200 shadow-sm">

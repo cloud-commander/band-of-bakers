@@ -12,6 +12,7 @@ import { KPICard } from "@/components/admin/kpi-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Metadata } from "next";
 import { getDashboardStats } from "@/actions/dashboard";
+import { getTopVouchers } from "@/actions/vouchers";
 
 export const metadata: Metadata = {
   title: "Dashboard | Band of Bakers Admin",
@@ -23,6 +24,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboard() {
   const { totalOrders, totalRevenue, totalProducts, totalUsers, recentOrders, trends } =
     await getDashboardStats();
+  const topVouchers = await getTopVouchers(5);
 
   return (
     <div>
@@ -153,7 +155,7 @@ export default async function AdminDashboard() {
             <TopProductsChart />
 
             {/* Top Vouchers */}
-            <TopVouchersList />
+            <TopVouchersList vouchers={topVouchers} />
           </div>
         </TabsContent>
       </Tabs>
