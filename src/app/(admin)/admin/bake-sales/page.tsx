@@ -52,8 +52,8 @@ export default function AdminBakeSalesPage() {
     setLoading(true);
     try {
       const { upcoming, archived } = await getBakeSales();
-      setUpcomingBakeSales(upcoming as any); // Type assertion needed due to serialization
-      setArchivedBakeSales(archived as any);
+      setUpcomingBakeSales(upcoming as BakeSale[]); // Type assertion needed due to serialization
+      setArchivedBakeSales(archived as BakeSale[]);
     } catch (error) {
       console.error("Failed to fetch bake sales:", error);
       toast.error("Failed to load bake sales");

@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { getDb } from "@/lib/db";
+import { images } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const runtime = "edge";
 
 /**
- * Delete image from Cloudflare R2
+ * Delete image from Cloudflare R2 and DB
  * DELETE /api/delete-image
  */
 export async function DELETE(request: NextRequest) {
@@ -37,6 +40,10 @@ export async function DELETE(request: NextRequest) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (env as any).R2.delete(key);
+
+    // 4. Delete from DB
+    const db = await getDb();
+    await db.delete(images).where(eq(images.url, url));
 
     return NextResponse.json({ success: true });
   } catch (error) {

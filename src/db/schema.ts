@@ -23,9 +23,8 @@ export const users = sqliteTable("users", {
   phone: text("phone"),
   role: text("role").notNull().default("customer"), // customer, staff, manager, owner
   avatar_url: text("avatar_url"),
-  email_verified: integer("email_verified", { mode: "boolean" })
-    .notNull()
-    .default(false),
+  email_verified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+  is_banned: integer("is_banned", { mode: "boolean" }).notNull().default(false),
   ...timestamps,
 });
 
@@ -120,12 +119,8 @@ export const orders = sqliteTable("orders", {
     .notNull()
     .references(() => bakeSales.id),
   status: text("status").notNull().default("pending"), // pending, processing, ready, fulfilled, cancelled, refunded
-  fulfillment_method: text("fulfillment_method")
-    .notNull()
-    .default("collection"), // collection, delivery
-  payment_method: text("payment_method")
-    .notNull()
-    .default("payment_on_collection"), // stripe, paypal, bank_transfer, payment_on_collection
+  fulfillment_method: text("fulfillment_method").notNull().default("collection"), // collection, delivery
+  payment_method: text("payment_method").notNull().default("payment_on_collection"), // stripe, paypal, bank_transfer, payment_on_collection
   payment_status: text("payment_status").notNull().default("pending"), // pending, completed, failed, refunded
   payment_intent_id: text("payment_intent_id"), // Stripe PaymentIntent ID
   subtotal: real("subtotal").notNull(),
@@ -159,15 +154,11 @@ export const orderItems = sqliteTable("order_items", {
   product_id: text("product_id")
     .notNull()
     .references(() => products.id),
-  product_variant_id: text("product_variant_id").references(
-    () => productVariants.id
-  ),
+  product_variant_id: text("product_variant_id").references(() => productVariants.id),
   quantity: integer("quantity").notNull(),
   unit_price: real("unit_price").notNull(), // Price at time of order
   total_price: real("total_price").notNull(), // unit_price * quantity
-  is_available: integer("is_available", { mode: "boolean" })
-    .notNull()
-    .default(true),
+  is_available: integer("is_available", { mode: "boolean" }).notNull().default(true),
   unavailable_reason: text("unavailable_reason"),
   ...timestamps,
 });
@@ -205,10 +196,23 @@ export const newsPosts = sqliteTable("news_posts", {
   author_id: text("author_id")
     .notNull()
     .references(() => users.id),
-  is_published: integer("is_published", { mode: "boolean" })
-    .notNull()
-    .default(false),
+  is_published: integer("is_published", { mode: "boolean" }).notNull().default(false),
   published_at: text("published_at"), // ISO datetime
+  ...timestamps,
+});
+
+// ============================================================================
+// IMAGES
+// ============================================================================
+
+export const images = sqliteTable("images", {
+  id: text("id").primaryKey(),
+  url: text("url").notNull().unique(),
+  filename: text("filename").notNull(),
+  category: text("category"),
+  tags: text("tags", { mode: "json" }).$type<string[]>(), // Store as JSON array
+  size: integer("size"),
+  uploaded_by: text("uploaded_by").references(() => users.id),
   ...timestamps,
 });
 
@@ -262,3 +266,6 @@ export type InsertNewsPost = typeof newsPosts.$inferInsert;
 
 export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;
+
+export type Image = typeof images.$inferSelect;
+export type InsertImage = typeof images.$inferInsert;

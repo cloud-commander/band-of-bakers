@@ -248,16 +248,118 @@
 
 ---
 
+## 📊 Phase 3: OBSERVABILITY & MONITORING - **COMPLETE** ✅
+
+### Task 3.1: Server-Side Logging Infrastructure ✅
+- **Status**: Complete (already existed)
+- **Files**:
+  - [src/lib/logger/server-logger.ts](src/lib/logger/server-logger.ts) - Logflare integration
+  - [src/lib/logger/server-rollbar.ts](src/lib/logger/server-rollbar.ts) - Rollbar error tracking
+  - [src/lib/logger/index.ts](src/lib/logger/index.ts) - Centralized logger export
+- **Features**:
+  - Structured logging with metadata
+  - Automatic Logflare integration
+  - Rollbar error reporting
+  - Development/production mode handling
+  - Failed request fallback logging
+- **Usage**:
+  ```typescript
+  import { logger } from '@/lib/logger';
+
+  logger.info('User action', { userId, action: 'profile_update' });
+  logger.error('Failed operation', { error, requestId });
+  ```
+
+### Task 3.2: Client-Side Analytics with Logflare ✅
+- **Status**: Complete (enhanced existing)
+- **Files**:
+  - [src/components/analytics/logflare-provider.tsx](src/components/analytics/logflare-provider.tsx) - Client provider
+  - [src/lib/monitoring/logflare-client.ts](src/lib/monitoring/logflare-client.ts) - Client SDK
+- **Features**:
+  - Page view tracking
+  - Custom event tracking
+  - Error tracking
+  - User interaction logging
+  - Automatic metadata collection (userAgent, screen, viewport)
+  - Global error handlers
+  - Unhandled promise rejection tracking
+
+### Task 3.3: Web Vitals Monitoring ✅
+- **Status**: Complete
+- **Files Created**:
+  - [src/lib/monitoring/web-vitals.ts](src/lib/monitoring/web-vitals.ts) - Core Web Vitals tracking (110 lines)
+  - [src/components/analytics/web-vitals-provider.tsx](src/components/analytics/web-vitals-provider.tsx) - Provider component
+- **Metrics Tracked**:
+  - **LCP** (Largest Contentful Paint) - Loading performance
+  - **INP** (Interaction to Next Paint) - Interactivity
+  - **CLS** (Cumulative Layout Shift) - Visual stability
+  - **FCP** (First Contentful Paint) - Initial render
+  - **TTFB** (Time to First Byte) - Server response
+- **Integration**:
+  - Sends to Logflare for analysis
+  - Sends to Google Analytics
+  - Development console logging
+  - Rating system (good/needs-improvement/poor)
+- **Thresholds Defined**:
+  ```typescript
+  LCP: { good: 2500ms, needsImprovement: 4000ms }
+  INP: { good: 200ms, needsImprovement: 500ms }
+  CLS: { good: 0.1, needsImprovement: 0.25 }
+  ```
+
+### Task 3.4: Request ID Correlation ✅
+- **Status**: Complete
+- **Files Created**:
+  - [src/lib/monitoring/request-id.ts](src/lib/monitoring/request-id.ts) - Request ID utilities (30 lines)
+- **Files Modified**:
+  - [middleware.ts](middleware.ts) - Added request ID generation and propagation
+- **Features**:
+  - Unique request ID generation using nanoid (21 chars, collision-resistant)
+  - Middleware injection of `x-request-id` header
+  - Request ID propagation through server components/actions
+  - Helper functions: `generateRequestId()`, `getRequestId()`, `ensureRequestId()`
+- **Usage**:
+  ```typescript
+  import { getRequestId } from '@/lib/monitoring/request-id';
+
+  export async function serverAction() {
+    const requestId = await getRequestId();
+    logger.info('Processing request', { requestId });
+  }
+  ```
+
+### Observability Stack Summary
+
+**Client-Side Monitoring**:
+- Logflare: Page views, events, errors
+- Web Vitals: Performance metrics
+- Google Analytics: User behavior
+
+**Server-Side Monitoring**:
+- Logflare: Structured logging
+- Rollbar: Error tracking and alerting
+- Request IDs: End-to-end tracing
+
+**Integration Points**:
+1. Layout providers initialize monitoring
+2. Middleware adds request IDs to all requests
+3. Server actions can log with request context
+4. Client errors automatically reported
+5. Performance metrics sent to analytics
+
+---
+
 ## 📊 Overall Progress
 
 | Phase | Tasks Complete | Total Tasks | Progress |
 |-------|---------------|-------------|----------|
 | Phase 0 | 3/3 | 3 | 100% ✅ |
 | Phase 1 | 4/4 | 4 | 100% ✅ |
+| Phase 3 | 4/4 | 4 | 100% ✅ |
 | Phase 5 | 4/4 | 4 | 100% ✅ |
-| **TOTAL** | **11/11** | **11** | **100%** ✅ |
+| **TOTAL** | **15/15** | **15** | **100%** ✅ |
 
-**Phase 0, Phase 1, and Phase 5 are now complete!**
+**Phase 0, Phase 1, Phase 3, and Phase 5 are now complete!**
 
 ---
 
@@ -282,6 +384,29 @@
    - Test CSRF protection on a Server Action
    - Test input sanitization with malicious HTML
 
+### In-Code TODOs Identified
+
+**Document**: [CODE_TODOS.md](CODE_TODOS.md) - Comprehensive tracking of all TODO comments
+
+**Summary**: 6 TODOs found requiring ~12.5-18.5 hours of work
+
+**Critical Priority** (🔴):
+- ✅ **Cloudflare Workers Types** ([src/lib/db.ts:6-10](src/lib/db.ts#L6-L10)) - Fix `any` types with proper `@cloudflare/workers-types` (30 min)
+
+**High Priority** (🟡):
+- ✅ **Checkout API** ([src/app/(shop)/checkout/page.tsx](src/app/(shop)/checkout/page.tsx)) - Complete payment flow (6 hours)
+- ✅ **Collection Checkout API** ([src/app/(shop)/checkout/collection/page.tsx](src/app/(shop)/checkout/collection/page.tsx)) - Click & collect flow (4 hours)
+
+**Medium Priority** (🟢):
+- ✅ **News API** ([src/app/(admin)/admin/news/new/page.tsx](src/app/(admin)/admin/news/new/page.tsx)) - Admin news creation (2 hours)
+- ✅ **Testimonial API** ([src/app/(admin)/admin/testimonials/new/page.tsx](src/app/(admin)/admin/testimonials/new/page.tsx)) - Testimonial management (2 hours)
+- ✅ **Bake Sale API** ([src/app/(admin)/admin/bake-sales/new/page.tsx](src/app/(admin)/admin/bake-sales/new/page.tsx)) - Event management (3 hours)
+
+**Recommended Order**:
+1. Sprint 1 (Week 1): Fix Cloudflare types (critical)
+2. Sprint 2 (Week 2-3): Complete checkout APIs (blocks production)
+3. Sprint 3 (Week 4): Implement CMS features (marketing/engagement)
+
 ### Future Phases (From refactor-plan.md)
 
 **Phase 2: Testing Infrastructure**
@@ -290,11 +415,11 @@
 - Component tests for critical UI
 - E2E tests for key flows
 
-**Phase 3: Observability & Monitoring**
-- Implement server-side Rollbar logging
-- Complete Logflare provider implementation
-- Add Web Vitals monitoring
-- Add request ID correlation
+**Phase 3: Observability & Monitoring** ✅ COMPLETE
+- ✅ Implement server-side Rollbar logging
+- ✅ Complete Logflare provider implementation
+- ✅ Add Web Vitals monitoring
+- ✅ Add request ID correlation
 
 **Phase 4: Performance Optimization**
 - Dynamic imports for code splitting
@@ -342,14 +467,21 @@ Phase 0 & 1 Complete - Verify implementations:
 - [ ] **Secrets Rotation**: Generate and test new Turnstile keys ⚠️ USER ACTION REQUIRED
 - [ ] **WAF Configuration**: Setup rate limiting rules in Cloudflare dashboard ⚠️ USER ACTION REQUIRED
 
-### Implementation Guide Created
-- ✅ **SECURITY_IMPLEMENTATION_GUIDE.md** - Comprehensive guide created (500+ lines)
+### Implementation Guides Created
+- ✅ **SECURITY_IMPLEMENTATION_GUIDE.md** - Comprehensive security guide (500+ lines)
   - Step-by-step instructions for applying CSRF protection to both Server Actions
   - Complete code examples with before/after comparisons
   - File upload validation patterns
   - Password strength requirements
   - Testing procedures for all security features
   - Production deployment checklist
+
+- ✅ **CODE_TODOS.md** - In-code TODO tracking (300+ lines)
+  - Catalogued all TODO comments in codebase
+  - Prioritized by impact (Critical/High/Medium)
+  - Implementation plan with time estimates
+  - Sprint-based roadmap for completion
+  - Service layer patterns and best practices
 
 ---
 
@@ -370,6 +502,20 @@ Phase 0 & 1 Complete - Verify implementations:
 
 **Total Lines Added Phase 1**: ~1100 lines of production-ready security code and documentation
 
+### Phase 3
+- ✅ `src/lib/logger/server-logger.ts` - Logflare server logging (existing)
+- ✅ `src/lib/logger/server-rollbar.ts` - Rollbar error tracking (existing)
+- ✅ `src/components/analytics/logflare-provider.tsx` - Client analytics (enhanced)
+- ✅ `src/lib/monitoring/logflare-client.ts` - Client SDK (150 lines)
+- ✅ `src/lib/monitoring/web-vitals.ts` - Web Vitals tracking (110 lines)
+- ✅ `src/components/analytics/web-vitals-provider.tsx` - Web Vitals provider (15 lines)
+- ✅ `src/lib/monitoring/request-id.ts` - Request ID utilities (30 lines)
+- ✅ `src/lib/monitoring/index.ts` - Monitoring exports (8 lines)
+- ✅ `middleware.ts` - Request ID correlation (updated)
+- ✅ `src/app/layout.tsx` - Web Vitals integration (updated)
+
+**Total Lines Added Phase 3**: ~315 lines of monitoring and observability code
+
 ### Phase 5
 - ✅ `src/components/navbar/index.tsx` - Refactored navbar (60 lines)
 - ✅ `src/components/navbar/logo.tsx` - Logo component (30 lines)
@@ -388,10 +534,10 @@ Phase 0 & 1 Complete - Verify implementations:
 
 **Total Lines Added Phase 5**: ~870 lines of clean, maintainable architecture code
 
-**Overall Total Lines Added**: ~2000 lines of production-ready code and documentation
+**Overall Total Lines Added**: ~2300 lines of production-ready code and documentation
 
 ---
 
-**Last Updated**: 2025-11-26
-**Completed Phases**: 0, 1, 5
-**Next Phase**: 2 (Testing Infrastructure), 3 (Observability), 4 (Performance), or 6 (Documentation & CI/CD)
+**Last Updated**: 2025-11-27
+**Completed Phases**: 0, 1, 3, 5
+**Next Phase**: 2 (Testing Infrastructure), 4 (Performance), or 6 (Documentation & CI/CD)

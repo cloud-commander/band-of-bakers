@@ -37,6 +37,7 @@ export async function syncUser(authData: AuthData) {
     avatar_url: authData.picture || authData.photoURL || authData.image,
     email_verified: Boolean(authData.emailVerified),
     role: "customer" as const,
+    is_banned: false,
   };
 
   await db.insert(users).values(newUser);

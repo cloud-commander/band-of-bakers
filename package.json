@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "clean-cache": "bash scripts/clean-cache.sh",
     "clean-all": "bash scripts/clean-cache.sh && rm -rf node_modules && pnpm install",
-    "seed": "npx tsx scripts/seed.ts"
+    "seed": "npx tsx scripts/seed.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:prod": "wrangler d1 migrations apply DB --remote",
+    "test": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -27,6 +31,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@tinymce/tinymce-react": "^6.3.0",
+    "better-sqlite3": "^12.4.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
@@ -35,6 +40,7 @@
     "isomorphic-dompurify": "^2.33.0",
     "jose": "^6.1.2",
     "lucide-react": "^0.554.0",
+    "nanoid": "^5.1.6",
     "next": "15.5.0",
     "next-auth": "^5.0.0-beta.30",
     "react": "19.2.0",
@@ -48,20 +54,35 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tinymce": "^8.2.2",
+    "web-vitals": "^5.1.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/dompurify": "^3.2.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.22",
     "drizzle-kit": "^0.31.7",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
+    "jsdom": "^27.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
+    "vitest": "^4.0.14",
     "wrangler": "^4.50.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
+    ]
   }
 }

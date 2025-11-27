@@ -9,6 +9,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       role?: string;
+      is_banned?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -17,6 +18,7 @@ declare module "next-auth" {
     refreshToken?: string;
     expiresIn?: string;
     role?: string;
+    is_banned?: boolean;
   }
 }
 
@@ -29,6 +31,11 @@ declare module "next-auth/jwt" {
     userId?: string;
     error?: string;
     role?: string;
+    is_banned?: boolean;
+    name?: string;
+    picture?: string;
+    phone?: string;
+    emailVerified?: boolean;
   }
 }
 
@@ -139,7 +146,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account }): Promise<JWT | null> {
       // Initial sign in
       if (account && user) {
         // If provider is Google, exchange token
@@ -183,6 +190,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             tenantId: tenantId,
             userId: dbUser?.id || data.localId, // Use DB ID if available
             role: dbUser?.role,
+            is_banned: dbUser?.is_banned,
+            // Cache user data in token
+            name: dbUser?.name || user.name || undefined,
+            picture: dbUser?.avatar_url || user.image || undefined,
+            phone: dbUser?.phone || undefined,
+            emailVerified: dbUser?.email_verified || false,
           };
         } else if (account.provider === "credentials") {
           // Credentials provider already returns the correct shape in `authorize`
@@ -198,6 +211,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             tenantId: process.env.GCP_IDENTITY_PLATFORM_TENANT_ID,
             userId: dbUser?.id || user.id, // Use DB ID if available
             role: dbUser?.role,
+            is_banned: dbUser?.is_banned,
+            // Cache user data in token
+            name: dbUser?.name || user.name || undefined,
+            picture: dbUser?.avatar_url || user.image || undefined,
+            phone: dbUser?.phone || undefined,
+            emailVerified: dbUser?.email_verified || false,
           };
         }
       }
@@ -215,47 +234,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.idToken && token.userId) {
         session.user.id = token.userId as string;
         session.user.role = token.role as string;
+        session.user.is_banned = token.is_banned as boolean;
 
-        // Fetch latest user data from DB to ensure updates (avatar, name, etc.) are reflected
-        try {
-          // We need to dynamically import getDb to avoid circular dependencies or context issues
-          // if auth.ts is used in places where getDb might not be ready.
-          // However, standard import should be fine if structured correctly.
-          // Let's use the imported getDb.
-          const { getDb } = await import("@/lib/db");
-          const { users } = await import("@/db/schema");
-          const { eq } = await import("drizzle-orm");
+        // Optimization: Use cached data from token if available
+        if (token.name) {
+          session.user.name = token.name as string;
+          session.user.image = token.picture as string;
+          // @ts-expect-error: Custom session property
+          session.user.phone = token.phone as string;
+          // @ts-expect-error: Custom session property
+          session.user.emailVerified = token.emailVerified as boolean;
+        } else {
+          // Fallback: Fetch from DB for existing sessions without cached data
+          try {
+            console.time("SessionDBFallback");
+            const { getDb } = await import("@/lib/db");
+            const { users } = await import("@/db/schema");
+            const { eq } = await import("drizzle-orm");
 
-          const db = await getDb();
-          let dbUser = await db.query.users.findFirst({
-            where: eq(users.id, token.userId as string),
-          });
-
-          // Fallback: If user not found by ID (e.g. token has GCP ID but DB has UUID), try email
-          if (!dbUser && session.user.email) {
-            console.log("User not found by ID, trying email:", session.user.email);
-            dbUser = await db.query.users.findFirst({
-              where: eq(users.email, session.user.email),
+            const db = await getDb();
+            const dbUser = await db.query.users.findFirst({
+              where: eq(users.id, token.userId as string),
             });
-          }
 
-          console.log(
-            "Session callback - Fetched user:",
-            dbUser ? { id: dbUser.id, name: dbUser.name } : "Not found"
-          );
-
-          if (dbUser) {
-            session.user.id = dbUser.id; // Ensure session has the correct DB ID
-            session.user.name = dbUser.name;
-            session.user.image = dbUser.avatar_url;
-            session.user.role = dbUser.role;
-            // @ts-expect-error: Custom session property
-            session.user.phone = dbUser.phone;
-            // @ts-expect-error: Custom session property
-            session.user.emailVerified = dbUser.email_verified;
+            if (dbUser) {
+              session.user.name = dbUser.name;
+              session.user.image = dbUser.avatar_url;
+              // @ts-expect-error: Custom session property
+              session.user.phone = dbUser.phone;
+              // @ts-expect-error: Custom session property
+              session.user.emailVerified = dbUser.email_verified;
+              session.user.is_banned = dbUser.is_banned;
+            }
+            console.timeEnd("SessionDBFallback");
+          } catch (error) {
+            console.error("Error fetching user in session callback fallback:", error);
           }
-        } catch (error) {
-          console.error("Error fetching user in session callback:", error);
         }
       }
       return session;

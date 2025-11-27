@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { bakeSaleRepository } from "@/lib/repositories/bake-sale.repository";
 import { z } from "zod";
-import { bakeSales, type BakeSale } from "@/db/schema";
+import { type BakeSale } from "@/db/schema";
 
 // Validation schema
 const bakeSaleSchema = z.object({
@@ -58,7 +58,7 @@ export async function getBakeSaleById(id: string) {
 /**
  * Create a new bake sale
  */
-export async function createBakeSale(formData: FormData): Promise<ActionResult<any>> {
+export async function createBakeSale(formData: FormData): Promise<ActionResult<BakeSale>> {
   try {
     // 1. Auth check
     const session = await auth();
@@ -81,10 +81,10 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<a
 
     // 3. Create record
     const id = crypto.randomUUID();
-    const bakeSale = await bakeSaleRepository.create({
+    const bakeSale = (await bakeSaleRepository.create({
       id,
       ...validated.data,
-    });
+    })) as BakeSale;
 
     // 4. Revalidate
     revalidatePath("/admin/bake-sales");
@@ -100,7 +100,10 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<a
 /**
  * Update an existing bake sale
  */
-export async function updateBakeSale(id: string, formData: FormData): Promise<ActionResult<any>> {
+export async function updateBakeSale(
+  id: string,
+  formData: FormData
+): Promise<ActionResult<BakeSale>> {
   try {
     // 1. Auth check
     const session = await auth();
@@ -122,7 +125,7 @@ export async function updateBakeSale(id: string, formData: FormData): Promise<Ac
     }
 
     // 3. Update record
-    const bakeSale = await bakeSaleRepository.update(id, validated.data);
+    const bakeSale = (await bakeSaleRepository.update(id, validated.data)) as BakeSale | null;
 
     if (!bakeSale) {
       return { success: false, error: "Bake sale not found" };

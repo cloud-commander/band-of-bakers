@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Upload, X, Check, Loader2, Trash2 } from "lucide-react";
+import { Upload, Check, Loader2, Trash2, Edit, Tag, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -16,17 +16,45 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface ImageRecord {
+  id: string;
+  url: string;
+  filename: string;
+  category?: string;
+  tags?: string[];
+  size?: number;
+}
 
 interface ImageGalleryProps {
   /**
-   * Currently selected image URL
+   * Currently selected image URL (in picker mode)
    */
   selectedImage?: string | null;
 
   /**
    * Callback when an image is selected
    */
-  onImageSelect: (imageUrl: string) => void;
+  onImageSelect?: (imageUrl: string) => void;
 
   /**
    * Optional category filter for images
@@ -42,6 +70,11 @@ interface ImageGalleryProps {
    * Maximum file size in MB
    */
   maxSizeMB?: number;
+
+  /**
+   * Mode of operation
+   */
+  mode?: "picker" | "manager";
 }
 
 /**
@@ -50,10 +83,10 @@ interface ImageGalleryProps {
  * Features:
  * - Upload images to Cloudflare R2
  * - Browse existing images
- * - Select image for use
+ * - Select image for use (picker mode)
+ * - Manage images (manager mode): delete, edit tags
  * - Filter by category
  * - Responsive grid layout
- * - Delete images with confirmation
  */
 export function ImageGallery({
   selectedImage,
@@ -61,94 +94,114 @@ export function ImageGallery({
   category,
   allowUpload = true,
   maxSizeMB = 5,
+  mode = "picker",
 }: ImageGalleryProps) {
   const [uploading, setUploading] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageRecord[]>([]);
   const [loadingImages, setLoadingImages] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState<string>(category || "all");
-  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
+
+  // Dialog states
+  const [imageToDelete, setImageToDelete] = useState<ImageRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [imageToEdit, setImageToEdit] = useState<ImageRecord | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch existing images on mount or when filter changes
-  useEffect(() => {
-    async function fetchExistingImages() {
-      try {
-        setLoadingImages(true);
-        const response = await fetch(`/api/list-images?category=${selectedFilter}`);
+  // Edit form state
+  const [editTags, setEditTags] = useState<string>("");
+  const [editCategory, setEditCategory] = useState<string>("");
 
-        if (response.ok) {
-          const data = await response.json();
-          setExistingImages(data.images || []);
+  // Fetch existing images
+  const fetchImages = useCallback(async () => {
+    try {
+      setLoadingImages(true);
+      const response = await fetch(`/api/list-images?category=${selectedFilter}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.data) {
+          setImages(data.data);
+        } else if (data.images) {
+          // Backward compatibility
+          setImages(
+            data.images.map((url: string) => ({
+              id: url,
+              url,
+              filename: url.split("/").pop() || "image",
+            }))
+          );
         }
-      } catch (error) {
-        console.error("Failed to fetch existing images:", error);
-      } finally {
-        setLoadingImages(false);
       }
+    } catch (error) {
+      console.error("Failed to fetch existing images:", error);
+      toast.error("Failed to load images");
+    } finally {
+      setLoadingImages(false);
     }
-
-    fetchExistingImages();
   }, [selectedFilter]);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      // Validate file size
-      const maxSizeBytes = maxSizeMB * 1024 * 1024;
-      if (file.size > maxSizeBytes) {
-        toast.error(`File too large. Max size is ${maxSizeMB}MB.`);
-        return;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please upload an image file.");
-        return;
-      }
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
 
       setUploading(true);
+      let successCount = 0;
 
       try {
-        // Create FormData for upload
-        const formData = new FormData();
-        formData.append("image", file);
-        if (category) {
-          formData.append("category", category);
+        // Upload each file
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          // Validate file size
+          const maxSizeBytes = maxSizeMB * 1024 * 1024;
+          if (file.size > maxSizeBytes) {
+            toast.error(`File ${file.name} too large. Max size is ${maxSizeMB}MB.`);
+            continue;
+          }
+
+          // Validate file type
+          if (!file.type.startsWith("image/")) {
+            toast.error(`File ${file.name} is not an image.`);
+            continue;
+          }
+
+          const formData = new FormData();
+          formData.append("image", file);
+          if (selectedFilter !== "all") {
+            formData.append("category", selectedFilter);
+          }
+
+          const response = await fetch("/api/upload-image", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            console.error(`Failed to upload ${file.name}`);
+          }
         }
 
-        // Upload to server action (we'll create this)
-        const response = await fetch("/api/upload-image", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("Upload failed");
+        if (successCount > 0) {
+          toast.success(`Successfully uploaded ${successCount} images`);
+          fetchImages();
         }
-
-        const data = await response.json();
-        const imageUrl = data.url;
-
-        // Add to uploaded images list
-        setUploadedImages((prev) => [imageUrl, ...prev]);
-
-        // Auto-select the newly uploaded image
-        onImageSelect(imageUrl);
-
-        toast.success("Image uploaded successfully");
       } catch (error) {
         console.error("Upload error:", error);
-        toast.error("Failed to upload image");
+        toast.error("Failed to upload images");
       } finally {
         setUploading(false);
         // Reset input
         event.target.value = "";
       }
     },
-    [category, maxSizeMB, onImageSelect]
+    [selectedFilter, maxSizeMB, fetchImages]
   );
 
   const handleDeleteImage = async () => {
@@ -161,19 +214,17 @@ export function ImageGallery({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url: imageToDelete }),
+        body: JSON.stringify({ url: imageToDelete.url }),
       });
 
       if (!response.ok) {
         throw new Error("Delete failed");
       }
 
-      // Remove from lists
-      setExistingImages((prev) => prev.filter((img) => img !== imageToDelete));
-      setUploadedImages((prev) => prev.filter((img) => img !== imageToDelete));
+      setImages((prev) => prev.filter((img) => img.id !== imageToDelete.id));
 
-      // Deselect if currently selected
-      if (selectedImage === imageToDelete) {
+      // Deselect if currently selected in picker mode
+      if (mode === "picker" && selectedImage === imageToDelete.url && onImageSelect) {
         onImageSelect("");
       }
 
@@ -187,6 +238,50 @@ export function ImageGallery({
     }
   };
 
+  const handleUpdateImage = async () => {
+    if (!imageToEdit) return;
+
+    setIsEditing(true);
+    try {
+      // Parse tags
+      const tagsArray = editTags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const response = await fetch("/api/update-image", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: imageToEdit.url,
+          category: editCategory,
+          tags: tagsArray,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Update failed");
+      }
+
+      toast.success("Image updated successfully");
+      fetchImages(); // Refresh to get updated data
+      setImageToEdit(null);
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error("Failed to update image");
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const openEditDialog = (image: ImageRecord) => {
+    setImageToEdit(image);
+    setEditCategory(image.category || "all");
+    setEditTags(image.tags ? image.tags.join(", ") : "");
+  };
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
@@ -197,9 +292,7 @@ export function ImageGallery({
       setPageSize(window.innerWidth < 768 ? 4 : 8);
     };
 
-    // Initial check
     handleResize();
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -209,44 +302,38 @@ export function ImageGallery({
     setCurrentPage(1);
   }, [selectedFilter]);
 
-  // Combine existing images, uploaded images, and selected image
-  const allImages = [
-    ...(selectedImage &&
-    !existingImages.includes(selectedImage) &&
-    !uploadedImages.includes(selectedImage)
-      ? [selectedImage]
-      : []),
-    ...uploadedImages,
-    ...existingImages,
-  ].filter((img, index, self) => img && self.indexOf(img) === index); // Remove duplicates
-
   // Pagination logic
-  const totalPages = Math.ceil(allImages.length / pageSize);
-  const paginatedImages = allImages.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.ceil(images.length / pageSize);
+  const paginatedImages = images.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="space-y-4">
       {/* Filter Dropdown */}
-      {!loadingImages && existingImages.length > 0 && (
-        <div className="flex items-center gap-2">
-          <label htmlFor="category-filter" className="text-sm font-medium">
-            Filter by category:
-          </label>
-          <select
-            id="category-filter"
-            value={selectedFilter}
-            onChange={(e) => setSelectedFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-input rounded-md bg-background"
-          >
-            <option value="all">All Categories</option>
-            <option value="cat-breads">Breads</option>
-            <option value="cat-pastries-bakes">Pastries & Bakes</option>
-            <option value="cat-cakes-loaves">Cakes & Loaves</option>
-            <option value="cat-tarts-pies">Tarts & Pies</option>
-            <option value="cat-savoury-specialities">Savoury & Specialities</option>
-          </select>
-        </div>
-      )}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        {!loadingImages && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="category-filter" className="text-sm font-medium">
+              Filter:
+            </label>
+            <select
+              id="category-filter"
+              value={selectedFilter}
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              className="px-3 py-1.5 text-sm border border-input rounded-md bg-background"
+            >
+              <option value="all">All Categories</option>
+              <option value="cat-breads">Breads</option>
+              <option value="cat-pastries-bakes">Pastries & Bakes</option>
+              <option value="cat-cakes-loaves">Cakes & Loaves</option>
+              <option value="cat-tarts-pies">Tarts & Pies</option>
+              <option value="cat-savoury-specialities">Savoury & Specialities</option>
+            </select>
+            <Button variant="ghost" size="icon" onClick={fetchImages} title="Refresh">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Loading State */}
       {loadingImages && (
@@ -276,7 +363,7 @@ export function ImageGallery({
                 <>
                   <Upload className="h-10 w-10 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Click to upload image</p>
+                    <p className="text-sm font-medium">Click to upload images</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       PNG, JPG, WEBP up to {maxSizeMB}MB
                     </p>
@@ -288,6 +375,7 @@ export function ImageGallery({
               id="image-upload"
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
               onChange={handleFileUpload}
               disabled={uploading}
@@ -297,20 +385,26 @@ export function ImageGallery({
       )}
 
       {/* Image Grid */}
-      {!loadingImages && allImages.length > 0 && (
+      {!loadingImages && images.length > 0 && (
         <div>
           <h3 className="text-sm font-medium mb-3">
-            {allowUpload ? "Select or upload an image" : "Select an image"}
+            {mode === "picker" ? "Select an image" : "Image Library"}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
-            {paginatedImages.map((imageUrl, index) => {
-              const isSelected = imageUrl === selectedImage;
+            {paginatedImages.map((image, index) => {
+              const isSelected = mode === "picker" && image.url === selectedImage;
 
               return (
-                <div key={`${imageUrl}-${index}`} className="relative group">
+                <div key={`${image.id}-${index}`} className="relative group">
                   <button
                     type="button"
-                    onClick={() => onImageSelect(imageUrl)}
+                    onClick={() => {
+                      if (mode === "picker" && onImageSelect) {
+                        onImageSelect(image.url);
+                      } else if (mode === "manager") {
+                        openEditDialog(image);
+                      }
+                    }}
                     className={cn(
                       "relative aspect-square rounded-lg overflow-hidden border-2 transition-all w-full",
                       isSelected
@@ -318,14 +412,9 @@ export function ImageGallery({
                         : "border-muted hover:border-muted-foreground/50"
                     )}
                   >
-                    <Image
-                      src={imageUrl}
-                      alt="Product image option"
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={image.url} alt={image.filename} fill className="object-cover" />
 
-                    {/* Selection Indicator */}
+                    {/* Selection Indicator (Picker Mode) */}
                     {isSelected && (
                       <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                         <div className="bg-primary text-primary-foreground rounded-full p-2">
@@ -333,20 +422,47 @@ export function ImageGallery({
                         </div>
                       </div>
                     )}
+
+                    {/* Tags Indicator */}
+                    {image.tags && image.tags.length > 0 && (
+                      <div className="absolute bottom-1 left-1 flex gap-1">
+                        <Badge variant="secondary" className="text-[10px] px-1 h-5 opacity-90">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {image.tags.length}
+                        </Badge>
+                      </div>
+                    )}
                   </button>
 
-                  {/* Delete Button (visible on hover) */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImageToDelete(imageUrl);
-                    }}
-                    className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-10"
-                    title="Delete image"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
+                  {/* Actions (Manager Mode or Hover) */}
+                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    {mode === "manager" && (
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="h-7 w-7 rounded-full shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditDialog(image);
+                        }}
+                        title="Edit details"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="h-7 w-7 rounded-full shadow-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImageToDelete(image);
+                      }}
+                      title="Delete image"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
@@ -363,7 +479,7 @@ export function ImageGallery({
               <PaginationInfo
                 currentPage={currentPage}
                 pageSize={pageSize}
-                totalItems={allImages.length}
+                totalItems={images.length}
               />
             </div>
           )}
@@ -371,7 +487,7 @@ export function ImageGallery({
       )}
 
       {/* Empty State */}
-      {!loadingImages && allImages.length === 0 && !allowUpload && (
+      {!loadingImages && images.length === 0 && !allowUpload && (
         <div className="text-center py-8 text-muted-foreground">
           <p className="text-sm">No images available</p>
         </div>
@@ -408,6 +524,62 @@ export function ImageGallery({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!imageToEdit} onOpenChange={(open) => !open && setImageToEdit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Image Details</DialogTitle>
+            <DialogDescription>Update category and tags for this image.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-category">Category</Label>
+              <Select value={editCategory} onValueChange={setEditCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Uncategorized</SelectItem>
+                  <SelectItem value="cat-breads">Breads</SelectItem>
+                  <SelectItem value="cat-pastries-bakes">Pastries & Bakes</SelectItem>
+                  <SelectItem value="cat-cakes-loaves">Cakes & Loaves</SelectItem>
+                  <SelectItem value="cat-tarts-pies">Tarts & Pies</SelectItem>
+                  <SelectItem value="cat-savoury-specialities">Savoury & Specialities</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-tags">Tags</Label>
+              <Input
+                id="edit-tags"
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                placeholder="e.g. sourdough, organic, featured (comma separated)"
+              />
+              <p className="text-xs text-muted-foreground">Separate tags with commas</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImageToEdit(null)} disabled={isEditing}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateImage} disabled={isEditing}>
+              {isEditing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

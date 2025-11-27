@@ -7,7 +7,8 @@
     {
       "binding": "DB",
       "database_name": "bandofbakers-db",
-      "database_id": "6f8424bd-f96f-493f-9f42-2b8ec5262454"
+      "database_id": "6f8424bd-f96f-493f-9f42-2b8ec5262454",
+      "preview_database_id": "DB"
     }
   ],
   "kv_namespaces": [

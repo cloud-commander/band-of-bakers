@@ -97,6 +97,7 @@ async function main() {
     sqlStatements.push("DELETE FROM products;");
     sqlStatements.push("DELETE FROM product_categories;");
     sqlStatements.push("DELETE FROM news_posts;");
+    sqlStatements.push("DELETE FROM images;");
     sqlStatements.push("DELETE FROM users;");
 
     // Users
@@ -247,21 +248,43 @@ async function main() {
       ];
 
       // Helper to download and upload with fallbacks
-      const processImage = async (primaryUrl: string, r2Path: string) => {
+      const processImage = async (
+        primaryUrl: string,
+        r2Path: string,
+        category: string,
+        tags: string[] = []
+      ) => {
         if (!primaryUrl || !primaryUrl.startsWith("http")) return;
 
-        // Check if image already exists in R2
-        try {
-          const checkResult = execSync(
-            `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --local`,
-            { stdio: "pipe" }
-          );
-          if (checkResult) {
-            console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping...`);
-            return;
+        let size = 0;
+        const filename = path.basename(r2Path);
+        const id = `img_${path.basename(r2Path, path.extname(r2Path))}`; // Simple ID generation
+
+        // Check if image already exists in R2 (unless overwriting)
+        const shouldOverwrite = args.includes("--overwrite") || args.includes("--clear");
+
+        if (!shouldOverwrite) {
+          try {
+            const checkResult = execSync(
+              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --local`,
+              { stdio: "pipe" }
+            );
+            if (checkResult) {
+              console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping upload...`);
+              // Still need to insert into DB if not exists
+              // Since we don't have size easily without downloading, we might skip size or set dummy
+              // But let's try to get size from checkResult if possible, or just default.
+              // For now, let's just insert into DB.
+              sqlStatements.push(
+                `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+                  tags
+                )}', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+              );
+              return;
+            }
+          } catch (error) {
+            // Image doesn't exist, continue with upload
           }
-        } catch (error) {
-          // Image doesn't exist, continue with upload
         }
 
         // Try primary URL first, then fallbacks
@@ -286,6 +309,32 @@ async function main() {
             // @ts-expect-error: Type 'ReadableStream<any>' is not assignable to type 'ReadableStream<Uint8Array>'.
             await finished(Readable.fromWeb(res.body).pipe(fileStream));
 
+            // Resize image using sharp
+            // We need to import sharp dynamically or use require if it's a CJS script, but this is TSX.
+            // Let's try dynamic import first to avoid top-level import issues if sharp is optional (though it's in deps).
+            // Actually, we can just use standard import at top, but since I'm editing this block, I'll use dynamic import for safety in this context.
+            const sharp = (await import("sharp")).default;
+
+            const buffer = fs.readFileSync(tempPath);
+            const originalSize = buffer.length;
+
+            const resizedBuffer = await sharp(buffer)
+              .resize(1200, 1200, { fit: "inside", withoutEnlargement: true }) // Max 1200x1200, preserve aspect ratio
+              .jpeg({ quality: 80, mozjpeg: true }) // Compress as JPEG
+              .toBuffer();
+
+            fs.writeFileSync(tempPath, resizedBuffer);
+
+            // Get file stats
+            const stats = fs.statSync(tempPath);
+            size = stats.size;
+
+            console.log(
+              `      Resized: ${(originalSize / 1024).toFixed(1)}KB -> ${(size / 1024).toFixed(
+                1
+              )}KB`
+            );
+
             downloaded = true;
             break; // Success! Stop trying other sources
           } catch (error) {
@@ -309,6 +358,13 @@ async function main() {
             stdio: "ignore",
           });
 
+          // Add to SQL
+          sqlStatements.push(
+            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+              tags
+            )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+          );
+
           // Cleanup temp file immediately
           fs.unlinkSync(tempPath);
         } catch (uploadError) {
@@ -320,7 +376,10 @@ async function main() {
       // Categories
       for (const cat of mockProductCategories) {
         if (cat.image) {
-          await processImage(cat.image, `images/categories/${cat.slug}.jpg`);
+          await processImage(cat.image, `images/categories/${cat.slug}.jpg`, "category", [
+            "category",
+            cat.slug,
+          ]);
         }
       }
 
@@ -329,7 +388,9 @@ async function main() {
         if (prod.image_url) {
           await processImage(
             prod.image_url,
-            `images/products/${prod.category_id}/${prod.slug}.jpg`
+            `images/products/${prod.category_id}/${prod.slug}.jpg`,
+            "product",
+            ["product", prod.category_id, prod.slug]
           );
         }
       }
@@ -337,7 +398,10 @@ async function main() {
       // News
       for (const post of mockNewsPosts) {
         if (post.image_url) {
-          await processImage(post.image_url, `images/news/${post.slug}.jpg`);
+          await processImage(post.image_url, `images/news/${post.slug}.jpg`, "news", [
+            "news",
+            post.slug,
+          ]);
         }
       }
     }

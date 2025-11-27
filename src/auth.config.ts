@@ -16,6 +16,16 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnAdmin = nextUrl.pathname.startsWith("/admin");
+      const isOnAuth = nextUrl.pathname.startsWith("/auth");
+
+      if (isLoggedIn) {
+        const user = auth.user as { role?: string; is_banned?: boolean };
+
+        // Block banned users immediately
+        if (user.is_banned) {
+          return false; // Redirect to login (or could be a specific banned page)
+        }
+      }
 
       if (isOnAdmin) {
         if (isLoggedIn) {
@@ -32,6 +42,19 @@ export const authConfig = {
         }
         return false; // Redirect unauthenticated users to login page
       }
+
+      if (isOnAuth) {
+        if (isLoggedIn) {
+          // Only redirect if user has a role (fully authenticated)
+          // If they don't have a role, they might be in a bad state and need to re-login
+          const user = auth.user as { role?: string };
+          if (user.role) {
+            return Response.redirect(new URL("/", nextUrl));
+          }
+        }
+        return true;
+      }
+
       return true;
     },
   },

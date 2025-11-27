@@ -4,8 +4,12 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 initOpenNextCloudflareForDev();
 
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
   images: {
+    loader: isProd ? "custom" : undefined,
+    loaderFile: isProd ? "./src/lib/image-loader.ts" : undefined,
     remotePatterns: [
       {
         protocol: "https",
@@ -87,6 +91,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "5mb",
     },
   },
+  serverExternalPackages: ["better-sqlite3"],
 };
 
 export default nextConfig;

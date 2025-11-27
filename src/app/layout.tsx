@@ -103,6 +103,7 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { RollbarProvider } from "@/components/analytics/rollbar-provider";
 import { LogflareProvider } from "@/components/analytics/logflare-provider";
+import { WebVitalsProvider } from "@/components/analytics/web-vitals-provider";
 
 export default function RootLayout({
   children,
@@ -131,6 +132,7 @@ export default function RootLayout({
           <CartProvider>
             <RollbarProvider />
             <LogflareProvider />
+            <WebVitalsProvider />
             <Navbar />
             {children}
             <Footer />
