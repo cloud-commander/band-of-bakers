@@ -1,6 +1,6 @@
 import { users } from "@/db/schema";
 import { BaseRepository } from "./base.repository";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -98,6 +98,18 @@ export class UserRepository extends BaseRepository<typeof users> {
     const managers = await this.findByRole("manager");
     const owners = await this.findByRole("owner");
     return [...staff, ...managers, ...owners];
+  }
+
+  /**
+   * Count customers
+   */
+  async countCustomers() {
+    const db = await this.getDatabase();
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(eq(users.role, "customer"));
+    return Number(result[0]?.count || 0);
   }
 }
 

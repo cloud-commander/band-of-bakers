@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { getProducts } from "@/actions/products";
-import { mockProductCategories } from "@/lib/mocks/products";
-import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
+import { getCategories } from "@/actions/categories";
+import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import type { ProductCategory } from "@/lib/repositories/category.repository";
+import type { BakeSaleWithLocation } from "@/lib/repositories/bake-sale.repository";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_PRODUCTS_ITEMS_PER_PAGE;
 
@@ -50,36 +52,46 @@ type Product = {
 
 export default function AdminProductsPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [upcomingBakeSales, setUpcomingBakeSales] = useState<BakeSaleWithLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const categories = mockProductCategories;
-
-  // Fetch products from database
+  // Fetch data
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchData() {
       setLoading(true);
       try {
-        const products = await getProducts();
-        setAllProducts(products);
+        const [productsData, categoriesData, bakeSalesData] = await Promise.all([
+          getProducts(),
+          getCategories(),
+          getUpcomingBakeSales(),
+        ]);
+        setAllProducts(productsData);
+        setCategories(categoriesData);
+        setUpcomingBakeSales(bakeSalesData);
       } catch (error) {
-        console.error("Failed to fetch products:", error);
-        toast.error("Failed to load products");
+        console.error("Failed to fetch data:", error);
+        toast.error("Failed to load data");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchProducts();
+    fetchData();
   }, []);
-
-  // Get upcoming bake sales for bake date display
-  const upcomingBakeSales = mockBakeSalesWithLocation.filter((bs) => bs.is_active);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBakeSale, setSelectedBakeSale] = useState<string>(upcomingBakeSales[0]?.id || "");
+  const [selectedBakeSale, setSelectedBakeSale] = useState<string>("");
+
+  // Update selected bake sale when data loads
+  useEffect(() => {
+    if (upcomingBakeSales.length > 0 && !selectedBakeSale) {
+      setSelectedBakeSale(upcomingBakeSales[0].id);
+    }
+  }, [upcomingBakeSales, selectedBakeSale]);
 
   // Filter products by category and search query
   let products = selectedCategory

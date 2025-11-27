@@ -73,14 +73,19 @@ export async function updateReviewStatus(id: string, status: "pending" | "approv
  */
 export async function getUserReviews(userId: string): Promise<ReviewWithUser[]> {
   const db = await getDb();
+  const { products } = await import("@/db/schema");
   const results = await db
     .select({
       ...reviews,
       user_name: users.name,
       user_avatar: users.avatar_url,
+      product_name: products.name,
+      product_image_url: products.image_url,
+      product_slug: products.slug,
     })
     .from(reviews)
     .leftJoin(users, eq(reviews.user_id, users.id))
+    .leftJoin(products, eq(reviews.product_id, products.id))
     .where(eq(reviews.user_id, userId))
     .orderBy(desc(reviews.created_at));
 

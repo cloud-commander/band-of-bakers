@@ -87,14 +87,27 @@ The project uses Cloudflare D1 (SQLite) with Drizzle ORM.
     pnpm seed --admin-only
     ```
 
+    **Real Products seed** (uses real product data and local images):
+
+    ```bash
+    pnpm seed --real-products
+    ```
+
     **Skip R2 uploads** (faster, uses external image URLs):
 
     ```bash
     pnpm seed --skip-r2
     ```
 
+    **Clear existing data** (wipes DB and R2 before seeding):
+
+    ```bash
+    pnpm seed --clear
+    ```
+
     > [!TIP]
     > The seed script automatically downloads product/category images and uploads them to local R2 storage. This can take a few minutes on first run. Use `--skip-r2` to skip this step during development.
+    > When using `--real-products`, ensure you have the product images in `seed-products/` directory.
 
     > [!IMPORTANT] > **Default Admin Credentials** (when using `--admin-only` or full seed):
     >

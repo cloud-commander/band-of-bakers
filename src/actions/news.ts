@@ -29,6 +29,34 @@ async function checkAdminRole() {
 }
 
 /**
+ * Get all news posts (admin only)
+ */
+export async function getNewsPosts() {
+  try {
+    const userId = await checkAdminRole();
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+    return await newsRepository.findAll();
+  } catch (error) {
+    console.error("Failed to fetch news posts:", error);
+    return [];
+  }
+}
+
+/**
+ * Get published news posts (public)
+ */
+export async function getPublishedNewsPosts() {
+  try {
+    return await newsRepository.findPublished();
+  } catch (error) {
+    console.error("Failed to fetch published news posts:", error);
+    return [];
+  }
+}
+
+/**
  * Create a new news post
  */
 export async function createNewsPost(formData: FormData): Promise<ActionResult<{ id: string }>> {

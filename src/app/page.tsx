@@ -15,15 +15,16 @@ import {
   STORY_SECTION,
   CTA_SECTION,
 } from "@/constants/homepage";
-import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import { mockProductCategories } from "@/lib/mocks/products";
 import { getActiveTestimonials } from "@/actions/testimonials";
+import { getUpcomingBakeSales } from "@/actions/bake-sales";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const categories = mockProductCategories;
   const testimonials = await getActiveTestimonials();
+  const upcomingBakeSales = await getUpcomingBakeSales();
 
   return (
     <>
@@ -165,7 +166,7 @@ export default async function Home() {
             </Heading>
             {/* Upcoming Bake Sales */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {mockBakeSalesWithLocation.slice(0, 3).map((bakeSale, index) => (
+              {upcomingBakeSales.slice(0, 3).map((bakeSale, index) => (
                 <FadeIn key={bakeSale.id} delay={index * 0.1}>
                   <Link href={`/menu?bakeSale=${bakeSale.id}`}>
                     <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">

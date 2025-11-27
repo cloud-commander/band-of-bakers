@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/state/page-header";
-import { mockUsers } from "@/lib/mocks/users";
-import type { User } from "@/lib/validators/user";
+import { getUsers } from "@/actions/users";
+import type { User } from "@/lib/repositories/user.repository";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,26 @@ type SortDirection = "asc" | "desc";
 type BanFilter = "all" | "active" | "banned";
 
 export default function AdminUsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      setLoading(true);
+      try {
+        const data = await getUsers();
+        setUsers(data);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+        toast.error("Failed to load users");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -59,7 +79,7 @@ export default function AdminUsersPage() {
 
   // Filter and sort users
   const filteredAndSortedUsers = useMemo(() => {
-    const filtered = mockUsers.filter((user) => {
+    const filtered = users.filter((user) => {
       const searchLower = debouncedSearchTerm.toLowerCase();
       const matchesSearch =
         user.name.toLowerCase().includes(searchLower) ||
@@ -102,7 +122,7 @@ export default function AdminUsersPage() {
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [debouncedSearchTerm, sortField, sortDirection, banFilter]);
+  }, [debouncedSearchTerm, sortField, sortDirection, banFilter, users]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredAndSortedUsers.length / ITEMS_PER_PAGE);
@@ -156,6 +176,17 @@ export default function AdminUsersPage() {
     setEditDialogOpen(false);
     setSelectedUser(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading users...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -273,11 +304,7 @@ export default function AdminUsersPage() {
                         {user.email_verified ? "Verified" : "Unverified"}
                       </Badge>
                       {user.is_banned && (
-                        <Badge
-                          variant="outline"
-                          className="bg-red-50 text-red-700 border-red-200"
-                          title={user.banned_reason || "No reason provided"}
-                        >
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
                           Banned
                         </Badge>
                       )}

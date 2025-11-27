@@ -2,6 +2,7 @@
 
 import { voucherRepository } from "@/lib/repositories";
 import { validateVoucher } from "@/lib/utils/voucher";
+import { auth } from "@/auth";
 
 export async function validateVoucherCode(code: string, cartTotal: number) {
   try {
@@ -27,5 +28,21 @@ export async function validateVoucherCode(code: string, cartTotal: number) {
   } catch (error) {
     console.error("Failed to validate voucher:", error);
     return { valid: false, error: "Failed to validate voucher" };
+  }
+}
+
+/**
+ * Get all vouchers (admin only)
+ */
+export async function getVouchers() {
+  try {
+    const session = await auth();
+    if (!session?.user?.role || !["owner", "manager", "staff"].includes(session.user.role)) {
+      throw new Error("Unauthorized");
+    }
+    return await voucherRepository.findAll();
+  } catch (error) {
+    console.error("Failed to fetch vouchers:", error);
+    return [];
   }
 }

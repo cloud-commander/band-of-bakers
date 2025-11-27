@@ -923,9 +923,9 @@ export const mockUsers: User[] = [
   },
   {
     id: "user-cust-59",
-    email: "montag@fireman.fahrenheit",
+    email: "mildred@fireman.fahrenheit",
     password_hash: "$2a$10$mockhashedpassword62",
-    name: "Guy Montag",
+    name: "Mildred Montag",
     phone: null,
     role: "customer",
     avatar_url: null,

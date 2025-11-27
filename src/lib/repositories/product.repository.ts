@@ -1,6 +1,6 @@
 import { products, productVariants } from "@/db/schema";
 import { BaseRepository } from "./base.repository";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
@@ -135,6 +135,18 @@ export class ProductRepository extends BaseRepository<typeof products> {
     return allProducts.filter((p: Product) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+  }
+
+  /**
+   * Count active products
+   */
+  async countActive() {
+    const db = await this.getDatabase();
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(products)
+      .where(eq(products.is_active, true));
+    return Number(result[0]?.count || 0);
   }
 }
 

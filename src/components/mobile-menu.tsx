@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,7 +33,12 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close menu when route changes
   useEffect(() => {
@@ -71,7 +77,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
         variant="ghost"
         size="lg"
         onClick={() => setIsOpen(true)}
-        className="relative z-50 h-12 w-12"
+        className="relative z-50 h-12 w-12 [&_svg]:size-7"
         aria-label="Open menu"
       >
         <Menu className="h-7 w-7" />
@@ -82,140 +88,154 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
         )}
       </Button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Drawer */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-background border-l shadow-2xl z-50 flex flex-col h-full"
-              style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <span
-                  className="text-lg font-bold"
-                  style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
-                >
-                  Menu
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
                   onClick={() => setIsOpen(false)}
-                  aria-label="Close menu"
+                />
+
+                {/* Drawer */}
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="fixed inset-y-0 right-0 w-[80%] max-w-sm bg-background border-l shadow-2xl z-[101] flex flex-col h-full"
+                  style={{ backgroundColor: DESIGN_TOKENS.colors.background }}
                 >
-                  <X className="h-6 w-6" />
-                </Button>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
-                {/* Main Navigation */}
-                <nav className="space-y-2">
-                  {menuItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                        pathname === item.href ? "bg-muted font-medium" : "hover:bg-muted/50"
-                      }`}
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <span
+                      className="text-lg font-bold"
+                      style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
                     >
-                      <div className="flex items-center gap-3">
-                        <item.icon className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-lg">{item.label}</span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </Link>
-                  ))}
-                </nav>
+                      Menu
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsOpen(false)}
+                      className="[&_svg]:size-6"
+                      aria-label="Close menu"
+                    >
+                      <X className="h-6 w-6" />
+                    </Button>
+                  </div>
 
-                {/* Cart Link */}
-                <div className="border-t pt-6">
-                  <Link
-                    href="/cart"
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-muted p-2 rounded-full">
-                        <ShoppingCart className="h-5 w-5" />
-                      </div>
-                      <span className="font-medium">Shopping Cart</span>
-                    </div>
-                    {cartItemCount > 0 && (
-                      <Badge className="text-white font-bold bg-orange-600">
-                        {cartItemCount} items
-                      </Badge>
-                    )}
-                  </Link>
-                </div>
-
-                {/* User Section */}
-                <div className="border-t pt-6">
-                  {isLoggedIn ? (
-                    <div className="space-y-2">
-                      <p className="px-3 text-sm font-medium text-muted-foreground mb-2">
-                        My Account
-                      </p>
-                      {userItems.map((item) => (
+                  {/* Content */}
+                  <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
+                    {/* Main Navigation */}
+                    <nav className="space-y-2">
+                      {menuItems.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                          className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                            pathname === item.href ? "bg-muted font-medium" : "hover:bg-muted/50"
+                          }`}
+                          onClick={() => setIsOpen(false)}
                         >
-                          <item.icon className="h-5 w-5 text-muted-foreground" />
-                          <span>{item.label}</span>
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-5 w-5 text-muted-foreground" />
+                            <span className="text-lg">{item.label}</span>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </Link>
                       ))}
-                      <button
-                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left"
-                        onClick={() => signOut()}
-                      >
-                        <LogOut className="h-5 w-5" />
-                        <span>Log Out</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Button asChild className="w-full justify-center" size="lg">
-                        <Link href="/auth/login">Log In</Link>
-                      </Button>
-                      <p className="text-center text-sm text-muted-foreground">
-                        Don&apos;t have an account?{" "}
-                        <Link href="/auth/signup" className="underline hover:text-foreground">
-                          Sign up
-                        </Link>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    </nav>
 
-              {/* Footer */}
-              <div className="p-4 border-t bg-muted/20">
-                <p className="text-xs text-center text-muted-foreground">
-                  {BUSINESS_INFO.phone}
-                  <br />
-                  {BUSINESS_INFO.email}
-                </p>
-              </div>
-            </motion.div>
-          </>
+                    {/* Cart Link */}
+                    <div className="border-t pt-6">
+                      <Link
+                        href="/cart"
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="bg-muted p-2 rounded-full">
+                            <ShoppingCart className="h-5 w-5" />
+                          </div>
+                          <span className="font-medium">Shopping Cart</span>
+                        </div>
+                        {cartItemCount > 0 && (
+                          <Badge className="text-white font-bold bg-orange-600">
+                            {cartItemCount} items
+                          </Badge>
+                        )}
+                      </Link>
+                    </div>
+
+                    {/* User Section */}
+                    <div className="border-t pt-6">
+                      {isLoggedIn ? (
+                        <div className="space-y-2">
+                          <p className="px-3 text-sm font-medium text-muted-foreground mb-2">
+                            My Account
+                          </p>
+                          {userItems.map((item) => (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              <item.icon className="h-5 w-5 text-muted-foreground" />
+                              <span>{item.label}</span>
+                            </Link>
+                          ))}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left"
+                            onClick={() => signOut()}
+                          >
+                            <LogOut className="h-5 w-5" />
+                            <span>Log Out</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Button asChild className="w-full justify-center" size="lg">
+                            <Link href="/auth/login" onClick={() => setIsOpen(false)}>
+                              Log In
+                            </Link>
+                          </Button>
+                          <p className="text-center text-sm text-muted-foreground">
+                            Don&apos;t have an account?{" "}
+                            <Link
+                              href="/auth/signup"
+                              className="underline hover:text-foreground"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              Sign up
+                            </Link>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="p-4 border-t bg-muted/20">
+                    <p className="text-xs text-center text-muted-foreground">
+                      {BUSINESS_INFO.phone}
+                      <br />
+                      {BUSINESS_INFO.email}
+                    </p>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

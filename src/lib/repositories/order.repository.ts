@@ -1,6 +1,6 @@
 import { BaseRepository } from "./base.repository";
 import { orders, orderItems, type InsertOrder, type InsertOrderItem } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export class OrderRepository extends BaseRepository<typeof orders> {
   constructor() {
@@ -99,6 +99,38 @@ export class OrderRepository extends BaseRepository<typeof orders> {
             location: true,
           },
         },
+      },
+    });
+  }
+
+  /**
+   * Count total orders
+   */
+  async count() {
+    const db = await this.getDatabase();
+    const result = await db.select({ count: sql<number>`count(*)` }).from(orders);
+    return Number(result[0]?.count || 0);
+  }
+
+  /**
+   * Sum total revenue
+   */
+  async sumTotal() {
+    const db = await this.getDatabase();
+    const result = await db.select({ total: sql<number>`sum(${orders.total})` }).from(orders);
+    return Number(result[0]?.total || 0);
+  }
+
+  /**
+   * Find recent orders with user
+   */
+  async findRecent(limit: number) {
+    const db = await this.getDatabase();
+    return await db.query.orders.findMany({
+      limit,
+      orderBy: desc(orders.created_at),
+      with: {
+        user: true,
       },
     });
   }

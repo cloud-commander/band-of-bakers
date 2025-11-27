@@ -16,7 +16,6 @@ import { Heading } from "@/components/ui/heading";
 import { Star, Pencil, Trash2, Upload, Quote } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { mockProducts } from "@/lib/mocks/products";
 import { updateProfile } from "@/actions/profile";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -343,15 +342,14 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
                 ) : (
                   <div className="space-y-4">
                     {initialReviews.map((review) => {
-                      const product = mockProducts.find((p) => p.id === review.product_id);
                       return (
                         <div key={review.id} className="border rounded-lg p-4">
                           <div className="flex items-start gap-4">
-                            {product?.image_url && (
+                            {review.product_image_url && (
                               <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0">
                                 <Image
-                                  src={product.image_url}
-                                  alt={product.name}
+                                  src={review.product_image_url}
+                                  alt={review.product_name || "Product"}
                                   fill
                                   className="object-cover"
                                 />
@@ -361,7 +359,7 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
                               <div className="flex items-start justify-between mb-2">
                                 <div>
                                   <p className="font-medium">
-                                    {product?.name || "Unknown Product"}
+                                    {review.product_name || "Unknown Product"}
                                   </p>
                                   <div className="flex items-center gap-1 mt-1">
                                     {Array.from({ length: review.rating }).map((_, i) => (

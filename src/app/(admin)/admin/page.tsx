@@ -1,8 +1,5 @@
 import { PageHeader } from "@/components/state/page-header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { mockOrders } from "@/lib/mocks/orders";
-import { mockProducts } from "@/lib/mocks/products";
-import { mockUsers } from "@/lib/mocks/users";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
@@ -14,25 +11,18 @@ import { Heading } from "@/components/ui/heading";
 import { KPICard } from "@/components/admin/kpi-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Metadata } from "next";
+import { getDashboardStats } from "@/actions/dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard | Band of Bakers Admin",
   description: "Overview of store performance, orders, and analytics.",
 };
 
-export default function AdminDashboard() {
-  const totalOrders = mockOrders.length;
-  const totalRevenue = mockOrders.reduce((sum, order) => sum + order.total, 0);
-  const totalProducts = mockProducts.filter((p) => p.is_active).length;
-  const totalUsers = mockUsers.filter((u) => u.role === "customer").length;
+export const dynamic = "force-dynamic";
 
-  // Calculate trends (mock data - in production, compare with previous period)
-  const ordersTrend = 12.5;
-  const revenueTrend = 8.3;
-  const productsTrend = -2.1;
-  const customersTrend = 15.7;
-
-  const recentOrders = mockOrders.slice(0, 5);
+export default async function AdminDashboard() {
+  const { totalOrders, totalRevenue, totalProducts, totalUsers, recentOrders, trends } =
+    await getDashboardStats();
 
   return (
     <div>
@@ -49,7 +39,7 @@ export default function AdminDashboard() {
             value={totalOrders}
             icon="ShoppingCart"
             variant="wheat"
-            trend={{ value: ordersTrend, label: "vs last month" }}
+            trend={{ value: trends.orders, label: "vs last month" }}
           />
         </Link>
         <Link href="/admin/orders">
@@ -58,7 +48,7 @@ export default function AdminDashboard() {
             value={`£${totalRevenue.toFixed(2)}`}
             icon="ArrowUpRight"
             variant="award"
-            trend={{ value: revenueTrend, label: "vs last month" }}
+            trend={{ value: trends.revenue, label: "vs last month" }}
           />
         </Link>
         <Link href="/admin/products">
@@ -67,7 +57,7 @@ export default function AdminDashboard() {
             value={totalProducts}
             icon="Package"
             variant="leaf"
-            trend={{ value: productsTrend, label: "vs last month" }}
+            trend={{ value: trends.products, label: "vs last month" }}
           />
         </Link>
         <Link href="/admin/users">
@@ -76,7 +66,7 @@ export default function AdminDashboard() {
             value={totalUsers}
             icon="Users"
             variant="time"
-            trend={{ value: customersTrend, label: "vs last month" }}
+            trend={{ value: trends.customers, label: "vs last month" }}
           />
         </Link>
       </div>
@@ -106,8 +96,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {recentOrders.map((order) => {
-                      const user = mockUsers.find((u) => u.id === order.user_id);
+                    {recentOrders.map((order: any) => {
                       return (
                         <Link
                           key={order.id}
@@ -123,7 +112,7 @@ export default function AdminDashboard() {
                                 Order #{order.id.slice(0, 8)}
                               </p>
                               <p className="text-sm font-medium text-stone-600">
-                                {user?.name || "Unknown Customer"}
+                                {order.user?.name || "Unknown Customer"}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {new Date(order.created_at).toLocaleDateString("en-GB", {

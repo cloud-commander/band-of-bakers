@@ -5,6 +5,9 @@ import { eq, desc, and, sql } from "drizzle-orm";
 export type ReviewWithUser = Review & {
   user_name: string;
   user_avatar: string | null;
+  product_name?: string;
+  product_image_url?: string | null;
+  product_slug?: string;
 };
 
 export class ReviewRepository extends BaseRepository<typeof reviews> {

@@ -21,6 +21,24 @@ import { mockNewsPosts } from "@/lib/mocks/news";
 import { mockOrders, mockOrderItems } from "@/lib/mocks/orders";
 import { mockVouchers } from "@/lib/mocks/vouchers";
 
+// Import real products data (used when --real-products flag is set)
+import {
+  realProductCategories,
+  realProducts,
+  realProductVariants,
+  getProductImageFiles,
+} from "@/lib/real-products-data";
+
+// Import real products mock data (orders, reviews, testimonials)
+import {
+  realPastBakeSales,
+  realFutureBakeSales,
+  realOrders,
+  realOrderItems,
+  realReviews,
+  realTestimonials,
+} from "@/lib/real-products-mock-data";
+
 // Configuration
 const DB_NAME = "bandofbakers-db";
 const R2_BUCKET = "bandofbakers-assets";
@@ -30,11 +48,13 @@ const TEMP_DIR = path.join(process.cwd(), "temp_seed");
 const args = process.argv.slice(2);
 const isAdminOnly = args.includes("--admin-only");
 const skipR2 = args.includes("--skip-r2");
+const useRealProducts = args.includes("--real-products");
 // const forceR2 = args.includes("--force-r2"); // Unused for now
 
 async function main() {
   console.log("🌱 Starting seed process...");
   console.log(`   Mode: ${isAdminOnly ? "Admin Only" : "Full Seed"}`);
+  console.log(`   Products: ${useRealProducts ? "Real Products" : "Mock Products"}`);
   console.log(`   R2: ${skipR2 ? "Skipping" : "Enabled"}`);
 
   // Create temp directory
@@ -129,14 +149,13 @@ async function main() {
     }
 
     if (!isAdminOnly) {
-      // Categories
-      for (const cat of mockProductCategories) {
-        // Handle image URL - if R2 is enabled, we'll update it later or assume standard path
-        // For now, let's use the mock URL, but if R2 is enabled, we might want to change it.
-        // Let's assume we keep the mock URL structure for now or update it if we download it.
-        // Actually, let's standardize R2 paths: /images/categories/[slug].jpg
-        // const imageUrl = skipR2 ? cat.image : `/images/categories/${cat.slug}.jpg`;
+      // Select which product data to use
+      const productCategories = useRealProducts ? realProductCategories : mockProductCategories;
+      const products = useRealProducts ? realProducts : mockProducts;
+      const productVariants = useRealProducts ? realProductVariants : mockProductVariants;
 
+      // Categories
+      for (const cat of productCategories) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO product_categories (id, name, slug, description, sort_order, created_at, updated_at) VALUES ('${
             cat.id
@@ -148,7 +167,7 @@ async function main() {
       }
 
       // Products
-      for (const prod of mockProducts) {
+      for (const prod of products) {
         const imageUrl = skipR2
           ? prod.image_url
           : prod.image_url
@@ -168,8 +187,8 @@ async function main() {
       }
 
       // Variants
-      const validProductIds = new Set(mockProducts.map((p) => p.id));
-      const validVariants = mockProductVariants.filter((v) => validProductIds.has(v.product_id));
+      const validProductIds = new Set(products.map((p) => p.id));
+      const validVariants = productVariants.filter((v) => validProductIds.has(v.product_id));
 
       for (const variant of validVariants) {
         sqlStatements.push(
@@ -196,8 +215,12 @@ async function main() {
         );
       }
 
-      // Bake Sales
-      for (const sale of mockBakeSales) {
+      // Bake Sales - use real or mock data based on flag
+      const bakeSalesToSeed = useRealProducts
+        ? [...realPastBakeSales, ...realFutureBakeSales]
+        : [...mockBakeSales, ...mockPastBakeSales];
+
+      for (const sale of bakeSalesToSeed) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO bake_sales (id, date, location_id, cutoff_datetime, is_active, created_at, updated_at) VALUES ('${
             sale.id
@@ -207,17 +230,7 @@ async function main() {
         );
       }
 
-      for (const sale of mockPastBakeSales) {
-        sqlStatements.push(
-          `INSERT OR REPLACE INTO bake_sales (id, date, location_id, cutoff_datetime, is_active, created_at, updated_at) VALUES ('${
-            sale.id
-          }', '${sale.date}', '${sale.location_id}', '${sale.cutoff_datetime}', ${
-            sale.is_active ? 1 : 0
-          }, '${sale.created_at}', '${sale.updated_at}');`
-        );
-      }
-
-      // News Posts
+      // News Posts (always use mock news posts)
       for (const post of mockNewsPosts) {
         const imageUrl = skipR2
           ? post.image_url
@@ -238,7 +251,7 @@ async function main() {
         );
       }
 
-      // Vouchers
+      // Vouchers (always use mock vouchers)
       for (const voucher of mockVouchers) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO vouchers (id, code, type, value, min_order_value, max_uses, current_uses, max_uses_per_customer, valid_from, valid_until, is_active, created_at, updated_at) VALUES ('${
@@ -251,8 +264,11 @@ async function main() {
         );
       }
 
-      // Orders
-      for (const order of mockOrders) {
+      // Orders - use real or mock data based on flag
+      const ordersToSeed = useRealProducts ? realOrders : mockOrders;
+      const orderItemsToSeed = useRealProducts ? realOrderItems : mockOrderItems;
+
+      for (const order of ordersToSeed) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO orders (id, user_id, bake_sale_id, status, fulfillment_method, payment_method, payment_status, payment_intent_id, subtotal, delivery_fee, voucher_discount, total, shipping_address_line1, shipping_address_line2, shipping_city, shipping_postcode, billing_address_line1, billing_address_line2, billing_city, billing_postcode, voucher_id, notes, created_at, updated_at) VALUES ('${
             order.id
@@ -283,7 +299,7 @@ async function main() {
       }
 
       // Order Items
-      for (const item of mockOrderItems) {
+      for (const item of orderItemsToSeed) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO order_items (id, order_id, product_id, product_variant_id, quantity, unit_price, total_price, is_available, unavailable_reason, created_at, updated_at) VALUES ('${
             item.id
@@ -296,23 +312,236 @@ async function main() {
           }, '${item.created_at}', '${item.updated_at}');`
         );
       }
+
+      // Reviews - use real or empty based on flag (mock reviews don't exist)
+      if (useRealProducts) {
+        for (const review of realReviews) {
+          sqlStatements.push(
+            `INSERT OR REPLACE INTO reviews (id, product_id, user_id, rating, title, comment, verified_purchase, helpful_count, status, created_at, updated_at) VALUES ('${
+              review.id
+            }', '${review.product_id}', '${review.user_id}', ${review.rating}, ${
+              review.title ? `'${review.title.replace(/'/g, "''")}'` : "NULL"
+            }, '${review.comment.replace(/'/g, "''")}', ${review.verified_purchase ? 1 : 0}, ${
+              review.helpful_count
+            }, '${review.status}', '${review.created_at}', '${review.updated_at}');`
+          );
+        }
+      }
+
+      // Testimonials - use real or empty based on flag
+      if (useRealProducts) {
+        for (const testimonial of realTestimonials) {
+          sqlStatements.push(
+            `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, user_id, is_active, created_at, updated_at) VALUES ('${
+              testimonial.id
+            }', '${testimonial.name.replace(/'/g, "''")}', ${
+              testimonial.role ? `'${testimonial.role.replace(/'/g, "''")}'` : "NULL"
+            }, '${testimonial.content.replace(/'/g, "''")}', ${testimonial.rating}, ${
+              testimonial.avatar_url ? `'${testimonial.avatar_url}'` : "NULL"
+            }, ${testimonial.user_id ? `'${testimonial.user_id}'` : "NULL"}, ${
+              testimonial.is_active ? 1 : 0
+            }, '${testimonial.created_at}', '${testimonial.updated_at}');`
+          );
+        }
+      }
     }
 
-    const sqlFile = path.join(TEMP_DIR, "seed.sql");
-    fs.writeFileSync(sqlFile, sqlStatements.join("\n"));
-    console.log(`   SQL generated at ${sqlFile}`);
+    // Split SQL into 3 phases to avoid FK constraint issues with large files
+    console.log("\n💾 Executing SQL in 3 phases...");
 
-    // 2. Execute SQL
-    console.log("\n💾 Executing SQL against D1 (local)...");
+    // Phase 1: Base data (Users, Locations, Vouchers, Images, News)
+    const phase1Statements: string[] = [];
+    phase1Statements.push("DELETE FROM order_items;");
+    phase1Statements.push("DELETE FROM orders;");
+    phase1Statements.push("DELETE FROM reviews;");
+    phase1Statements.push("DELETE FROM testimonials;");
+    phase1Statements.push("DELETE FROM news_posts;");
+    phase1Statements.push("DELETE FROM product_variants;");
+    phase1Statements.push("DELETE FROM products;");
+    phase1Statements.push("DELETE FROM product_categories;");
+    phase1Statements.push("DELETE FROM bake_sales;");
+    phase1Statements.push("DELETE FROM locations;");
+    phase1Statements.push("DELETE FROM vouchers;");
+    phase1Statements.push("DELETE FROM users;");
+    phase1Statements.push("DELETE FROM images;");
+
+    // Add users, locations, vouchers, news, images
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO users"))
+    );
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO locations"))
+    );
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO vouchers"))
+    );
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO news_posts"))
+    );
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO images"))
+    );
+
+    const phase1File = path.join(TEMP_DIR, "seed_phase1.sql");
+    fs.writeFileSync(phase1File, phase1Statements.join("\n"));
+    console.log("   Phase 1: Base data (users, locations, vouchers, news)");
+
     try {
-      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${sqlFile}`, {
+      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase1File}`, {
         stdio: "pipe",
         encoding: "utf-8",
       });
-    } catch (e: any) {
-      console.error("Wrangler Error Output:");
-      console.error(e.stdout);
-      console.error(e.stderr);
+      console.log("   ✅ Phase 1 complete");
+    } catch (e: unknown) {
+      console.error("\n❌ Phase 1 failed:");
+      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+        console.error(e.stdout);
+        console.error(e.stderr);
+      }
+      throw e;
+    }
+
+    // Phase 2: Products (Categories, Products, Variants)
+    const phase2Statements: string[] = [];
+    phase2Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO product_categories"))
+    );
+    phase2Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO products ("))
+    );
+    phase2Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO product_variants"))
+    );
+
+    const phase2File = path.join(TEMP_DIR, "seed_phase2.sql");
+    fs.writeFileSync(phase2File, phase2Statements.join("\n"));
+    console.log("   Phase 2: Products (categories, products, variants)");
+
+    try {
+      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase2File}`, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+      console.log("   ✅ Phase 2 complete");
+    } catch (e: unknown) {
+      console.error("\n❌ Phase 2 failed:");
+      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+        console.error(e.stdout);
+        console.error(e.stderr);
+      }
+      throw e;
+    }
+
+    // Phase 3a: Bake Sales
+    const phase3aStatements: string[] = [];
+    phase3aStatements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO bake_sales"))
+    );
+
+    const phase3aFile = path.join(TEMP_DIR, "seed_phase3a.sql");
+    fs.writeFileSync(phase3aFile, phase3aStatements.join("\n"));
+    console.log("   Phase 3a: Bake sales");
+
+    try {
+      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3aFile}`, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+      console.log("   ✅ Phase 3a complete");
+    } catch (e: unknown) {
+      console.error("\n❌ Phase 3a failed:");
+      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+        console.error(e.stdout);
+        console.error(e.stderr);
+      }
+      throw e;
+    }
+
+    // Phase 3b: Orders (split into batches to avoid FK constraints)
+    const allOrderStatements = sqlStatements.filter((s) =>
+      s.includes("INSERT OR REPLACE INTO orders (")
+    );
+    const BATCH_SIZE = 30;
+    const orderBatches = [];
+
+    for (let i = 0; i < allOrderStatements.length; i += BATCH_SIZE) {
+      orderBatches.push(allOrderStatements.slice(i, i + BATCH_SIZE));
+    }
+
+    console.log(`   Phase 3b: Orders (${orderBatches.length} batches of ~${BATCH_SIZE})`);
+
+    for (let batchIndex = 0; batchIndex < orderBatches.length; batchIndex++) {
+      const batchFile = path.join(TEMP_DIR, `seed_phase3b_batch${batchIndex}.sql`);
+      fs.writeFileSync(batchFile, orderBatches[batchIndex].join("\n"));
+
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${batchFile}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        process.stdout.write(".");
+      } catch (e: unknown) {
+        console.error(`\n❌ Phase 3b batch ${batchIndex + 1} failed:`);
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error(e.stdout);
+          console.error(e.stderr);
+        }
+        throw e;
+      }
+    }
+    console.log(" ✅ Phase 3b complete");
+
+    // Phase 3c: Order Items
+    const phase3cStatements: string[] = [];
+    phase3cStatements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO order_items"))
+    );
+
+    const phase3cFile = path.join(TEMP_DIR, "seed_phase3c.sql");
+    fs.writeFileSync(phase3cFile, phase3cStatements.join("\n"));
+    console.log("   Phase 3c: Order items");
+
+    try {
+      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3cFile}`, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+      console.log("   ✅ Phase 3c complete");
+    } catch (e: unknown) {
+      console.error("\n❌ Phase 3c failed:");
+      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+        console.error(e.stdout);
+        console.error(e.stderr);
+      }
+      throw e;
+    }
+
+    // Phase 3d: Reviews and Testimonials
+    const phase3dStatements: string[] = [];
+    phase3dStatements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO reviews"))
+    );
+    phase3dStatements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO testimonials"))
+    );
+
+    const phase3dFile = path.join(TEMP_DIR, "seed_phase3d.sql");
+    fs.writeFileSync(phase3dFile, phase3dStatements.join("\n"));
+    console.log("   Phase 3d: Reviews and testimonials");
+
+    try {
+      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3dFile}`, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+      console.log("   ✅ Phase 3d complete");
+      console.log("\n✅ All phases executed successfully!");
+    } catch (e: unknown) {
+      console.error("\n❌ Phase 3d failed:");
+      if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+        console.error(e.stdout);
+        console.error(e.stderr);
+      }
       throw e;
     }
 
@@ -362,7 +591,7 @@ async function main() {
               );
               return;
             }
-          } catch (error) {
+          } catch {
             // Image doesn't exist, continue with upload
           }
         }
@@ -453,29 +682,133 @@ async function main() {
         }
       };
 
-      // Categories
-      for (const cat of mockProductCategories) {
-        if (cat.image) {
-          await processImage(cat.image, `images/categories/${cat.slug}.jpg`, "category", [
-            "category",
-            cat.slug,
-          ]);
+      // Helper to process local images from seed-products/ directory
+      const processLocalImage = async (
+        localFilePath: string,
+        r2Path: string,
+        category: string,
+        tags: string[] = []
+      ) => {
+        const seedProductsDir = path.join(process.cwd(), "seed-products");
+        const fullLocalPath = path.join(seedProductsDir, localFilePath);
+
+        if (!fs.existsSync(seedProductsDir)) {
+          console.warn(`   ⚠️  Seed products directory not found: ${seedProductsDir}`);
+          return;
+        }
+
+        if (!fs.existsSync(fullLocalPath)) {
+          console.warn(`   ⚠️  Local image not found: ${localFilePath}`);
+          return;
+        }
+
+        let size = 0;
+        const filename = path.basename(r2Path);
+        const id = `img_${path.basename(r2Path, path.extname(r2Path))}`;
+
+        // Check if image already exists in R2 (unless overwriting)
+        const shouldOverwrite = args.includes("--overwrite") || args.includes("--clear");
+
+        if (!shouldOverwrite) {
+          try {
+            const checkResult = execSync(
+              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --local`,
+              { stdio: "pipe" }
+            );
+            if (checkResult) {
+              console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping upload...`);
+              return;
+            }
+          } catch {
+            // Image doesn't exist, continue with upload
+          }
+        }
+
+        try {
+          console.log(`   Processing local image: ${localFilePath}...`);
+
+          // Get file stats directly from source
+          const stats = fs.statSync(fullLocalPath);
+          size = stats.size;
+
+          // Upload to R2 directly from source (skipping optimization as requested)
+          console.log(`   Uploading to ${r2Path}...`);
+          execSync(
+            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --local --file=${fullLocalPath}`,
+            {
+              stdio: "ignore",
+            }
+          );
+
+          // Add to SQL for images table
+          sqlStatements.push(
+            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+              tags
+            )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+          );
+        } catch (uploadError) {
+          console.error(`   ❌ Failed to process/upload local image:`, uploadError);
+        }
+      };
+
+      // Categories (only process for mock products, real products don't have category images yet)
+      if (!useRealProducts) {
+        for (const cat of mockProductCategories) {
+          if (cat.image) {
+            await processImage(cat.image, `images/categories/${cat.slug}.jpg`, "category", [
+              "category",
+              cat.slug,
+            ]);
+          }
         }
       }
 
       // Products
-      for (const prod of mockProducts) {
-        if (prod.image_url) {
-          await processImage(
-            prod.image_url,
-            `images/products/${prod.category_id}/${prod.slug}.jpg`,
+      if (useRealProducts) {
+        // Use local images from seed-products/ directory
+        const categorySlugMap = new Map(realProductCategories.map((c) => [c.id, c.slug]));
+
+        for (const prod of realProducts) {
+          const categorySlug = categorySlugMap.get(prod.category_id) || "uncategorized";
+          const imageFiles = getProductImageFiles(prod.slug);
+
+          // Process all three image types: card, detail, thumbnail
+          await processLocalImage(
+            imageFiles.card,
+            `images/products/${categorySlug}/${imageFiles.card}`,
             "product",
-            ["product", prod.category_id, prod.slug]
+            ["product", prod.category_id, prod.slug, "card"]
           );
+
+          await processLocalImage(
+            imageFiles.detail,
+            `images/products/${categorySlug}/${imageFiles.detail}`,
+            "product",
+            ["product", prod.category_id, prod.slug, "detail"]
+          );
+
+          await processLocalImage(
+            imageFiles.thumbnail,
+            `images/products/${categorySlug}/${imageFiles.thumbnail}`,
+            "product",
+            ["product", prod.category_id, prod.slug, "thumbnail"]
+          );
+        }
+      } else {
+        // Use mock products with URL downloads
+        for (const prod of mockProducts) {
+          if (prod.image_url) {
+            await processImage(
+              prod.image_url,
+              `images/products/${prod.category_id}/${prod.slug}.jpg`,
+              "product",
+              ["product", prod.category_id, prod.slug]
+            );
+          }
         }
       }
 
-      // News
+      // News (always use mock news posts)
       for (const post of mockNewsPosts) {
         if (post.image_url) {
           await processImage(post.image_url, `images/news/${post.slug}.jpg`, "news", [
