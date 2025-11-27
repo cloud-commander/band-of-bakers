@@ -23,6 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { createTestimonial } from "@/actions/testimonials";
 
 // Form validation schema (simplified for admin form - we'll add user_id server-side)
 const testimonialFormSchema = z.object({
@@ -60,21 +61,23 @@ export default function NewTestimonialPage() {
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = async (_data: TestimonialForm) => {
+  const onSubmit = async (data: TestimonialForm) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/testimonials", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     user_id: currentUser.id,
-      //     content: data.content,
-      //     rating: data.rating,
-      //   }),
-      // });
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("role", data.role);
+      formData.append("content", data.content);
+      formData.append("rating", data.rating.toString());
+      formData.append("status", "active"); // Default to active for now, or add field
+      if (data.avatar) {
+        formData.append("avatar", data.avatar);
+      }
 
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
+      const result = await createTestimonial(formData);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       toast.success("Testimonial created successfully!");
       router.push("/admin/testimonials");

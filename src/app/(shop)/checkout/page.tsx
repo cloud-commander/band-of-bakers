@@ -14,6 +14,7 @@ import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { ArrowRight, CreditCard, ShoppingBag, Truck } from "lucide-react";
 import { SHIPPING_COST, MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { createOrder } from "@/actions/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -76,27 +77,27 @@ export default function CheckoutPage() {
 
   const totalToPay = cartTotal + SHIPPING_COST;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = async (_data: CheckoutDeliveryForm) => {
+  const onSubmit = async (data: CheckoutDeliveryForm) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/orders", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     ...data,
-      //     items: items.map(item => ({
-      //       product_id: item.productId,
-      //       variant_id: item.variantId,
-      //       quantity: item.quantity,
-      //     })),
-      //     fulfillment_method: "delivery",
-      //     payment_method: "stripe",
-      //   }),
-      // });
+      const orderData = {
+        ...data,
+        fulfillment_method: "delivery" as const,
+        payment_method: "stripe",
+        items: items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      };
+
+      const result = await createOrder(orderData);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS * 2));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       clearCart();
       toast.success("Payment successful! Order placed.");

@@ -13,6 +13,7 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { createBakeSale } from "@/actions/bake-sales";
 
 // Simplified form schema for demo
 // In production, use insertBakeSaleSchema and location_id from database
@@ -81,14 +82,21 @@ export default function NewBakeSalePage() {
 
   const onSubmit = async (data: BakeSaleForm) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/bake-sales", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
+      const formData = new FormData();
+      formData.append("date", data.date);
+      formData.append("location", data.location);
+      formData.append("address", data.address);
+      formData.append("cutoff_datetime", data.cutoff_datetime);
+      formData.append("is_active", data.is_active.toString());
+      if (data.notes) {
+        formData.append("notes", data.notes);
+      }
 
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
+      const result = await createBakeSale(formData);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       toast.success("Bake sale created successfully!", {
         description: `${data.location} on ${new Date(data.date).toLocaleDateString("en-GB")}`,

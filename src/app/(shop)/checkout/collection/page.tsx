@@ -25,6 +25,7 @@ import {
   Banknote,
 } from "lucide-react";
 import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { createOrder } from "@/actions/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -89,26 +90,31 @@ export default function CheckoutCollectionPage() {
     toast.success("Details filled from profile");
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = async (_data: CheckoutCollectionForm) => {
+  const onSubmit = async (data: CheckoutCollectionForm) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/orders", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     ...data,
-      //     items: items.map(item => ({
-      //       product_id: item.productId,
-      //       variant_id: item.variantId,
-      //       quantity: item.quantity,
-      //     })),
-      //     fulfillment_method: "collection",
-      //     payment_method: "payment_on_collection",
-      //   }),
-      // });
+      // Get bake sale ID from first item (assuming single bake sale for now)
+      const bakeSaleId = items[0]?.bakeSaleId;
 
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS * 1.5));
+      const orderData = {
+        ...data,
+        fulfillment_method: "collection" as const,
+        payment_method: "payment_on_collection",
+        bake_sale_id: bakeSaleId,
+        notes: data.note,
+        items: items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      };
+
+      const result = await createOrder(orderData);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       clearCart();
       toast.success("Order placed successfully!");

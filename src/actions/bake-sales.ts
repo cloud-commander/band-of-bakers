@@ -9,9 +9,11 @@ import { type BakeSale } from "@/db/schema";
 // Validation schema
 const bakeSaleSchema = z.object({
   date: z.string().min(1, "Date is required"),
-  location_id: z.string().min(1, "Location is required"),
+  location: z.string().min(1, "Location name is required"),
+  address: z.string().min(1, "Address is required"),
   cutoff_datetime: z.string().min(1, "Cutoff time is required"),
   is_active: z.boolean().default(true),
+  notes: z.string().optional(),
 });
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
@@ -58,7 +60,7 @@ export async function getBakeSaleById(id: string) {
 /**
  * Create a new bake sale
  */
-export async function createBakeSale(formData: FormData): Promise<ActionResult<BakeSale>> {
+export async function createBakeSale(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     // 1. Auth check
     const session = await auth();
@@ -68,10 +70,12 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<B
 
     // 2. Validation
     const rawData = {
-      date: formData.get("date"),
-      location_id: formData.get("location_id"),
-      cutoff_datetime: formData.get("cutoff_datetime"),
+      date: formData.get("date") as string,
+      location: formData.get("location") as string,
+      address: formData.get("address") as string,
+      cutoff_datetime: formData.get("cutoff_datetime") as string,
       is_active: formData.get("is_active") === "true",
+      notes: formData.get("notes") as string,
     };
 
     const validated = bakeSaleSchema.safeParse(rawData);
@@ -79,18 +83,37 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<B
       return { success: false, error: validated.error.issues[0].message };
     }
 
-    // 3. Create record
+    // 3. Find or create location
+    // We need to import locationRepository dynamically or at top level if not circular
+    const { locationRepository } = await import("@/lib/repositories/location.repository");
+    let location = await locationRepository.findByName(validated.data.location);
+
+    if (!location) {
+      location = await locationRepository.create({
+        id: crypto.randomUUID(),
+        name: validated.data.location,
+        address_line1: validated.data.address,
+        city: "Unknown", // Default
+        postcode: "Unknown", // Default
+        is_active: true,
+      });
+    }
+
+    // 4. Create record
     const id = crypto.randomUUID();
-    const bakeSale = (await bakeSaleRepository.create({
+    const bakeSale = await bakeSaleRepository.create({
       id,
-      ...validated.data,
-    })) as BakeSale;
+      date: validated.data.date,
+      location_id: location.id,
+      cutoff_datetime: validated.data.cutoff_datetime,
+      is_active: validated.data.is_active,
+    });
 
-    // 4. Revalidate
+    // 5. Revalidate
     revalidatePath("/admin/bake-sales");
-    revalidatePath("/"); // Homepage usually shows upcoming bake sales
+    revalidatePath("/");
 
-    return { success: true, data: bakeSale };
+    return { success: true, data: { id: bakeSale.id } };
   } catch (error) {
     console.error("Create bake sale error:", error);
     return { success: false, error: "Failed to create bake sale" };

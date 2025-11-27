@@ -29,7 +29,7 @@ export function Footer() {
           {/* Logo */}
           <div className="flex justify-center">
             <Image
-              src="/images_logos/bandofbakers-256.png"
+              src="/images/logos/bandofbakers-256.png"
               alt="Band of Bakers Logo"
               width={120}
               height={120}

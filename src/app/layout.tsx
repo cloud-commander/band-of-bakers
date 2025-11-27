@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/logo.ico",
-    apple: "/images_logos/bandofbakers-256.png",
+    apple: "/images/logos/bandofbakers-256.png",
   },
   openGraph: {
     type: "website",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
       "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
     images: [
       {
-        url: "/images_logos/bandofbakers-256.png",
+        url: "/images/logos/bandofbakers-256.png",
         width: 1200,
         height: 630,
         alt: "Band of Bakers - Artisan Bakery",
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     title: "Band of Bakers | Artisan Bakery in Shropshire",
     description:
       "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
-    images: ["/images_logos/bandofbakers-256.png"],
+    images: ["/images/logos/bandofbakers-256.png"],
     creator: "@bandofbakers",
   },
   robots: {

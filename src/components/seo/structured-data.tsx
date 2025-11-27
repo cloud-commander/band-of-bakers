@@ -7,8 +7,8 @@ export function StructuredData() {
     description:
       "Artisan bakery in Shropshire specializing in fresh-baked bread, pastries, and baked goods",
     url: "https://bandofbakers.co.uk",
-    logo: "https://bandofbakers.co.uk/images_logos/bandofbakers-256.png",
-    image: "https://bandofbakers.co.uk/images_logos/bandofbakers-256.png",
+    logo: "https://bandofbakers.co.uk/images/logos/bandofbakers-256.png",
+    image: "https://bandofbakers.co.uk/images/logos/bandofbakers-256.png",
     telephone: "+44-1234-567890",
     email: "hello@bandofbakers.co.uk",
     address: {

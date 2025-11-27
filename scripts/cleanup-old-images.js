@@ -27,12 +27,18 @@ const FILES_TO_DELETE = [
   'Bandofbakers-logo-removebg-preview.png',
   'mike.webp',
   'jon.webp',
+  '20250927_081454-EDIT.jpg', // Old unused image
   'instagram/instagram-1.jpg',
   'instagram/instagram-2.jpg',
   'instagram/instagram-3.jpg',
   'instagram/instagram-4.jpg',
   'instagram/instagram-5.jpg',
   'instagram/instagram-6.jpg',
+];
+
+// Folders to delete (after files are removed)
+const FOLDERS_TO_DELETE = [
+  'instagram',
 ];
 
 async function deleteFile(filePath) {
@@ -53,6 +59,26 @@ async function deleteFile(filePath) {
   }
 }
 
+async function deleteFolder(folderPath) {
+  const fullPath = path.join(PUBLIC_DIR, folderPath);
+
+  try {
+    await fs.access(fullPath);
+    await fs.rmdir(fullPath);
+    console.log(`${colors.green}✓${colors.reset} Deleted folder: ${folderPath}`);
+    return true;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log(`${colors.yellow}○${colors.reset} Folder already deleted: ${folderPath}`);
+    } else if (error.code === 'ENOTEMPTY') {
+      console.log(`${colors.yellow}○${colors.reset} Folder not empty (skipped): ${folderPath}`);
+    } else {
+      console.error(`${colors.red}✗${colors.reset} Error deleting folder ${folderPath}:`, error.message);
+    }
+    return false;
+  }
+}
+
 async function main() {
   console.log(`\n${colors.bright}${colors.cyan}Band of Bakers - Cleanup Old Images${colors.reset}\n`);
 
@@ -65,6 +91,8 @@ async function main() {
 
   console.log('Files to be deleted:');
   FILES_TO_DELETE.forEach(file => console.log(`  - ${file}`));
+  console.log('\nFolders to be deleted:');
+  FOLDERS_TO_DELETE.forEach(folder => console.log(`  - ${folder}/`));
   console.log('');
 
   // Simple confirmation (in a real script, you might want readline-sync or inquirer)
@@ -75,6 +103,12 @@ async function main() {
   for (const file of FILES_TO_DELETE) {
     const deleted = await deleteFile(file);
     if (deleted) deletedCount++;
+  }
+
+  console.log('');
+
+  for (const folder of FOLDERS_TO_DELETE) {
+    await deleteFolder(folder);
   }
 
   console.log(`\n${colors.bright}${colors.green}✅ Cleanup Complete!${colors.reset}`);

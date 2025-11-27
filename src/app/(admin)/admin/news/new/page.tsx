@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { createNewsPost } from "@/actions/news";
 
 const WysiwygEditor = dynamic(
   () => import("@/components/admin/wysiwyg-editor").then((mod) => mod.WysiwygEditor),
@@ -68,14 +69,18 @@ export default function NewNewsPostPage() {
 
   const onSubmit = async (data: NewsPostForm) => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/news", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("summary", data.summary);
+      formData.append("content", data.content);
+      formData.append("status", data.status);
+      formData.append("publishedAt", data.publishedAt);
 
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
+      const result = await createNewsPost(formData);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       toast.success(
         data.status === "published" ? "Post published successfully!" : "Draft saved successfully!",

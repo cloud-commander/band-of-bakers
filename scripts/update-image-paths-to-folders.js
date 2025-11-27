@@ -20,30 +20,48 @@ const colors = {
 // Mapping of old paths to new folder-based paths
 const PATH_MAPPINGS = [
   // Hero images
-  { old: '/hero-artisan-bread.jpg', new: '/images_hero/artisan-bread.jpg' },
-  { old: 'hero-artisan-bread.jpg', new: 'images_hero/artisan-bread.jpg' },
+  { old: '/images_hero/artisan-bread.jpg', new: '/images/hero/artisan-bread.jpg' },
+  { old: 'images_hero/artisan-bread.jpg', new: 'images/hero/artisan-bread.jpg' },
+  { old: '/hero-artisan-bread.jpg', new: '/images/hero/artisan-bread.jpg' },
+  { old: 'hero-artisan-bread.jpg', new: 'images/hero/artisan-bread.jpg' },
 
   // Logos - all sizes
-  { old: '/logo-bandofbakers-256.png', new: '/images_logos/bandofbakers-256.png' },
-  { old: 'logo-bandofbakers-256.png', new: 'images_logos/bandofbakers-256.png' },
-  { old: '/logo-bandofbakers-512.png', new: '/images_logos/bandofbakers-512.png' },
-  { old: 'logo-bandofbakers-512.png', new: 'images_logos/bandofbakers-512.png' },
-  { old: '/logo-bandofbakers-1200.png', new: '/images_logos/bandofbakers-1200.png' },
-  { old: 'logo-bandofbakers-1200.png', new: 'images_logos/bandofbakers-1200.png' },
+  { old: '/images_logos/bandofbakers-256.png', new: '/images/logos/bandofbakers-256.png' },
+  { old: 'images_logos/bandofbakers-256.png', new: 'images/logos/bandofbakers-256.png' },
+  { old: '/images_logos/bandofbakers-512.png', new: '/images/logos/bandofbakers-512.png' },
+  { old: 'images_logos/bandofbakers-512.png', new: 'images/logos/bandofbakers-512.png' },
+  { old: '/images_logos/bandofbakers-1200.png', new: '/images/logos/bandofbakers-1200.png' },
+  { old: 'images_logos/bandofbakers-1200.png', new: 'images/logos/bandofbakers-1200.png' },
+  { old: '/logo-bandofbakers-256.png', new: '/images/logos/bandofbakers-256.png' },
+  { old: 'logo-bandofbakers-256.png', new: 'images/logos/bandofbakers-256.png' },
+  { old: '/logo-bandofbakers-512.png', new: '/images/logos/bandofbakers-512.png' },
+  { old: 'logo-bandofbakers-512.png', new: 'images/logos/bandofbakers-512.png' },
+  { old: '/logo-bandofbakers-1200.png', new: '/images/logos/bandofbakers-1200.png' },
+  { old: 'logo-bandofbakers-1200.png', new: 'images/logos/bandofbakers-1200.png' },
 
   // Team photos
-  { old: '/team-mike.webp', new: '/images_team/mike.webp' },
-  { old: 'team-mike.webp', new: 'images_team/mike.webp' },
-  { old: '/team-jon.webp', new: '/images_team/jon.webp' },
-  { old: 'team-jon.webp', new: 'images_team/jon.webp' },
+  { old: '/images_team/mike.webp', new: '/images/team/mike.webp' },
+  { old: 'images_team/mike.webp', new: 'images/team/mike.webp' },
+  { old: '/images_team/jon.webp', new: '/images/team/jon.webp' },
+  { old: 'images_team/jon.webp', new: 'images/team/jon.webp' },
+  { old: '/team-mike.webp', new: '/images/team/mike.webp' },
+  { old: 'team-mike.webp', new: 'images/team/mike.webp' },
+  { old: '/team-jon.webp', new: '/images/team/jon.webp' },
+  { old: 'team-jon.webp', new: 'images/team/jon.webp' },
 
   // Instagram gallery
-  { old: '/instagram/gallery-instagram-01.jpg', new: '/images_gallery/instagram-01.jpg' },
-  { old: '/instagram/gallery-instagram-02.jpg', new: '/images_gallery/instagram-02.jpg' },
-  { old: '/instagram/gallery-instagram-03.jpg', new: '/images_gallery/instagram-03.jpg' },
-  { old: '/instagram/gallery-instagram-04.jpg', new: '/images_gallery/instagram-04.jpg' },
-  { old: '/instagram/gallery-instagram-05.jpg', new: '/images_gallery/instagram-05.jpg' },
-  { old: '/instagram/gallery-instagram-06.jpg', new: '/images_gallery/instagram-06.jpg' },
+  { old: '/images_gallery/instagram-01.jpg', new: '/images/gallery/instagram-01.jpg' },
+  { old: '/images_gallery/instagram-02.jpg', new: '/images/gallery/instagram-02.jpg' },
+  { old: '/images_gallery/instagram-03.jpg', new: '/images/gallery/instagram-03.jpg' },
+  { old: '/images_gallery/instagram-04.jpg', new: '/images/gallery/instagram-04.jpg' },
+  { old: '/images_gallery/instagram-05.jpg', new: '/images/gallery/instagram-05.jpg' },
+  { old: '/images_gallery/instagram-06.jpg', new: '/images/gallery/instagram-06.jpg' },
+  { old: '/instagram/gallery-instagram-01.jpg', new: '/images/gallery/instagram-01.jpg' },
+  { old: '/instagram/gallery-instagram-02.jpg', new: '/images/gallery/instagram-02.jpg' },
+  { old: '/instagram/gallery-instagram-03.jpg', new: '/images/gallery/instagram-03.jpg' },
+  { old: '/instagram/gallery-instagram-04.jpg', new: '/images/gallery/instagram-04.jpg' },
+  { old: '/instagram/gallery-instagram-05.jpg', new: '/images/gallery/instagram-05.jpg' },
+  { old: '/instagram/gallery-instagram-06.jpg', new: '/images/gallery/instagram-06.jpg' },
 ];
 
 const FILES_TO_UPDATE = [
@@ -111,10 +129,10 @@ async function main() {
   console.log(`Updated ${totalUpdates} reference${totalUpdates !== 1 ? 's' : ''} across ${FILES_TO_UPDATE.length} files\n`);
 
   console.log(`${colors.bright}New folder structure:${colors.reset}`);
-  console.log('  public/images_hero/ - Hero/banner images');
-  console.log('  public/images_logos/ - Brand logos');
-  console.log('  public/images_team/ - Team member photos');
-  console.log('  public/images_gallery/ - Instagram gallery\n');
+  console.log('  public/images/hero/ - Hero/banner images');
+  console.log('  public/images/logos/ - Brand logos');
+  console.log('  public/images/team/ - Team member photos');
+  console.log('  public/images/gallery/ - Instagram gallery\n');
 }
 
 main().catch(console.error);

@@ -251,6 +251,27 @@ export const images = sqliteTable(
 );
 
 // ============================================================================
+// TESTIMONIALS
+// ============================================================================
+
+export const testimonials = sqliteTable(
+  "testimonials",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    role: text("role"), // e.g. "Regular Customer"
+    content: text("content").notNull(),
+    rating: integer("rating").notNull().default(5),
+    avatar_url: text("avatar_url"),
+    is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    isActiveIdx: index("idx_testimonials_is_active").on(table.is_active),
+  })
+);
+
+// ============================================================================
 // SETTINGS
 // ============================================================================
 
@@ -303,3 +324,6 @@ export type InsertSetting = typeof settings.$inferInsert;
 
 export type Image = typeof images.$inferSelect;
 export type InsertImage = typeof images.$inferInsert;
+
+export type Testimonial = typeof testimonials.$inferSelect;
+export type InsertTestimonial = typeof testimonials.$inferInsert;
