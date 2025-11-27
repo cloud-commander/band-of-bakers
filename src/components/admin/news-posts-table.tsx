@@ -55,7 +55,8 @@ export function NewsPostsTable({ posts }: NewsPostsTableProps) {
         />
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block border rounded-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
@@ -141,6 +142,77 @@ export function NewsPostsTable({ posts }: NewsPostsTableProps) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {paginatedPosts.map((post) => (
+          <div key={post.id} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <p className="font-medium">{post.title}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <User className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    {post.author_id || "Unknown"}
+                  </span>
+                </div>
+              </div>
+              {post.is_published ? (
+                <Badge variant="default" className="flex items-center gap-1 w-fit">
+                  <Eye className="h-3 w-3" />
+                  Published
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                  <EyeOff className="h-3 w-3" />
+                  Draft
+                </Badge>
+              )}
+            </div>
+
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{post.excerpt}</p>
+
+            <div className="flex items-center justify-between pt-3 border-t">
+              <div className="text-xs text-muted-foreground">
+                {post.published_at ? (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(post.published_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                ) : (
+                  <span>Unpublished</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button size="sm" variant="ghost" className="h-8 px-2">
+                  Edit
+                </Button>
+                {post.is_published ? (
+                  <Button size="sm" variant="ghost" className="h-8 px-2">
+                    Unpublish
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="ghost" className="h-8 px-2">
+                    Publish
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 px-2 text-destructive hover:text-destructive"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Pagination Controls */}

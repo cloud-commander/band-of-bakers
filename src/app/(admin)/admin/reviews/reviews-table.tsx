@@ -141,7 +141,8 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
           />
         </div>
 
-        <div className="rounded-md border border-stone-200">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block rounded-md border border-stone-200">
           <Table>
             <TableHeader>
               <TableRow className="bg-stone-50">
@@ -261,6 +262,101 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
+          {paginatedReviews.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground bg-muted/50 rounded-lg border">
+              No reviews found matching your filters.
+            </div>
+          ) : (
+            paginatedReviews.map((review) => (
+              <div
+                key={review.id}
+                className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    {review.product?.image_url && (
+                      <div className="relative w-10 h-10 rounded-md overflow-hidden bg-stone-100">
+                        <Image
+                          src={review.product.image_url}
+                          alt={review.product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-sm">
+                        {review.product?.name || "Unknown Product"}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <span className="font-bold text-xs">{review.rating}</span>
+                        <Star className="w-3 h-3 fill-bakery-amber-400 text-bakery-amber-400" />
+                      </div>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      review.status === "approved"
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : review.status === "rejected"
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                    }
+                  >
+                    {review.status}
+                  </Badge>
+                </div>
+
+                <div className="mb-3">
+                  <p className="text-sm text-muted-foreground line-clamp-3">{review.comment}</p>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-3 pb-3 border-b">
+                  <span>{review.user?.name || "Unknown User"}</span>
+                  <span>{new Date(review.created_at).toLocaleDateString()}</span>
+                </div>
+
+                <div className="flex items-center justify-end gap-2">
+                  {review.status !== "approved" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleStatusUpdate(review.id, "approved")}
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Approve
+                    </Button>
+                  )}
+                  {review.status !== "rejected" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleStatusUpdate(review.id, "rejected")}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Reject
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(review.id)}
+                    className="text-stone-400 hover:text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Pagination Controls */}
