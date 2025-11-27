@@ -148,6 +148,64 @@ export class ProductRepository extends BaseRepository<typeof products> {
       .where(eq(products.is_active, true));
     return Number(result[0]?.count || 0);
   }
+  /**
+   * Update product with variants
+   */
+  async updateWithVariants(
+    productId: string,
+    productUpdates: Partial<InsertProduct>,
+    variants: {
+      create: InsertProductVariant[];
+      update: (Partial<InsertProductVariant> & { id: string })[];
+      delete: string[];
+    }
+  ): Promise<Product | null> {
+    const db = await this.getDatabase();
+
+    // Use transaction to ensure data consistency
+    const result = await db.transaction(async (tx: typeof db) => {
+      // 1. Update product
+      const [updatedProduct] = await tx
+        .update(products)
+        .set({ ...productUpdates, updated_at: new Date().toISOString() })
+        .where(eq(products.id, productId))
+        .returning();
+
+      if (!updatedProduct) return null;
+
+      // 2. Delete removed variants
+      if (variants.delete.length > 0) {
+        // SQLite doesn't support WHERE IN with multiple values nicely in all drivers,
+        // but Drizzle handles it.
+        // However, for safety and simplicity with D1, we'll iterate or use a specialized query if needed.
+        // Drizzle's `inArray` is the standard way.
+        const { inArray } = await import("drizzle-orm");
+        await tx.delete(productVariants).where(inArray(productVariants.id, variants.delete));
+      }
+
+      // 3. Create new variants
+      if (variants.create.length > 0) {
+        const variantsWithProductId = variants.create.map((v) => ({
+          ...v,
+          product_id: productId,
+        }));
+        await tx.insert(productVariants).values(variantsWithProductId);
+      }
+
+      // 4. Update existing variants
+      for (const variant of variants.update) {
+        const { id, ...updates } = variant;
+        await tx
+          .update(productVariants)
+          .set({ ...updates, updated_at: new Date().toISOString() })
+          .where(eq(productVariants.id, id));
+      }
+
+      return updatedProduct;
+    });
+
+    return result;
+  }
 }
 
 export const productRepository = new ProductRepository();

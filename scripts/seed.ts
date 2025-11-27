@@ -68,7 +68,7 @@ async function main() {
     if (args.includes("--clear")) {
       console.log("\n🧹 Clearing R2 bucket...");
       try {
-        const listOutput = execSync(`npx wrangler r2 object list ${R2_BUCKET} --local`, {
+        const listOutput = execSync(`npx wrangler r2 object list ${R2_BUCKET}`, {
           encoding: "utf-8",
           stdio: ["ignore", "pipe", "ignore"], // Suppress stderr
         });
@@ -78,7 +78,7 @@ async function main() {
           console.log(`   Found ${objects.length} objects to delete.`);
           for (const obj of objects) {
             try {
-              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key} --local`, {
+              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key}`, {
                 stdio: "ignore",
               });
               process.stdout.write("."); // Progress indicator
@@ -155,17 +155,25 @@ async function main() {
       const products = useRealProducts ? realProducts : mockProducts;
       const productVariants = useRealProducts ? realProductVariants : mockProductVariants;
 
-      // Categories - use first product image from each category as category image
+      // Categories - use category image if available, otherwise fallback to first product
       for (const cat of productCategories) {
-        // Find first product in this category to use its image
-        const firstProduct = products.find((p) => p.category_id === cat.id);
         let categoryImageUrl = "NULL";
 
-        if (!skipR2 && firstProduct?.image_url) {
-          if (useRealProducts) {
-            categoryImageUrl = `/images/products/${cat.slug}/${firstProduct.slug}-card.webp`;
-          } else {
-            categoryImageUrl = `/images/products/${firstProduct.slug}.jpg`;
+        // Check if category has its own image (mock data has .image property)
+        // We uploaded these to images/categories/{slug}.jpg in the R2 step
+        if (!skipR2 && "image" in cat && cat.image) {
+          categoryImageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/categories/${cat.slug}.jpg`;
+        }
+        // Fallback to first product image if no category image
+        else {
+          const firstProduct = products.find((p) => p.category_id === cat.id);
+          if (!skipR2 && firstProduct?.image_url) {
+            if (useRealProducts) {
+              categoryImageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${cat.slug}/${firstProduct.slug}-card.webp`;
+            } else {
+              // Fix: Include category_id in path to match R2 upload structure
+              categoryImageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${firstProduct.category_id}/${firstProduct.slug}.jpg`;
+            }
           }
         }
 
@@ -190,10 +198,12 @@ async function main() {
             // For real products, use category subdirectory structure
             const category = productCategories.find((c) => c.id === prod.category_id);
             const categorySlug = category?.slug || "uncategorized";
-            imageUrl = `/images/products/${categorySlug}/${prod.slug}-card.webp`;
+            // Use R2 URL if not skipping R2
+            imageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${categorySlug}/${prod.slug}-card.webp`;
           } else {
             // For mock products, use old structure
-            imageUrl = `/images/products/${prod.slug}.jpg`;
+            // Use R2 URL if not skipping R2
+            imageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${prod.category_id}/${prod.slug}.jpg`;
           }
         } else if (skipR2) {
           imageUrl = prod.image_url || "NULL";
@@ -649,7 +659,14 @@ async function main() {
         }
 
         // Try primary URL first, then fallbacks
-        const sources = [primaryUrl, ...FALLBACK_IMAGES];
+        // Rotate fallbacks based on filename hash to avoid "same image" everywhere
+        const hash = filename.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const rotatedFallbacks = [
+          ...FALLBACK_IMAGES.slice(hash % FALLBACK_IMAGES.length),
+          ...FALLBACK_IMAGES.slice(0, hash % FALLBACK_IMAGES.length),
+        ];
+
+        const sources = [primaryUrl, ...rotatedFallbacks];
         let downloaded = false;
         const tempPath = path.join(TEMP_DIR, path.basename(r2Path));
 
@@ -715,7 +732,7 @@ async function main() {
         try {
           // Upload
           console.log(`   Uploading to ${r2Path}...`);
-          execSync(`npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --local --file=${tempPath}`, {
+          execSync(`npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${tempPath}`, {
             stdio: "ignore",
           });
 
@@ -763,10 +780,9 @@ async function main() {
 
         if (!shouldOverwrite) {
           try {
-            const checkResult = execSync(
-              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --local`,
-              { stdio: "pipe" }
-            );
+            const checkResult = execSync(`npx wrangler r2 object get ${R2_BUCKET}/${r2Path}`, {
+              stdio: "pipe",
+            });
             if (checkResult) {
               console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping upload...`);
               return;
@@ -785,12 +801,18 @@ async function main() {
 
           // Upload to R2 directly from source (skipping optimization as requested)
           console.log(`   Uploading to ${r2Path}...`);
-          execSync(
-            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --local --file=${fullLocalPath}`,
-            {
-              stdio: "ignore",
-            }
-          );
+          execSync(`npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath}`, {
+            stdio: "ignore",
+          });
+
+          // ALSO save to public/ directory for local dev
+          const publicPath = path.join(process.cwd(), "public", r2Path);
+          const publicDir = path.dirname(publicPath);
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          fs.copyFileSync(fullLocalPath, publicPath);
+          console.log(`      Saved to public/${r2Path}`);
 
           // Add to SQL for images table
           sqlStatements.push(

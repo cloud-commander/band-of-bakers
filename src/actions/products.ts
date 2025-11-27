@@ -14,8 +14,19 @@ const productSchema = z.object({
   slug: z.string().min(1, "Slug is required").max(200),
   description: z.string().optional(),
   category_id: z.string().min(1, "Category is required"),
-  base_price: z.number().min(0, "Price must be positive"),
+  category_id: z.string().min(1, "Category is required"),
+  // base_price is now optional in input because it's calculated from variants if they exist
+  base_price: z.number().min(0, "Price must be positive").optional(),
   is_active: z.boolean().default(true),
+  variants: z
+    .array(
+      z.object({
+        id: z.string().optional(), // Optional for new variants
+        name: z.string().min(1, "Variant name is required"),
+        price: z.number().min(0, "Price must be positive"),
+      })
+    )
+    .optional(),
 });
 
 /**
@@ -97,8 +108,11 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
       slug: formData.get("slug") as string,
       description: formData.get("description") as string,
       category_id: formData.get("category_id") as string,
-      base_price: parseFloat(formData.get("base_price") as string),
+      base_price: formData.get("base_price")
+        ? parseFloat(formData.get("base_price") as string)
+        : undefined,
       is_active: formData.get("is_active") === "true",
+      variants: formData.get("variants") ? JSON.parse(formData.get("variants") as string) : [],
     };
 
     const validated = productSchema.safeParse(rawData);
@@ -106,7 +120,29 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
       return { success: false, error: validated.error.issues[0].message };
     }
 
-    // 3. Handle image upload
+    // 3. Calculate prices
+    let finalBasePrice = validated.data.base_price || 0;
+    const variantsToCreate = [];
+
+    if (validated.data.variants && validated.data.variants.length > 0) {
+      // Find lowest price among variants to set as base_price
+      const prices = validated.data.variants.map((v) => v.price);
+      finalBasePrice = Math.min(...prices);
+
+      // Prepare variants with price_adjustment
+      for (const variant of validated.data.variants) {
+        variantsToCreate.push({
+          name: variant.name,
+          price_adjustment: variant.price - finalBasePrice,
+          sort_order: 0, // Default sort order
+          is_active: true,
+        });
+      }
+    } else if (validated.data.base_price === undefined) {
+      return { success: false, error: "Price is required if no variants are added" };
+    }
+
+    // 4. Handle image upload
     const imageFile = formData.get("image") as File | null;
     let imageUrl: string | undefined;
 
@@ -118,13 +154,21 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
       imageUrl = uploadedUrl;
     }
 
-    // 4. Create product in database
-    const product = await productRepository.create({
-      ...validated.data,
-      image_url: imageUrl,
-    });
+    // 5. Create product in database
+    const product = await productRepository.createWithVariants(
+      {
+        name: validated.data.name,
+        slug: validated.data.slug,
+        description: validated.data.description,
+        category_id: validated.data.category_id,
+        base_price: finalBasePrice,
+        is_active: validated.data.is_active,
+        image_url: imageUrl,
+      },
+      variantsToCreate
+    );
 
-    // 5. Revalidate relevant pages
+    // 6. Revalidate relevant pages
     revalidatePath("/admin/products");
     revalidatePath("/menu");
 
@@ -160,8 +204,11 @@ export async function updateProduct(
       slug: formData.get("slug") as string,
       description: formData.get("description") as string,
       category_id: formData.get("category_id") as string,
-      base_price: parseFloat(formData.get("base_price") as string),
+      base_price: formData.get("base_price")
+        ? parseFloat(formData.get("base_price") as string)
+        : undefined,
       is_active: formData.get("is_active") === "true",
+      variants: formData.get("variants") ? JSON.parse(formData.get("variants") as string) : [],
     };
 
     const validated = productSchema.safeParse(rawData);
@@ -169,7 +216,49 @@ export async function updateProduct(
       return { success: false, error: validated.error.issues[0].message };
     }
 
-    // 4. Handle image upload (if new image provided)
+    // 4. Calculate prices & Prepare variants
+    let finalBasePrice = validated.data.base_price || 0;
+    const variantsCreate = [];
+    const variantsUpdate = [];
+    const variantIdsToKeep = new Set<string>();
+
+    if (validated.data.variants && validated.data.variants.length > 0) {
+      // Find lowest price among variants to set as base_price
+      const prices = validated.data.variants.map((v) => v.price);
+      finalBasePrice = Math.min(...prices);
+
+      for (const variant of validated.data.variants) {
+        const priceAdjustment = variant.price - finalBasePrice;
+
+        if (variant.id) {
+          // Update existing variant
+          variantsUpdate.push({
+            id: variant.id,
+            name: variant.name,
+            price_adjustment: priceAdjustment,
+          });
+          variantIdsToKeep.add(variant.id);
+        } else {
+          // Create new variant
+          variantsCreate.push({
+            name: variant.name,
+            price_adjustment: priceAdjustment,
+            sort_order: 0,
+            is_active: true,
+          });
+        }
+      }
+    } else if (validated.data.base_price === undefined) {
+      return { success: false, error: "Price is required if no variants are added" };
+    }
+
+    // Identify variants to delete
+    const existingVariants = await productRepository.getVariants(id);
+    const variantsDelete = existingVariants
+      .filter((v) => !variantIdsToKeep.has(v.id))
+      .map((v) => v.id);
+
+    // 5. Handle image upload (if new image provided)
     const imageFile = formData.get("image") as File | null;
     let imageUrl = existingProduct.image_url;
 
@@ -187,13 +276,30 @@ export async function updateProduct(
       imageUrl = uploadedUrl;
     }
 
-    // 5. Update product in database
-    const product = await productRepository.update(id, {
-      ...validated.data,
-      image_url: imageUrl,
-    });
+    // 6. Update product and variants in database
+    const product = await productRepository.updateWithVariants(
+      id,
+      {
+        name: validated.data.name,
+        slug: validated.data.slug,
+        description: validated.data.description,
+        category_id: validated.data.category_id,
+        base_price: finalBasePrice,
+        is_active: validated.data.is_active,
+        image_url: imageUrl,
+      },
+      {
+        create: variantsCreate,
+        update: variantsUpdate,
+        delete: variantsDelete,
+      }
+    );
 
-    // 6. Revalidate relevant pages
+    if (!product) {
+      return { success: false, error: "Failed to update product" };
+    }
+
+    // 7. Revalidate relevant pages
     revalidatePath("/admin/products");
     revalidatePath("/menu");
     revalidatePath(`/products/${existingProduct.slug}`);
@@ -294,10 +400,16 @@ export async function getActiveProducts() {
 /**
  * Get product by ID
  */
+/**
+ * Get product by ID with variants
+ */
 export async function getProductById(id: string) {
   try {
     const product = await productRepository.findById(id);
-    return product;
+    if (!product) return null;
+
+    const variants = await productRepository.getVariants(id);
+    return { ...product, variants };
   } catch (error) {
     console.error("Get product error:", error);
     return null;

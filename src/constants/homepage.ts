@@ -78,7 +78,7 @@ export const STORY_SECTION = {
   heading: "Real Hands, Real Flour.",
   /** Section main text */
   mainText:
-    "For over 25 years, Band of Bakers has been a fixture in our community. We believe in slow fermentation, local sourcing, and the kind of craftsmanship that can't be rushed. Every loaf that leaves our kitchen carries the warmth of family tradition and the precision of modern technique.",
+    "For over 10 years, Band of Bakers has been a fixture in our community. We believe in slow fermentation, local sourcing, and the kind of craftsmanship that can't be rushed. Every loaf that leaves our kitchen carries the warmth of family tradition and the precision of modern technique.",
   /** Section tagline */
   tagline: "This is the village kitchen. This is Band of Bakers.",
 } as const;
@@ -91,7 +91,7 @@ export const CTA_SECTION = {
   /** Section heading */
   heading: "Ready to Order?",
   /** Section description */
-  description: "Reserve your fresh loaves today. Available for pickup or delivery.",
+  description: "Reserve your fresh loaves today. Available for pickup.",
   /** CTA button text */
   ctaText: "Order Online",
   /** CTA button link */
