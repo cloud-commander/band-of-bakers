@@ -247,60 +247,128 @@ export default function AdminUsersPage() {
           </div>
         </div>
       ) : (
-      {/* Desktop Table View */}
-      <div className="hidden lg:block border rounded-lg overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("name")}>
-                <button
-                  onClick={() => handleSort("name")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Name {getSortIcon("name")}
-                </button>
-              </th>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("email")}>
-                <button
-                  onClick={() => handleSort("email")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Email {getSortIcon("email")}
-                </button>
-              </th>
-              <th className="text-left p-4 font-medium">Telephone</th>
-              <th className="text-left p-4 font-medium">Role</th>
-              <th className="text-left p-4 font-medium">Status</th>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("created_at")}>
-                <button
-                  onClick={() => handleSort("created_at")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Joined {getSortIcon("created_at")}
-                </button>
-              </th>
-              <th className="text-right p-4 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden lg:block border rounded-lg overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("name")}>
+                    <button
+                      onClick={() => handleSort("name")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
+                    >
+                      Name {getSortIcon("name")}
+                    </button>
+                  </th>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("email")}>
+                    <button
+                      onClick={() => handleSort("email")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
+                    >
+                      Email {getSortIcon("email")}
+                    </button>
+                  </th>
+                  <th className="text-left p-4 font-medium">Telephone</th>
+                  <th className="text-left p-4 font-medium">Role</th>
+                  <th className="text-left p-4 font-medium">Status</th>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("created_at")}>
+                    <button
+                      onClick={() => handleSort("created_at")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
+                    >
+                      Joined {getSortIcon("created_at")}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    className={cn(
+                      "border-t hover:bg-muted/30 transition-colors",
+                      user.is_banned && "bg-red-50/50"
+                    )}
+                  >
+                    <td className="p-4 font-medium">{user.name}</td>
+                    <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
+                    <td className="p-4 text-sm text-muted-foreground">{user.phone || "—"}</td>
+                    <td className="p-4">
+                      <Badge variant="outline" className="capitalize">
+                        {user.role}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-col gap-1">
+                        <Badge variant={user.email_verified ? "default" : "secondary"}>
+                          {user.email_verified ? "Verified" : "Unverified"}
+                        </Badge>
+                        {user.is_banned && (
+                          <Badge
+                            variant="outline"
+                            className="bg-red-50 text-red-700 border-red-200"
+                          >
+                            Banned
+                          </Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">
+                      {new Date(user.created_at).toLocaleDateString("en-GB")}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Link href={`/admin/users/${user.id}`}>
+                            <Edit className="w-4 h-4 mr-1" />
+                            View
+                          </Link>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
             {paginatedUsers.map((user) => (
-              <tr
+              <div
                 key={user.id}
                 className={cn(
-                  "border-t hover:bg-muted/30 transition-colors",
+                  "border rounded-lg p-4 hover:bg-muted/30 transition-colors",
                   user.is_banned && "bg-red-50/50"
                 )}
               >
-                <td className="p-4 font-medium">{user.name}</td>
-                <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
-                <td className="p-4 text-sm text-muted-foreground">{user.phone || "—"}</td>
-                <td className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
                   <Badge variant="outline" className="capitalize">
                     {user.role}
                   </Badge>
-                </td>
-                <td className="p-4">
-                  <div className="flex flex-col gap-1">
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Phone</p>
+                    <p>{user.phone || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Joined</p>
+                    <p>{new Date(user.created_at).toLocaleDateString("en-GB")}</p>
+                  </div>
+                  <div className="col-span-2 flex gap-2">
                     <Badge variant={user.email_verified ? "default" : "secondary"}>
                       {user.email_verified ? "Verified" : "Unverified"}
                     </Badge>
@@ -310,88 +378,25 @@ export default function AdminUsersPage() {
                       </Badge>
                     )}
                   </div>
-                </td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  {new Date(user.created_at).toLocaleDateString("en-GB")}
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      <Link href={`/admin/users/${user.id}`}>
-                        <Edit className="w-4 h-4 mr-1" />
-                        View
-                      </Link>
-                    </Button>
-                  </div>
-                </td>
-              </tr>
+                </div>
+
+                <div className="flex items-center justify-end pt-3 border-t">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    <Link href={`/admin/users/${user.id}`}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      View Details
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="lg:hidden space-y-4">
-        {paginatedUsers.map((user) => (
-          <div
-            key={user.id}
-            className={cn(
-              "border rounded-lg p-4 hover:bg-muted/30 transition-colors",
-              user.is_banned && "bg-red-50/50"
-            )}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="font-medium">{user.name}</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-              </div>
-              <Badge variant="outline" className="capitalize">
-                {user.role}
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Phone</p>
-                <p>{user.phone || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Joined</p>
-                <p>{new Date(user.created_at).toLocaleDateString("en-GB")}</p>
-              </div>
-              <div className="col-span-2 flex gap-2">
-                <Badge variant={user.email_verified ? "default" : "secondary"}>
-                  {user.email_verified ? "Verified" : "Unverified"}
-                </Badge>
-                {user.is_banned && (
-                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                    Banned
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end pt-3 border-t">
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                <Link href={`/admin/users/${user.id}`}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  View Details
-                </Link>
-              </Button>
-            </div>
           </div>
-        ))}
-      </div>
+        </>
       )}
 
       {/* Pagination Controls */}

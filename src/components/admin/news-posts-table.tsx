@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { Calendar, User, Eye, EyeOff } from "lucide-react";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
+import { toggleNewsPostStatus, deleteNewsPost } from "@/actions/news";
+import { toast } from "sonner";
+import Link from "next/link";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_NEWS_ITEMS_PER_PAGE;
 
@@ -17,6 +20,7 @@ interface NewsPostsTableProps {
 
 export function NewsPostsTable({ posts }: NewsPostsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPending, setIsPending] = useState(false);
 
   // Sort by created date, newest first
   const sortedPosts = [...posts].sort(
@@ -34,6 +38,40 @@ export function NewsPostsTable({ posts }: NewsPostsTableProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    setIsPending(true);
+    try {
+      const result = await toggleNewsPostStatus(id, !currentStatus);
+      if (result.success) {
+        toast.success(`Post ${!currentStatus ? "published" : "unpublished"} successfully`);
+      } else {
+        toast.error(result.error);
+      }
+    } catch {
+      toast.error("Failed to update post status");
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+
+    setIsPending(true);
+    try {
+      const result = await deleteNewsPost(id);
+      if (result.success) {
+        toast.success("Post deleted successfully");
+      } else {
+        toast.error(result.error);
+      }
+    } catch {
+      toast.error("Failed to delete post");
+    } finally {
+      setIsPending(false);
+    }
+  };
+
   if (posts.length === 0) {
     return (
       <div className="text-center py-16 border rounded-lg">
@@ -43,6 +81,43 @@ export function NewsPostsTable({ posts }: NewsPostsTableProps) {
       </div>
     );
   }
+
+  // Helper for rendering actions to avoid duplication between desktop and mobile
+  const renderActions = (post: NewsPost) => (
+    <div className="flex items-center gap-2">
+      <Button size="sm" variant="ghost" asChild>
+        <Link href={`/admin/news/${post.id}/edit`}>Edit</Link>
+      </Button>
+      {post.is_published ? (
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={isPending}
+          onClick={() => handleToggleStatus(post.id, true)}
+        >
+          Unpublish
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={isPending}
+          onClick={() => handleToggleStatus(post.id, false)}
+        >
+          Publish
+        </Button>
+      )}
+      <Button
+        size="sm"
+        variant="ghost"
+        className="text-destructive hover:text-destructive"
+        disabled={isPending}
+        onClick={() => handleDelete(post.id)}
+      >
+        Delete
+      </Button>
+    </div>
+  );
 
   return (
     <>
@@ -115,29 +190,7 @@ export function NewsPostsTable({ posts }: NewsPostsTableProps) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="ghost">
-                      Edit
-                    </Button>
-                    {post.is_published ? (
-                      <Button size="sm" variant="ghost">
-                        Unpublish
-                      </Button>
-                    ) : (
-                      <Button size="sm" variant="ghost">
-                        Publish
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-destructive hover:text-destructive"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </td>
+                <td className="p-4">{renderActions(post)}</td>
               </tr>
             ))}
           </tbody>
@@ -189,27 +242,7 @@ export function NewsPostsTable({ posts }: NewsPostsTableProps) {
                 )}
               </div>
 
-              <div className="flex items-center gap-1">
-                <Button size="sm" variant="ghost" className="h-8 px-2">
-                  Edit
-                </Button>
-                {post.is_published ? (
-                  <Button size="sm" variant="ghost" className="h-8 px-2">
-                    Unpublish
-                  </Button>
-                ) : (
-                  <Button size="sm" variant="ghost" className="h-8 px-2">
-                    Publish
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 px-2 text-destructive hover:text-destructive"
-                >
-                  Delete
-                </Button>
-              </div>
+              {renderActions(post)}
             </div>
           </div>
         ))}

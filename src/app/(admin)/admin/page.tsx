@@ -139,10 +139,10 @@ export default async function AdminDashboard() {
                         <Link
                           key={order.id}
                           href={`/admin/orders/${order.id}`}
-                          className="flex items-center justify-between p-4 border border-stone-200 rounded-lg hover:bg-stone-50 hover:border-bakery-amber-200 transition-all group"
+                          className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-stone-200 rounded-lg hover:bg-stone-50 hover:border-bakery-amber-200 transition-all group gap-4 sm:gap-0"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-bakery-amber-100 flex items-center justify-center">
+                          <div className="flex items-center gap-4 w-full sm:w-auto">
+                            <div className="w-10 h-10 rounded-full bg-bakery-amber-100 flex items-center justify-center shrink-0">
                               <ShoppingCart className="w-5 h-5 text-bakery-amber-700" />
                             </div>
                             <div>
@@ -161,7 +161,7 @@ export default async function AdminDashboard() {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pl-14 sm:pl-0">
                             <Badge variant="outline" className="bg-white capitalize">
                               {order.status}
                             </Badge>

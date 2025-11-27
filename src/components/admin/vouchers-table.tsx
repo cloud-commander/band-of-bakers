@@ -214,169 +214,173 @@ export function VouchersTable({ vouchers }: VouchersTableProps) {
           </div>
         </div>
       ) : (
-      {/* Desktop Table View */}
-      <div className="hidden lg:block border rounded-lg overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("code")}>
-                <button
-                  onClick={() => handleSort("code")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Code {getSortIcon("code")}
-                </button>
-              </th>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("type")}>
-                <button
-                  onClick={() => handleSort("type")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Type {getSortIcon("type")}
-                </button>
-              </th>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("value")}>
-                <button
-                  onClick={() => handleSort("value")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Value {getSortIcon("value")}
-                </button>
-              </th>
-              <th className="text-left p-4 font-medium">Min Order</th>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("current_uses")}>
-                <button
-                  onClick={() => handleSort("current_uses")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Uses {getSortIcon("current_uses")}
-                </button>
-              </th>
-              <th className="text-left p-0 font-medium" aria-sort={getAriaSort("valid_until")}>
-                <button
-                  onClick={() => handleSort("valid_until")}
-                  className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
-                >
-                  Valid Until {getSortIcon("valid_until")}
-                </button>
-              </th>
-              <th className="text-left p-4 font-medium">Status</th>
-              <th className="text-right p-4 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedVouchers.map((voucher) => (
-              <tr key={voucher.id} className="border-t hover:bg-muted/30 transition-colors">
-                <td className="p-4 font-mono font-medium">{voucher.code}</td>
-                <td className="p-4 text-sm">
-                  {formatVoucherType(voucher.type as "percentage" | "fixed_amount")}
-                </td>
-                <td className="p-4 text-sm font-medium">{formatVoucherValue(voucher as any)}</td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  £{voucher.min_order_value.toFixed(2)}
-                </td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  {formatUsage(voucher as any)}
-                </td>
-                <td className="p-4 text-sm text-muted-foreground">
-                  {new Date(voucher.valid_until).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </td>
-                <td className="p-4">{getStatusBadge(voucher)}</td>
-                <td className="p-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden lg:block border rounded-lg overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("code")}>
+                    <button
+                      onClick={() => handleSort("code")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
                     >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(voucher)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      Code {getSortIcon("code")}
+                    </button>
+                  </th>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("type")}>
+                    <button
+                      onClick={() => handleSort("type")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
                     >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="lg:hidden space-y-4">
-        {paginatedVouchers.map((voucher) => (
-          <div
-            key={voucher.id}
-            className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="font-mono font-medium text-lg">{voucher.code}</p>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {formatVoucherValue(voucher as any)} off
-                </p>
-              </div>
-              {getStatusBadge(voucher)}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Type</p>
-                <p>{formatVoucherType(voucher.type as "percentage" | "fixed_amount")}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Min Order</p>
-                <p>£{voucher.min_order_value.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Usage</p>
-                <p>{formatUsage(voucher as any)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Valid Until</p>
-                <p>
-                  {new Date(voucher.valid_until).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3 border-t">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDelete(voucher)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-            </div>
+                      Type {getSortIcon("type")}
+                    </button>
+                  </th>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("value")}>
+                    <button
+                      onClick={() => handleSort("value")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
+                    >
+                      Value {getSortIcon("value")}
+                    </button>
+                  </th>
+                  <th className="text-left p-4 font-medium">Min Order</th>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("current_uses")}>
+                    <button
+                      onClick={() => handleSort("current_uses")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
+                    >
+                      Uses {getSortIcon("current_uses")}
+                    </button>
+                  </th>
+                  <th className="text-left p-0 font-medium" aria-sort={getAriaSort("valid_until")}>
+                    <button
+                      onClick={() => handleSort("valid_until")}
+                      className="w-full h-full p-4 flex items-center hover:bg-muted/80 transition-colors text-left font-medium"
+                    >
+                      Valid Until {getSortIcon("valid_until")}
+                    </button>
+                  </th>
+                  <th className="text-left p-4 font-medium">Status</th>
+                  <th className="text-right p-4 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedVouchers.map((voucher) => (
+                  <tr key={voucher.id} className="border-t hover:bg-muted/30 transition-colors">
+                    <td className="p-4 font-mono font-medium">{voucher.code}</td>
+                    <td className="p-4 text-sm">
+                      {formatVoucherType(voucher.type as "percentage" | "fixed_amount")}
+                    </td>
+                    <td className="p-4 text-sm font-medium">
+                      {formatVoucherValue(voucher as any)}
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">
+                      £{voucher.min_order_value.toFixed(2)}
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">
+                      {formatUsage(voucher as any)}
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">
+                      {new Date(voucher.valid_until).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="p-4">{getStatusBadge(voucher)}</td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(voucher)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {paginatedVouchers.map((voucher) => (
+              <div
+                key={voucher.id}
+                className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="font-mono font-medium text-lg">{voucher.code}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {formatVoucherValue(voucher as any)} off
+                    </p>
+                  </div>
+                  {getStatusBadge(voucher)}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Type</p>
+                    <p>{formatVoucherType(voucher.type as "percentage" | "fixed_amount")}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Min Order</p>
+                    <p>£{voucher.min_order_value.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Usage</p>
+                    <p>{formatUsage(voucher as any)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Valid Until</p>
+                    <p>
+                      {new Date(voucher.valid_until).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(voucher)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Pagination Controls */}

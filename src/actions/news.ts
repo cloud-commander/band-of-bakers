@@ -121,3 +121,123 @@ export async function createNewsPost(formData: FormData): Promise<ActionResult<{
     return { success: false, error: "Failed to create news post" };
   }
 }
+
+/**
+ * Toggle news post publish status
+ */
+export async function toggleNewsPostStatus(
+  id: string,
+  isPublished: boolean
+): Promise<ActionResult<void>> {
+  try {
+    const userId = await checkAdminRole();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await newsRepository.update(id, {
+      is_published: isPublished,
+      published_at: isPublished ? new Date().toISOString() : null,
+    });
+
+    revalidatePath("/admin/news");
+    revalidatePath("/news");
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Toggle news post status error:", error);
+    return { success: false, error: "Failed to update news post status" };
+  }
+}
+
+/**
+ * Delete a news post
+ */
+export async function deleteNewsPost(id: string): Promise<ActionResult<void>> {
+  try {
+    const userId = await checkAdminRole();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await newsRepository.delete(id);
+
+    revalidatePath("/admin/news");
+    revalidatePath("/news");
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Delete news post error:", error);
+    return { success: false, error: "Failed to delete news post" };
+  }
+}
+
+/**
+ * Get a single news post by ID
+ */
+export async function getNewsPostById(id: string) {
+  try {
+    const userId = await checkAdminRole();
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+    return await newsRepository.findById(id);
+  } catch (error) {
+    console.error("Failed to fetch news post:", error);
+    return null;
+  }
+}
+
+/**
+ * Update a news post
+ */
+export async function updateNewsPost(
+  id: string,
+  formData: FormData
+): Promise<ActionResult<{ id: string }>> {
+  try {
+    const userId = await checkAdminRole();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const rawData = {
+      title: formData.get("title") as string,
+      summary: formData.get("summary") as string,
+      content: formData.get("content") as string,
+      status: formData.get("status") as string,
+      publishedAt: formData.get("publishedAt") as string,
+    };
+
+    const validated = newsPostSchema.safeParse(rawData);
+    if (!validated.success) {
+      return { success: false, error: validated.error.issues[0].message };
+    }
+
+    // Generate slug from title
+    const slug =
+      validated.data.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "") +
+      "-" +
+      nanoid(6);
+
+    await newsRepository.update(id, {
+      title: validated.data.title,
+      slug,
+      content: validated.data.content,
+      excerpt: validated.data.summary,
+      is_published: validated.data.status === "published",
+      published_at: validated.data.publishedAt,
+    });
+
+    revalidatePath("/admin/news");
+    revalidatePath("/news");
+
+    return { success: true, data: { id } };
+  } catch (error) {
+    console.error("Update news post error:", error);
+    return { success: false, error: "Failed to update news post" };
+  }
+}
