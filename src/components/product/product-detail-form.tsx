@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Product, ProductVariant } from "@/lib/validators/product";
-import { BakeSaleWithLocation } from "@/lib/validators/bake-sale";
+import { Product, ProductVariant, BakeSaleWithLocation } from "@/lib/repositories";
 import {
   Select,
   SelectContent,
@@ -54,6 +53,8 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
       quantity: parseInt(quantity),
       variantId: selectedVariant?.id,
       bakeSaleId: selectedBakeSaleId,
+      bakeSaleDate: upcomingBakeSales.find((bs) => bs.id === selectedBakeSaleId)?.date,
+      bakeSaleLocation: upcomingBakeSales.find((bs) => bs.id === selectedBakeSaleId)?.location.name,
     });
     toast.success(`Added ${product.name} to cart`);
   };

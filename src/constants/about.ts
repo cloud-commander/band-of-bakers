@@ -36,7 +36,7 @@ export interface ProcessStep {
 export const ABOUT_HERO_SECTION = {
   heading: "Our Story",
   description:
-    "A family tradition of artisan baking, passed down through generations and baked with love in the heart of Shropshire.",
+    "Proudly independent artisan baking, serving the community from the heart of Shropshire.",
   backgroundImage: "/images/hero/about-hero-v2.jpg",
   backgroundAlt: "Artisan bakery workspace",
 } as const;
@@ -48,8 +48,8 @@ export const ABOUT_HERO_SECTION = {
 export const ABOUT_STORY_SECTION = {
   heading: "Baking with Passion Since Day One",
   paragraphs: [
-    "Band of Bakers started as a dream in our home kitchen—a vision to bring authentic, handcrafted bread to our local community. What began with a single sourdough starter has grown into a beloved bakery that serves fresh, artisan baked goods throughout Shropshire.",
-    "We believe in the simple pleasures of real bread: the aroma of a fresh loaf, the satisfying crunch of a perfectly baked crust, and the soft, airy crumb that comes from time, patience, and traditional techniques. Every product we make is a labor of love, crafted by hand using the finest local ingredients.",
+    "Band of Bakers started as a dream in our home kitchen. A vision to bring authentic, handcrafted bread to our local community. What began with a single sourdough starter has grown into a beloved bakery that serves fresh, artisan baked goods throughout Shropshire.",
+    "We believe in the simple pleasures of real bread: the aroma of a fresh loaf, the satisfying crunch of a perfectly baked crust, and the soft, airy crumb that comes from time, patience, and traditional techniques. Every product we make is a labour of love, crafted by hand using the finest local ingredients.",
   ],
 } as const;
 
@@ -71,7 +71,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     name: "Mike Deeble",
     role: "Manager & Founder",
     favorite: "Almond Croissant",
-    bio: "Mike is the strategic mind behind Band of Bakers, ensuring every bake sale runs smoothly and every customer has a delightful experience. With a background in hospitality and a love for quality food, Mike combines operational excellence with genuine care for the business and its community. He's passionate about supporting local suppliers and sustainable practices.",
+    bio: "Mike is the strategic mind behind Band of Bakers, ensuring every bake sale runs smoothly and every customer has a delightful experience. With a background in business and a love for quality food, Mike combines operational excellence with genuine care for the business and its community. He's passionate about supporting local suppliers and sustainable practices.",
     image: "/images/team/mike.webp",
   },
 ];
@@ -120,7 +120,7 @@ export const HOW_WE_WORK_STEPS: ProcessStep[] = [
     id: "step-1",
     number: 1,
     title: "Browse our menu",
-    description: "and select your favorite baked goods",
+    description: "and select your favourite baked goods",
   },
   {
     id: "step-2",
@@ -143,7 +143,7 @@ export const HOW_WE_WORK_STEPS: ProcessStep[] = [
   {
     id: "step-5",
     number: 5,
-    title: "Collect or receive delivery",
+    title: "Collect",
     description: "on your chosen bake sale day",
   },
 ];
@@ -154,7 +154,7 @@ export const ABOUT_HOW_WE_WORK_SECTION = {
     "We operate through a unique bake sale model that allows us to guarantee freshness and reduce waste. Here's how it works:",
   steps: HOW_WE_WORK_STEPS,
   closingText:
-    "This approach means every loaf, pastry, and cake is made specifically for you, ensuring maximum freshness and allowing us to minimize waste while supporting sustainable practices.",
+    "This approach means every loaf, pastry, and cake is made specifically for you, ensuring maximum freshness and allowing us to minimise waste whilst supporting sustainable practices.",
 } as const;
 
 // ============================================================================

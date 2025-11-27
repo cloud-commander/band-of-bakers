@@ -50,6 +50,13 @@
       "when": 1764240336146,
       "tag": "0006_smart_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1764243426054,
+      "tag": "0007_ordinary_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

@@ -64,6 +64,8 @@ export const products = sqliteTable(
     base_price: real("base_price").notNull(), // GBP
     image_url: text("image_url"),
     is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    stock_quantity: integer("stock_quantity"),
+    available_from: text("available_from"), // ISO datetime
     ...timestamps,
   },
   (table) => ({

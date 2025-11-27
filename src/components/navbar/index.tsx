@@ -2,8 +2,6 @@
 
 import { useSession } from "next-auth/react";
 import { useCart } from "@/context/cart-context";
-import { UI_THRESHOLDS } from "@/lib/constants/frontend";
-import { useScrollNavbar } from "@/hooks/use-scroll-navbar";
 import { MobileMenu } from "@/components/mobile-menu";
 import { CartPreview } from "@/components/cart-preview";
 import { NavbarLogo } from "./logo";
@@ -11,18 +9,16 @@ import { DesktopNav } from "./desktop-nav";
 import { UserMenu } from "./user-menu";
 
 export function Navbar() {
-  const isScrolled = useScrollNavbar({ threshold: UI_THRESHOLDS.SCROLL_NAVBAR });
   const { cartCount } = useCart();
   const { data: session } = useSession();
-  const isLoggedIn = !!session?.user;
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full transition-all duration-300 border-b"
+      className="sticky top-0 z-50 w-full transition-all duration-300 border-b shadow-md bg-white"
       style={{
-        backgroundColor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(249, 248, 246, 0.8)",
-        backdropFilter: isScrolled ? "blur(12px)" : "blur(8px)",
-        borderColor: "rgba(44, 40, 37, 0.1)",
+        backgroundColor: "rgb(255, 255, 255)",
+        backdropFilter: "blur(12px)",
+        borderColor: "rgba(44, 40, 37, 0.2)",
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,11 +35,11 @@ export function Navbar() {
             <CartPreview />
 
             {/* User Menu / Login */}
-            <UserMenu isLoggedIn={isLoggedIn} />
+            <UserMenu isLoggedIn={!!session?.user} />
           </div>
 
           {/* Mobile Menu */}
-          <MobileMenu isLoggedIn={isLoggedIn} cartItemCount={cartCount} />
+          <MobileMenu isLoggedIn={!!session?.user} cartItemCount={cartCount} />
         </div>
       </div>
     </nav>

@@ -1,5 +1,5 @@
 import { BaseRepository } from "./base.repository";
-import { newsPosts, type NewsPost, type InsertNewsPost } from "@/db/schema";
+import { newsPosts, type NewsPost } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export class NewsRepository extends BaseRepository<typeof newsPosts> {

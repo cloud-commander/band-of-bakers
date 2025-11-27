@@ -19,6 +19,8 @@ import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import { mockProductCategories } from "@/lib/mocks/products";
 import { getActiveTestimonials } from "@/actions/testimonials";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const categories = mockProductCategories;
   const testimonials = await getActiveTestimonials();

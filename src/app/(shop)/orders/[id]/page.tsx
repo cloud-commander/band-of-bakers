@@ -1,8 +1,7 @@
 import { PageHeader } from "@/components/state/page-header";
-import { mockOrdersWithItems } from "@/lib/mocks/orders";
-import { mockBakeSales } from "@/lib/mocks/bake-sales";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
+import { getOrderById } from "@/actions/orders";
 
 interface OrderPageProps {
   params: Promise<{
@@ -21,23 +20,23 @@ const statusColors = {
 
 export default async function OrderPage({ params }: OrderPageProps) {
   const { id } = await params;
-  const order = mockOrdersWithItems.find((o) => o.id === id);
+  const order = await getOrderById(id);
 
   if (!order) {
     notFound();
   }
 
-  const bakeSale = mockBakeSales.find((bs) => bs.id === order.bake_sale_id);
+  const bakeSale = order.bakeSale;
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <PageHeader
-          title={`Order #${order.id}`}
+          title={`Order #${order.id.slice(0, 8)}`}
           breadcrumbs={[
             { label: "Home", href: "/" },
             { label: "Orders", href: "/orders" },
-            { label: order.id },
+            { label: `#${order.id.slice(0, 8)}` },
           ]}
         />
 
@@ -97,17 +96,15 @@ export default async function OrderPage({ params }: OrderPageProps) {
         <div className="border rounded-lg p-6 mb-6">
           <h2 className="font-semibold text-lg mb-4">Order Items</h2>
           <div className="space-y-4">
-            {order.items.map((item) => (
+            {order.items.map((item: (typeof order.items)[number]) => (
               <div
                 key={item.id}
                 className="flex justify-between items-start pb-4 border-b last:border-b-0 last:pb-0"
               >
                 <div className="flex-1">
-                  <p className="font-medium">{item.product_id}</p>
-                  {item.product_variant_id && (
-                    <p className="text-sm text-muted-foreground">
-                      Variant: {item.product_variant_id}
-                    </p>
+                  <p className="font-medium">{item.product?.name || "Unknown Product"}</p>
+                  {item.variant && (
+                    <p className="text-sm text-muted-foreground">Variant: {item.variant.name}</p>
                   )}
                   <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                 </div>
@@ -136,12 +133,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 <span>£{order.delivery_fee.toFixed(2)}</span>
               </div>
             )}
-            {order.voucher_discount > 0 && (
-              <div className="flex justify-between text-green-600">
-                <span>Discount</span>
-                <span>-£{order.voucher_discount.toFixed(2)}</span>
-              </div>
-            )}
+            {/* TODO: Add voucher discount if available in schema/data */}
             <div className="border-t pt-2 mt-2">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total</span>
@@ -153,7 +145,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 Payment Method: {order.payment_method.replace(/_/g, " ")}
               </p>
               <p className="text-sm text-muted-foreground capitalize">
-                Payment Status: {order.payment_status}
+                Payment Status: {order.payment_status || "pending"}
               </p>
             </div>
           </div>

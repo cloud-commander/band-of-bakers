@@ -7,6 +7,8 @@ import { getDb } from "@/lib/db";
 import { reviews, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
+type OrderHelpers = { desc: typeof desc };
+
 /**
  * Check admin role
  */
@@ -27,7 +29,9 @@ export async function getAllReviews() {
   }
   const db = await getDb();
   return await db.query.reviews.findMany({
-    orderBy: (reviews, { desc }) => [desc(reviews.created_at)],
+    orderBy: (reviews: typeof db.query.reviews.$inferSelect, { desc }: OrderHelpers) => [
+      desc(reviews.created_at),
+    ],
     with: {
       user: true, // Assuming relation exists, if not we rely on user_name in review
       product: true,
@@ -100,7 +104,7 @@ export async function getProductRatings(): Promise<
 
   const ratings: Record<string, { total: number; count: number }> = {};
 
-  allReviews.forEach((r) => {
+  allReviews.forEach((r: { productId: string; rating: number }) => {
     if (!ratings[r.productId]) {
       ratings[r.productId] = { total: 0, count: 0 };
     }

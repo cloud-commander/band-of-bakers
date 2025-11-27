@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/state/page-header";
-import { mockProductsWithVariants } from "@/lib/mocks/products";
-import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
+import { getProductBySlug } from "@/actions/products";
+import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ProductDetailForm } from "@/components/product/product-detail-form";
@@ -14,13 +14,16 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = mockProductsWithVariants.find((p) => p.slug === slug);
+
+  // Fetch data in parallel
+  const [product, upcomingBakeSales] = await Promise.all([
+    getProductBySlug(slug),
+    getUpcomingBakeSales(),
+  ]);
 
   if (!product) {
     notFound();
   }
-
-  const upcomingBakeSales = mockBakeSalesWithLocation.filter((bs) => bs.is_active);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">

@@ -21,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
 import { createNewsPost } from "@/actions/news";
 
 const WysiwygEditor = dynamic(

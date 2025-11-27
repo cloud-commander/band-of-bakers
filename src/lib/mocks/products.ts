@@ -549,6 +549,19 @@ export const mockProducts: Product[] = [
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",
   },
+  {
+    id: "prod-victoria-sponge",
+    category_id: "cat-cakes-loaves",
+    name: "Victoria Sponge",
+    slug: "victoria-sponge",
+    description: "Classic Victoria Sponge with jam and cream.",
+    base_price: 18.0,
+    image_url:
+      "https://images.pexels.com/photos/1029665/pexels-photo-1029665.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
 ];
 
 // Export by category
@@ -784,6 +797,28 @@ export const mockProductVariants: ProductVariant[] = [
     name: "Sliced",
     price_adjustment: 0,
     sort_order: 2,
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+  // Sourdough variants
+  {
+    id: "var-sourdough-small",
+    product_id: "prod-sourdough",
+    name: "Small",
+    price_adjustment: -1.0,
+    sort_order: 1,
+    is_active: true,
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
+  },
+  // Victoria Sponge variants
+  {
+    id: "var-victoria-medium",
+    product_id: "prod-victoria-sponge",
+    name: "Medium (8 inch)",
+    price_adjustment: 0,
+    sort_order: 1,
     is_active: true,
     created_at: "2024-01-01T00:00:00.000Z",
     updated_at: "2024-01-01T00:00:00.000Z",

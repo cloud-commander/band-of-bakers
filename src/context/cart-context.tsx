@@ -9,6 +9,8 @@ export type CartItem = {
   productId: string;
   variantId?: string;
   bakeSaleId?: string;
+  bakeSaleDate?: string; // ISO date
+  bakeSaleLocation?: string; // Location name
   name: string;
   price: number;
   image?: string;

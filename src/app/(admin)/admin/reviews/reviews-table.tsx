@@ -74,7 +74,7 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
       await updateReviewStatus(reviewId, newStatus);
       setReviews(reviews.map((r) => (r.id === reviewId ? { ...r, status: newStatus } : r)));
       toast.success(`Review ${newStatus} successfully`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update status");
     }
   };
@@ -85,7 +85,7 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
         await deleteReview(reviewId);
         setReviews(reviews.filter((r) => r.id !== reviewId));
         toast.success("Review deleted successfully");
-      } catch (error) {
+      } catch {
         toast.error("Failed to delete review");
       }
     }

@@ -131,20 +131,11 @@ export async function createOrder(
       bakeSaleId = upcomingSales[0]?.id;
     }
 
-    if (!bakeSaleId) {
-      // Handle case where no bake sale is found
-      // For now, we might allow null if schema allows, or error
-      // Schema has bake_sale_id as nullable? Let's check.
-      // Assuming it might be needed.
-      // If strict, return error.
-      // return { success: false, error: "No active bake sale found" };
-    }
-
     const order = await orderRepository.createWithItems(
       {
         id: nanoid(),
         user_id: userId,
-        bake_sale_id: bakeSaleId, // Can be undefined if not found/provided? Schema in DB might allow null?
+        bake_sale_id: bakeSaleId,
         status: "pending",
         fulfillment_method,
         payment_method: validated.data.payment_method,
@@ -152,7 +143,7 @@ export async function createOrder(
         subtotal,
         total,
         notes: validated.data.notes,
-        // Billing (same as shipping for now or from form)
+        // Billing
         billing_address_line1: address1 || "Collection",
         billing_address_line2: address2,
         billing_city: city || "Collection",
@@ -172,5 +163,39 @@ export async function createOrder(
   } catch (error) {
     console.error("Create order error:", error);
     return { success: false, error: "Failed to create order" };
+  }
+}
+
+export async function getOrders() {
+  try {
+    const orders = await orderRepository.findAll();
+    return orders;
+  } catch (error) {
+    console.error("Failed to fetch orders:", error);
+    return [];
+  }
+}
+
+export async function getOrderById(id: string) {
+  try {
+    const order = await orderRepository.findByIdWithRelations(id);
+    return order;
+  } catch (error) {
+    console.error(`Failed to fetch order ${id}:`, error);
+    return null;
+  }
+}
+
+export async function getUserOrders() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return [];
+    }
+    const orders = await orderRepository.findByUserId(session.user.id);
+    return orders;
+  } catch (error) {
+    console.error("Failed to fetch user orders:", error);
+    return [];
   }
 }

@@ -25,9 +25,9 @@ export function Footer() {
   return (
     <footer className={`bg-card border-t border-opacity-20 py-16`}>
       <div className="container mx-auto px-4">
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mb-8 grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           {/* Logo */}
-          <div className="flex justify-center">
+          <div className="flex justify-center sm:col-span-2 md:col-span-3 lg:col-span-1">
             <Image
               src="/images/logos/logo-transparent-256.png"
               alt="Band of Bakers Logo"
@@ -38,7 +38,7 @@ export function Footer() {
           </div>
 
           {/* Address */}
-          <div className="text-center md:mt-[120px] lg:mt-0">
+          <div className="text-center">
             <Heading level={4} className="mb-4">
               Address
             </Heading>

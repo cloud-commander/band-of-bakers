@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { productRepository } from "@/lib/repositories";
+import { productRepository, categoryRepository } from "@/lib/repositories";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -330,5 +330,78 @@ export async function toggleProductActive(
   } catch (error) {
     console.error("Toggle product active error:", error);
     return { success: false, error: "Failed to toggle product status" };
+  }
+}
+
+/**
+ * Get all categories sorted
+ */
+export async function getCategories() {
+  try {
+    return await categoryRepository.findAllSorted();
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
+}
+
+/**
+ * Get product by slug with variants
+ */
+export async function getProductBySlug(slug: string) {
+  try {
+    const product = await productRepository.findBySlug(slug);
+    if (!product) return null;
+
+    const variants = await productRepository.getActiveVariants(product.id);
+    return { ...product, variants };
+  } catch (error) {
+    console.error(`Failed to fetch product ${slug}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Get products by category slug
+ */
+export async function getProductsByCategory(categorySlug: string) {
+  try {
+    const category = await categoryRepository.findBySlug(categorySlug);
+    if (!category) return [];
+
+    const products = await productRepository.findActiveByCategoryId(category.id);
+
+    const productsWithVariants = await Promise.all(
+      products.map(async (product) => {
+        const variants = await productRepository.getActiveVariants(product.id);
+        return { ...product, variants };
+      })
+    );
+
+    return productsWithVariants;
+  } catch (error) {
+    console.error(`Failed to fetch products for category ${categorySlug}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Get all categories with their products (for Menu page)
+ */
+export async function getMenu() {
+  try {
+    const categories = await getCategories();
+
+    const menu = await Promise.all(
+      categories.map(async (category) => {
+        const products = await getProductsByCategory(category.slug);
+        return { ...category, products };
+      })
+    );
+
+    return menu;
+  } catch (error) {
+    console.error("Failed to fetch menu:", error);
+    return [];
   }
 }

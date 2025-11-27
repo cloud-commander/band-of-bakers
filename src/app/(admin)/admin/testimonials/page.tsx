@@ -5,6 +5,8 @@ import Link from "next/link";
 import { getAllTestimonials } from "@/actions/testimonials";
 import { TestimonialsTable } from "./testimonials-table";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminTestimonialsPage() {
   const testimonials = await getAllTestimonials();
 

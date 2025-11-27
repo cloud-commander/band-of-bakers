@@ -601,7 +601,7 @@ export const mockOrderItems: OrderItem[] = [
   {
     id: "oi-1",
     order_id: "ord-1",
-    product_id: mockProducts[0].id, // Sourdough
+    product_id: "prod-sourdough", // Sourdough
     product_variant_id: "var-sourdough-small",
     quantity: 2,
     unit_price: 5.5,
@@ -629,7 +629,7 @@ export const mockOrderItems: OrderItem[] = [
   {
     id: "oi-3",
     order_id: "ord-2",
-    product_id: mockProducts[8].id, // Victoria Sponge
+    product_id: "prod-victoria-sponge", // Victoria Sponge
     product_variant_id: "var-victoria-medium",
     quantity: 1,
     unit_price: 18.0,
@@ -657,7 +657,7 @@ export const mockOrderItems: OrderItem[] = [
   {
     id: "oi-5",
     order_id: "ord-3",
-    product_id: mockProducts[0].id, // Sourdough
+    product_id: "prod-sourdough", // Sourdough
     product_variant_id: null,
     quantity: 2,
     unit_price: 6.5,
@@ -756,7 +756,7 @@ export const mockOrderItems: OrderItem[] = [
   {
     id: "oi-12",
     order_id: "ord-7",
-    product_id: mockProducts[0].id, // Sourdough
+    product_id: "prod-sourdough", // Sourdough
     product_variant_id: null,
     quantity: 3,
     unit_price: 6.5,
@@ -786,7 +786,7 @@ export const mockOrderItems: OrderItem[] = [
   {
     id: "oi-14",
     order_id: "ord-9",
-    product_id: mockProducts[8].id, // Victoria Sponge
+    product_id: "prod-victoria-sponge", // Victoria Sponge
     product_variant_id: null,
     quantity: 1,
     unit_price: 22.5,

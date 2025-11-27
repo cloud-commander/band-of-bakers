@@ -36,11 +36,71 @@ export class OrderRepository extends BaseRepository<typeof orders> {
    */
   async findByUserId(userId: string) {
     const db = await this.getDatabase();
-    return await db
-      .select()
-      .from(orders)
-      .where(eq(orders.user_id, userId))
-      .orderBy(desc(orders.created_at));
+    return await db.query.orders.findMany({
+      where: eq(orders.user_id, userId),
+      with: {
+        items: {
+          with: {
+            product: true,
+            variant: true,
+          },
+        },
+        bakeSale: {
+          with: {
+            location: true,
+          },
+        },
+      },
+      orderBy: desc(orders.created_at),
+    });
+  }
+
+  /**
+   * Find all orders with relations
+   */
+  async findAll() {
+    const db = await this.getDatabase();
+    return await db.query.orders.findMany({
+      with: {
+        user: true,
+        items: {
+          with: {
+            product: true,
+            variant: true,
+          },
+        },
+        bakeSale: {
+          with: {
+            location: true,
+          },
+        },
+      },
+      orderBy: desc(orders.created_at),
+    });
+  }
+
+  /**
+   * Find order by ID with relations
+   */
+  async findByIdWithRelations(id: string) {
+    const db = await this.getDatabase();
+    return await db.query.orders.findFirst({
+      where: eq(orders.id, id),
+      with: {
+        user: true,
+        items: {
+          with: {
+            product: true,
+            variant: true,
+          },
+        },
+        bakeSale: {
+          with: {
+            location: true,
+          },
+        },
+      },
+    });
   }
 }
 

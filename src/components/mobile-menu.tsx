@@ -66,17 +66,17 @@ export function MobileMenu({ isLoggedIn, cartItemCount }: MobileMenuProps) {
   ];
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <Button
         variant="ghost"
-        size="icon"
+        size="lg"
         onClick={() => setIsOpen(true)}
-        className="relative z-50"
+        className="relative z-50 h-12 w-12"
         aria-label="Open menu"
       >
-        <Menu className="h-6 w-6" />
+        <Menu className="h-7 w-7" />
         {cartItemCount > 0 && !isOpen && (
-          <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-[10px] text-white font-bold border border-white bg-orange-600">
+          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] text-white font-bold border border-white bg-orange-600">
             {cartItemCount}
           </Badge>
         )}

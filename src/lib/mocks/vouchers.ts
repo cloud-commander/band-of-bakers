@@ -56,6 +56,21 @@ export const mockVouchers: Voucher[] = [
     created_at: new Date("2024-11-15T00:00:00Z").toISOString(),
     updated_at: new Date("2024-11-15T00:00:00Z").toISOString(),
   },
+  {
+    id: "vouch-4",
+    code: "FREEDELIVERY",
+    type: "fixed_amount",
+    value: 5.0, // Assuming free delivery value
+    min_order_value: 40.0,
+    max_uses: 20,
+    current_uses: 5,
+    max_uses_per_customer: 1,
+    valid_from: new Date("2024-11-01T00:00:00Z").toISOString(),
+    valid_until: new Date("2024-12-31T23:59:59Z").toISOString(),
+    is_active: true,
+    created_at: new Date("2024-11-01T00:00:00Z").toISOString(),
+    updated_at: new Date("2024-11-01T00:00:00Z").toISOString(),
+  },
 ];
 
 export const mockVouchersEmpty: Voucher[] = [];

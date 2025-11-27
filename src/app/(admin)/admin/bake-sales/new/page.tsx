@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
 import { createBakeSale } from "@/actions/bake-sales";
 
 // Simplified form schema for demo

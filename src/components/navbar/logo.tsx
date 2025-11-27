@@ -8,18 +8,18 @@ export function NavbarLogo() {
     <div className="flex-shrink-0">
       <Link
         href="/"
-        className="flex items-center gap-3 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md transition-colors"
+        className="flex items-center gap-2 sm:gap-3 hover:bg-red-50 hover:text-red-700 px-2 sm:px-3 py-2 rounded-md transition-colors"
       >
         <Image
           src="/images/logos/logo-transparent-256.png"
           alt="Band of Bakers Logo"
-          width={40}
-          height={40}
+          width={48}
+          height={48}
           className="object-contain"
           priority
         />
         <span
-          className="text-xl font-bold"
+          className="text-lg sm:text-xl font-bold"
           style={{
             fontFamily: DESIGN_TOKENS.typography.h4.family,
             color: DESIGN_TOKENS.colors.text.main,

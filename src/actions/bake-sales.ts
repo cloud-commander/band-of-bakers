@@ -33,6 +33,18 @@ export async function getBakeSales() {
 }
 
 /**
+ * Get upcoming bake sales
+ */
+export async function getUpcomingBakeSales() {
+  try {
+    return await bakeSaleRepository.findUpcoming();
+  } catch (error) {
+    console.error("Get upcoming bake sales error:", error);
+    return [];
+  }
+}
+
+/**
  * Get all active locations for dropdowns
  */
 export async function getLocations() {

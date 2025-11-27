@@ -15,11 +15,11 @@ import { mockUsers } from "@/lib/mocks/users";
 import { mockProductCategories } from "@/lib/mocks/products";
 import { mockProducts, mockProductVariants } from "@/lib/mocks/products";
 import { mockLocations } from "@/lib/mocks/locations";
-import { mockBakeSales } from "@/lib/mocks/bake-sales";
+import { mockBakeSales, mockPastBakeSales } from "@/lib/mocks/bake-sales";
 import { mockNewsPosts } from "@/lib/mocks/news";
-import { mockReviews } from "@/lib/mocks/reviews";
-import { mockTestimonials } from "@/lib/mocks/testimonials";
-// import { mockFaqs } from "@/lib/mocks/faq";
+
+import { mockOrders, mockOrderItems } from "@/lib/mocks/orders";
+import { mockVouchers } from "@/lib/mocks/vouchers";
 
 // Configuration
 const DB_NAME = "bandofbakers-db";
@@ -83,24 +83,25 @@ async function main() {
 
     // Clear existing data (order matters for foreign keys)
     // We use DELETE FROM to clear data but keep structure
-    // We wrap in a transaction or just append.
     // If tables don't exist, this will fail.
     // We should assume migrations have run.
     // If order_items is missing, maybe the migration file is old?
 
     // Let's verify schema first.
+    // Clear existing data (order matters for foreign keys)
     sqlStatements.push("DELETE FROM order_items;");
     sqlStatements.push("DELETE FROM orders;");
-    sqlStatements.push("DELETE FROM bake_sales;");
-    sqlStatements.push("DELETE FROM locations;");
+    sqlStatements.push("DELETE FROM reviews;");
+    sqlStatements.push("DELETE FROM testimonials;");
+    sqlStatements.push("DELETE FROM news_posts;");
     sqlStatements.push("DELETE FROM product_variants;");
     sqlStatements.push("DELETE FROM products;");
     sqlStatements.push("DELETE FROM product_categories;");
-    sqlStatements.push("DELETE FROM news_posts;");
-    sqlStatements.push("DELETE FROM images;");
-    sqlStatements.push("DELETE FROM reviews;");
-    sqlStatements.push("DELETE FROM testimonials;");
+    sqlStatements.push("DELETE FROM bake_sales;");
+    sqlStatements.push("DELETE FROM locations;");
+    sqlStatements.push("DELETE FROM vouchers;");
     sqlStatements.push("DELETE FROM users;");
+    sqlStatements.push("DELETE FROM images;");
 
     // Users
     const usersToSeed = isAdminOnly ? mockUsers.filter((u) => u.role === "owner") : mockUsers;
@@ -206,6 +207,16 @@ async function main() {
         );
       }
 
+      for (const sale of mockPastBakeSales) {
+        sqlStatements.push(
+          `INSERT OR REPLACE INTO bake_sales (id, date, location_id, cutoff_datetime, is_active, created_at, updated_at) VALUES ('${
+            sale.id
+          }', '${sale.date}', '${sale.location_id}', '${sale.cutoff_datetime}', ${
+            sale.is_active ? 1 : 0
+          }, '${sale.created_at}', '${sale.updated_at}');`
+        );
+      }
+
       // News Posts
       for (const post of mockNewsPosts) {
         const imageUrl = skipR2
@@ -227,32 +238,62 @@ async function main() {
         );
       }
 
-      // Reviews
-      for (const review of mockReviews) {
-        console.log(
-          `Seeding review ${review.id} (prod: ${review.product_id}, user: ${review.user_id})`
-        );
+      // Vouchers
+      for (const voucher of mockVouchers) {
         sqlStatements.push(
-          `INSERT OR REPLACE INTO reviews (id, product_id, user_id, rating, title, comment, verified_purchase, helpful_count, status, created_at, updated_at) VALUES ('${
-            review.id
-          }', '${review.product_id}', '${review.user_id}', ${review.rating}, ${
-            review.title ? `'${review.title.replace(/'/g, "''")}'` : "NULL"
-          }, '${review.comment.replace(/'/g, "''")}', ${review.verified_purchase ? 1 : 0}, ${
-            review.helpful_count
-          }, '${review.status}', '${review.created_at}', '${review.created_at}');`
+          `INSERT OR REPLACE INTO vouchers (id, code, type, value, min_order_value, max_uses, current_uses, max_uses_per_customer, valid_from, valid_until, is_active, created_at, updated_at) VALUES ('${
+            voucher.id
+          }', '${voucher.code}', '${voucher.type}', ${voucher.value}, ${voucher.min_order_value}, ${
+            voucher.max_uses === null ? "NULL" : voucher.max_uses
+          }, ${voucher.current_uses}, ${voucher.max_uses_per_customer}, '${voucher.valid_from}', '${
+            voucher.valid_until
+          }', ${voucher.is_active ? 1 : 0}, '${voucher.created_at}', '${voucher.updated_at}');`
         );
       }
 
-      // Testimonials
-      for (const testimonial of mockTestimonials) {
+      // Orders
+      for (const order of mockOrders) {
         sqlStatements.push(
-          `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, is_active, created_at, updated_at) VALUES ('${
-            testimonial.id
-          }', '${testimonial.name.replace(/'/g, "''")}', ${
-            testimonial.role ? `'${testimonial.role.replace(/'/g, "''")}'` : "NULL"
-          }, '${testimonial.quote.replace(/'/g, "''")}', ${testimonial.rating}, ${
-            testimonial.avatar ? `'${testimonial.avatar}'` : "NULL"
-          }, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+          `INSERT OR REPLACE INTO orders (id, user_id, bake_sale_id, status, fulfillment_method, payment_method, payment_status, payment_intent_id, subtotal, delivery_fee, voucher_discount, total, shipping_address_line1, shipping_address_line2, shipping_city, shipping_postcode, billing_address_line1, billing_address_line2, billing_city, billing_postcode, voucher_id, notes, created_at, updated_at) VALUES ('${
+            order.id
+          }', '${order.user_id}', '${order.bake_sale_id}', '${order.status}', '${
+            order.fulfillment_method
+          }', '${order.payment_method}', '${order.payment_status}', ${
+            order.payment_intent_id ? `'${order.payment_intent_id}'` : "NULL"
+          }, ${order.subtotal}, ${order.delivery_fee}, ${order.voucher_discount}, ${order.total}, ${
+            order.shipping_address_line1
+              ? `'${order.shipping_address_line1.replace(/'/g, "''")}'`
+              : "NULL"
+          }, ${
+            order.shipping_address_line2
+              ? `'${order.shipping_address_line2.replace(/'/g, "''")}'`
+              : "NULL"
+          }, ${order.shipping_city ? `'${order.shipping_city.replace(/'/g, "''")}'` : "NULL"}, ${
+            order.shipping_postcode ? `'${order.shipping_postcode}'` : "NULL"
+          }, '${order.billing_address_line1.replace(/'/g, "''")}', ${
+            order.billing_address_line2
+              ? `'${order.billing_address_line2.replace(/'/g, "''")}'`
+              : "NULL"
+          }, '${order.billing_city.replace(/'/g, "''")}', '${order.billing_postcode}', ${
+            order.voucher_id ? `'${order.voucher_id}'` : "NULL"
+          }, ${order.notes ? `'${order.notes.replace(/'/g, "''")}'` : "NULL"}, '${
+            order.created_at
+          }', '${order.updated_at}');`
+        );
+      }
+
+      // Order Items
+      for (const item of mockOrderItems) {
+        sqlStatements.push(
+          `INSERT OR REPLACE INTO order_items (id, order_id, product_id, product_variant_id, quantity, unit_price, total_price, is_available, unavailable_reason, created_at, updated_at) VALUES ('${
+            item.id
+          }', '${item.order_id}', '${item.product_id}', ${
+            item.product_variant_id ? `'${item.product_variant_id}'` : "NULL"
+          }, ${item.quantity}, ${item.unit_price}, ${item.total_price}, ${
+            item.is_available ? 1 : 0
+          }, ${
+            item.unavailable_reason ? `'${item.unavailable_reason.replace(/'/g, "''")}'` : "NULL"
+          }, '${item.created_at}', '${item.updated_at}');`
         );
       }
     }
@@ -263,9 +304,17 @@ async function main() {
 
     // 2. Execute SQL
     console.log("\n💾 Executing SQL against D1 (local)...");
-    execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${sqlFile}`, {
-      stdio: "inherit",
-    });
+    try {
+      execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${sqlFile}`, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+    } catch (e: any) {
+      console.error("Wrangler Error Output:");
+      console.error(e.stdout);
+      console.error(e.stderr);
+      throw e;
+    }
 
     // 3. R2 Population
     if (!skipR2 && !isAdminOnly) {

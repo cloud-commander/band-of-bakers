@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/cart-context";
-import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 
 export function CartPreview() {
   const { items, removeItem, cartTotal, cartCount } = useCart();
@@ -66,18 +65,19 @@ export function CartPreview() {
                     <h5 className="font-medium text-sm line-clamp-2">{item.name}</h5>
                     {item.bakeSaleId ? (
                       (() => {
-                        const bakeSale = mockBakeSalesWithLocation.find(
-                          (bs) => bs.id === item.bakeSaleId
-                        );
-                        return bakeSale ? (
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(bakeSale.date).toLocaleDateString("en-GB", {
-                              month: "short",
-                              day: "numeric",
-                            })}{" "}
-                            at {bakeSale.location.name}
-                          </p>
-                        ) : null;
+                        // Use stored bake sale details if available
+                        if (item.bakeSaleDate && item.bakeSaleLocation) {
+                          return (
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(item.bakeSaleDate).toLocaleDateString("en-GB", {
+                                month: "short",
+                                day: "numeric",
+                              })}{" "}
+                              at {item.bakeSaleLocation}
+                            </p>
+                          );
+                        }
+                        return null;
                       })()
                     ) : (
                       <p className="text-xs text-orange-600">⚠️ No collection date</p>
