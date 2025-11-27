@@ -20,6 +20,7 @@ import { mockNewsPosts } from "@/lib/mocks/news";
 
 import { mockOrders, mockOrderItems } from "@/lib/mocks/orders";
 import { mockVouchers } from "@/lib/mocks/vouchers";
+import { mockTestimonials } from "@/lib/mocks/testimonials";
 
 // Import real products data (used when --real-products flag is set)
 import {
@@ -360,21 +361,20 @@ async function main() {
         }
       }
 
-      // Testimonials - use real or empty based on flag
-      if (useRealProducts) {
-        for (const testimonial of realTestimonials) {
-          sqlStatements.push(
-            `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, user_id, is_active, created_at, updated_at) VALUES ('${
-              testimonial.id
-            }', '${testimonial.name.replace(/'/g, "''")}', ${
-              testimonial.role ? `'${testimonial.role.replace(/'/g, "''")}'` : "NULL"
-            }, '${testimonial.content.replace(/'/g, "''")}', ${testimonial.rating}, ${
-              testimonial.avatar_url ? `'${testimonial.avatar_url}'` : "NULL"
-            }, ${testimonial.user_id ? `'${testimonial.user_id}'` : "NULL"}, ${
-              testimonial.is_active ? 1 : 0
-            }, '${testimonial.created_at}', '${testimonial.updated_at}');`
-          );
-        }
+      // Testimonials - use real or mock based on flag
+      const testimonialsToSeed = useRealProducts ? realTestimonials : mockTestimonials;
+      for (const testimonial of testimonialsToSeed) {
+        sqlStatements.push(
+          `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, user_id, is_active, created_at, updated_at) VALUES ('${
+            testimonial.id
+          }', '${testimonial.name?.replace(/'/g, "''")}', ${
+            testimonial.role ? `'${testimonial.role.replace(/'/g, "''")}'` : "NULL"
+          }, '${testimonial.content?.replace(/'/g, "''")}', ${testimonial.rating}, ${
+            testimonial.avatar_url ? `'${testimonial.avatar_url}'` : "NULL"
+          }, ${testimonial.user_id ? `'${testimonial.user_id}'` : "NULL"}, ${
+            testimonial.is_active ? 1 : 0
+          }, '${testimonial.created_at}', '${testimonial.updated_at}');`
+        );
       }
     }
 

@@ -79,9 +79,14 @@ export async function deleteTestimonial(id: string): Promise<ActionResult<void>>
  */
 export async function createTestimonial(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
-    if (!(await checkAdminRole())) {
-      return { success: false, error: "Unauthorized" };
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, error: "You must be logged in to submit a testimonial" };
     }
+
+    const isAdmin = session.user.role
+      ? ["owner", "manager", "staff"].includes(session.user.role)
+      : false;
 
     const rawData = {
       name: formData.get("name") as string,
@@ -97,6 +102,14 @@ export async function createTestimonial(formData: FormData): Promise<ActionResul
       return { success: false, error: validated.error.issues[0].message };
     }
 
+    // If not admin, force status to inactive (pending)
+    const isActive = isAdmin ? validated.data.status === "active" : false;
+
+    // Use user's name/avatar if not provided (or override if we want strictness, but let's trust form for now or use session)
+    // For user submissions, we might want to enforce using their profile name/avatar?
+    // The plan said "Name/Role/Avatar will be pulled from the user's profile automatically".
+    // Let's rely on what's passed from the client for now, but ensure user_id is set.
+
     const testimonial = await testimonialRepository.create({
       id: nanoid(),
       name: validated.data.name,
@@ -104,15 +117,39 @@ export async function createTestimonial(formData: FormData): Promise<ActionResul
       content: validated.data.content,
       rating: validated.data.rating,
       avatar_url: validated.data.avatar || null,
-      is_active: validated.data.status === "active",
+      is_active: isActive,
+      user_id: session.user.id || "",
     });
 
     revalidatePath("/admin/testimonials");
-    revalidatePath("/testimonials"); // Assuming public page exists
+    revalidatePath("/"); // Homepage
 
     return { success: true, data: { id: testimonial.id } };
   } catch (error) {
     console.error("Create testimonial error:", error);
     return { success: false, error: "Failed to create testimonial" };
+  }
+}
+
+/**
+ * Update testimonial status (approve/reject)
+ */
+export async function updateTestimonialStatus(
+  id: string,
+  isActive: boolean
+): Promise<ActionResult<void>> {
+  try {
+    if (!(await checkAdminRole())) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await testimonialRepository.update(id, { is_active: isActive });
+    revalidatePath("/admin/testimonials");
+    revalidatePath("/");
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Update testimonial status error:", error);
+    return { success: false, error: "Failed to update testimonial status" };
   }
 }

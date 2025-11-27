@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Testimonial } from "@/db/schema";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SubmitTestimonialDialog } from "@/components/testimonials/submit-testimonial-dialog";
 
 interface TestimonialsCarouselProps {
   testimonials: Testimonial[];
@@ -154,6 +155,11 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* Submit Testimonial Dialog */}
+        <div className="flex justify-center mt-8">
+          <SubmitTestimonialDialog />
         </div>
       </div>
     </div>

@@ -16,12 +16,12 @@ export default async function AdminTestimonialsPage() {
         title="Testimonials"
         description="Manage customer testimonials displayed on the homepage"
         actions={
-          <Link href="/admin/testimonials/new">
-            <Button className="bg-bakery-amber-600 hover:bg-bakery-amber-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
+          <Button asChild>
+            <Link href="/admin/testimonials/new">
+              <Plus className="h-4 w-4 mr-2" />
               Add Testimonial
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         }
       />
 
