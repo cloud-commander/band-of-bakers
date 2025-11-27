@@ -1,6 +1,6 @@
 /**
- * Homepage Mock Data
- * Mock data specifically for the homepage hero and featured sections
+ * Homepage Constants
+ * Static content for the homepage hero and featured sections
  */
 
 // ============================================================================
@@ -14,7 +14,7 @@ export interface FeaturedBake {
   image: string;
 }
 
-export const mockFeaturedBakes: FeaturedBake[] = [
+export const FEATURED_BAKES: FeaturedBake[] = [
   {
     id: 1,
     name: "Sourdough",
@@ -44,10 +44,9 @@ export const mockFeaturedBakes: FeaturedBake[] = [
 
 export const HERO_SECTION = {
   /** Hero background image URL */
-  backgroundImage:
-    "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=2000&h=1200&fit=crop&auto=format",
+  backgroundImage: "/images/hero/workspace-hero.jpg",
   /** Hero background image alt text */
-  backgroundAlt: "Baker's hands kneading dough",
+  backgroundAlt: "Artisan Bakery Workspace",
   /** Hero main heading */
   heading: "Baking for the Village since 2012.",
   /** Hero subheading/description */

@@ -14,8 +14,6 @@ import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { mockReviews, Review } from "@/lib/mocks/reviews";
-import { StarRating } from "@/components/ui/star-rating";
 import {
   Select,
   SelectContent,
@@ -87,17 +85,8 @@ function MenuPageContent() {
       case "price-high":
         return b.base_price - a.base_price;
       case "rating": {
-        const aReviews = mockReviews.filter((r: Review) => r.product_id === a.id);
-        const bReviews = mockReviews.filter((r: Review) => r.product_id === b.id);
-        const aRating =
-          aReviews.length > 0
-            ? aReviews.reduce((acc: number, r: Review) => acc + r.rating, 0) / aReviews.length
-            : 0;
-        const bRating =
-          bReviews.length > 0
-            ? bReviews.reduce((acc: number, r: Review) => acc + r.rating, 0) / bReviews.length
-            : 0;
-        return bRating - aRating;
+        // Rating sort temporarily disabled during migration
+        return 0;
       }
       default:
         return 0;
@@ -327,28 +316,8 @@ function MenuPageContent() {
                         {product.name}
                       </h3>
 
-                      {/* Rating */}
-                      {(() => {
-                        const productReviews = mockReviews.filter(
-                          (r: Review) => r.product_id === product.id
-                        );
-                        const averageRating: number =
-                          productReviews.length > 0
-                            ? productReviews.reduce((acc: number, r: Review) => acc + r.rating, 0) /
-                              productReviews.length
-                            : 0;
-
-                        if (averageRating === 0) return <div className="mb-3" />; // Spacer
-
-                        return (
-                          <div className="flex items-center gap-1 mb-3">
-                            <StarRating rating={averageRating} size={14} />
-                            <span className="text-xs text-muted-foreground">
-                              ({productReviews.length})
-                            </span>
-                          </div>
-                        );
-                      })()}
+                      {/* Rating - Temporarily hidden */}
+                      {/* TODO: Fetch ratings from DB */}
 
                       <p
                         className={`${DESIGN_TOKENS.typography.body.sm.size} text-muted-foreground line-clamp-2 mb-3`}

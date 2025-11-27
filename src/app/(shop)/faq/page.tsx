@@ -7,7 +7,7 @@ import {
   FAQ_CATEGORIES,
   FAQ_PAGE_HEADER,
   FAQ_CTA_SECTION,
-} from "@/lib/mocks/faq";
+} from "@/constants/faq";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import {
   Accordion,

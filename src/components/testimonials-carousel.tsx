@@ -1,39 +1,49 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { mockTestimonials } from "@/lib/mocks/testimonials";
 import { StarRating } from "@/components/ui/star-rating";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { motion, AnimatePresence } from "framer-motion";
+import { Testimonial } from "@/db/schema";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function TestimonialsCarousel() {
+interface TestimonialsCarouselProps {
+  testimonials: Testimonial[];
+}
+
+export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
-  const testimonials = mockTestimonials;
-
   const nextTestimonial = useCallback(() => {
+    if (!testimonials || testimonials.length === 0) return;
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  }, [testimonials.length]);
+  }, [testimonials]);
 
   const prevTestimonial = () => {
+    if (!testimonials || testimonials.length === 0) return;
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   // Auto-rotate every 8 seconds
   useEffect(() => {
+    if (!testimonials || testimonials.length === 0) return;
     const timer = setInterval(() => {
       nextTestimonial();
     }, 8000);
 
     return () => clearInterval(timer);
-  }, [nextTestimonial]);
+  }, [nextTestimonial, testimonials]);
+
+  // If no testimonials, don't render anything or render a placeholder
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
 
   const currentTestimonial = testimonials[currentIndex];
 
@@ -84,15 +94,15 @@ export function TestimonialsCarousel() {
               <p
                 className={`${DESIGN_TOKENS.typography.body.lg.size} italic text-foreground leading-relaxed max-w-3xl mx-auto`}
               >
-                &ldquo;{currentTestimonial.quote}&rdquo;
+                &ldquo;{currentTestimonial.content}&rdquo;
               </p>
             </blockquote>
 
             {/* Author */}
             <div className="flex flex-col items-center text-center">
-              {currentTestimonial.avatar && (
+              {currentTestimonial.avatar_url && (
                 <Avatar className="w-16 h-16 mb-4 border-2 border-background shadow-sm">
-                  <AvatarImage src={currentTestimonial.avatar} alt={currentTestimonial.name} />
+                  <AvatarImage src={currentTestimonial.avatar_url} alt={currentTestimonial.name} />
                   <AvatarFallback>{currentTestimonial.name.charAt(0)}</AvatarFallback>
                 </Avatar>
               )}

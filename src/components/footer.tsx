@@ -29,7 +29,7 @@ export function Footer() {
           {/* Logo */}
           <div className="flex justify-center">
             <Image
-              src="/images/logos/bandofbakers-256.png"
+              src="/images/logos/logo-transparent-256.png"
               alt="Band of Bakers Logo"
               width={120}
               height={120}
@@ -38,7 +38,7 @@ export function Footer() {
           </div>
 
           {/* Address */}
-          <div className="text-center">
+          <div className="text-center md:mt-[120px] lg:mt-0">
             <Heading level={4} className="mb-4">
               Address
             </Heading>

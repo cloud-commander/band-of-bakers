@@ -1,4 +1,4 @@
-import { TERMS_OF_SERVICE } from "@/lib/mocks/legal";
+import { TERMS_OF_SERVICE } from "@/constants/legal";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { SectionDivider } from "@/components/section-divider";
 

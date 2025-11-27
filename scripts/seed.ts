@@ -17,8 +17,8 @@ import { mockProducts, mockProductVariants } from "@/lib/mocks/products";
 import { mockLocations } from "@/lib/mocks/locations";
 import { mockBakeSales } from "@/lib/mocks/bake-sales";
 import { mockNewsPosts } from "@/lib/mocks/news";
-// import { mockReviews } from "@/lib/mocks/reviews";
-// import { mockTestimonials } from "@/lib/mocks/testimonials";
+import { mockReviews } from "@/lib/mocks/reviews";
+import { mockTestimonials } from "@/lib/mocks/testimonials";
 // import { mockFaqs } from "@/lib/mocks/faq";
 
 // Configuration
@@ -98,6 +98,8 @@ async function main() {
     sqlStatements.push("DELETE FROM product_categories;");
     sqlStatements.push("DELETE FROM news_posts;");
     sqlStatements.push("DELETE FROM images;");
+    sqlStatements.push("DELETE FROM reviews;");
+    sqlStatements.push("DELETE FROM testimonials;");
     sqlStatements.push("DELETE FROM users;");
 
     // Users
@@ -222,6 +224,35 @@ async function main() {
           )}', '${(post.excerpt || "").replace(/'/g, "''")}', ${imageVal}, '${post.author_id}', ${
             post.is_published ? 1 : 0
           }, '${post.published_at}', '${post.created_at}', '${post.updated_at}');`
+        );
+      }
+
+      // Reviews
+      for (const review of mockReviews) {
+        console.log(
+          `Seeding review ${review.id} (prod: ${review.product_id}, user: ${review.user_id})`
+        );
+        sqlStatements.push(
+          `INSERT OR REPLACE INTO reviews (id, product_id, user_id, rating, title, comment, verified_purchase, helpful_count, status, created_at, updated_at) VALUES ('${
+            review.id
+          }', '${review.product_id}', '${review.user_id}', ${review.rating}, ${
+            review.title ? `'${review.title.replace(/'/g, "''")}'` : "NULL"
+          }, '${review.comment.replace(/'/g, "''")}', ${review.verified_purchase ? 1 : 0}, ${
+            review.helpful_count
+          }, '${review.status}', '${review.created_at}', '${review.created_at}');`
+        );
+      }
+
+      // Testimonials
+      for (const testimonial of mockTestimonials) {
+        sqlStatements.push(
+          `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, is_active, created_at, updated_at) VALUES ('${
+            testimonial.id
+          }', '${testimonial.name.replace(/'/g, "''")}', ${
+            testimonial.role ? `'${testimonial.role.replace(/'/g, "''")}'` : "NULL"
+          }, '${testimonial.quote.replace(/'/g, "''")}', ${testimonial.rating}, ${
+            testimonial.avatar ? `'${testimonial.avatar}'` : "NULL"
+          }, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
         );
       }
     }

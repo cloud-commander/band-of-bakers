@@ -1,4 +1,4 @@
-import { COOKIES_POLICY } from "@/lib/mocks/legal";
+import { COOKIES_POLICY } from "@/constants/legal";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { SectionDivider } from "@/components/section-divider";
 

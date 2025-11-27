@@ -11,8 +11,7 @@ import {
   ABOUT_TEAM_SECTION,
   ABOUT_VALUES_SECTION,
   ABOUT_HOW_WE_WORK_SECTION,
-  ABOUT_CTA_SECTION,
-} from "@/lib/mocks/about";
+} from "@/constants/about";
 
 export default function AboutPage() {
   return (
@@ -24,7 +23,7 @@ export default function AboutPage() {
             src={ABOUT_HERO_SECTION.backgroundImage}
             alt={ABOUT_HERO_SECTION.backgroundAlt}
             fill
-            className="object-cover"
+            className="object-cover object-top"
             priority
           />
           <div
@@ -239,36 +238,6 @@ export default function AboutPage() {
             zoom={17}
             className="w-full h-[300px] md:h-[400px] rounded-lg overflow-hidden border"
           />
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <SectionDivider variant="strong" />
-      <section
-        className={DESIGN_TOKENS.sections.padding}
-        style={{ backgroundColor: DESIGN_TOKENS.colors.card }}
-      >
-        <div className="max-w-2xl mx-auto text-center">
-          <h2
-            className={`${DESIGN_TOKENS.typography.h3.size} ${DESIGN_TOKENS.typography.h3.weight} mb-4`}
-            style={{ fontFamily: DESIGN_TOKENS.typography.h3.family }}
-          >
-            {ABOUT_CTA_SECTION.heading}
-          </h2>
-          <p
-            className={`${DESIGN_TOKENS.typography.body.lg.size} mb-8`}
-            style={{ color: DESIGN_TOKENS.colors.text.muted }}
-          >
-            {ABOUT_CTA_SECTION.description}
-          </p>
-          <Button
-            asChild
-            size="lg"
-            className={DESIGN_TOKENS.buttons.primary}
-            style={{ backgroundColor: DESIGN_TOKENS.colors.accent }}
-          >
-            <Link href={ABOUT_CTA_SECTION.ctaLink}>{ABOUT_CTA_SECTION.ctaText}</Link>
-          </Button>
         </div>
       </section>
     </div>

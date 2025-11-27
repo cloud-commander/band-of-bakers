@@ -1,10 +1,10 @@
-import { Review } from "@/lib/mocks/reviews";
 import { StarRating } from "@/components/ui/star-rating";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle2 } from "lucide-react";
+import { ReviewWithUser } from "@/lib/repositories/review.repository";
 
 interface ReviewCardProps {
-  review: Review;
+  review: ReviewWithUser;
 }
 
 export function ReviewCard({ review }: ReviewCardProps) {
@@ -13,6 +13,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
+            <AvatarImage src={review.user_avatar || undefined} alt={review.user_name} />
             <AvatarFallback>{review.user_name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
@@ -27,7 +28,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
             <div className="flex items-center gap-2">
               <StarRating rating={review.rating} size={12} />
               <span className="text-xs text-muted-foreground">
-                {new Date(review.date).toLocaleDateString()}
+                {new Date(review.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>

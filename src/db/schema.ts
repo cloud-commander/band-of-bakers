@@ -251,6 +251,35 @@ export const images = sqliteTable(
 );
 
 // ============================================================================
+// REVIEWS
+// ============================================================================
+
+export const reviews = sqliteTable(
+  "reviews",
+  {
+    id: text("id").primaryKey(),
+    product_id: text("product_id")
+      .notNull()
+      .references(() => products.id),
+    user_id: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    rating: integer("rating").notNull(), // 1-5
+    title: text("title"),
+    comment: text("comment").notNull(),
+    verified_purchase: integer("verified_purchase", { mode: "boolean" }).notNull().default(false),
+    helpful_count: integer("helpful_count").notNull().default(0),
+    status: text("status").notNull().default("pending"), // pending, approved, rejected
+    ...timestamps,
+  },
+  (table) => ({
+    productIdIdx: index("idx_reviews_product_id").on(table.product_id),
+    userIdIdx: index("idx_reviews_user_id").on(table.user_id),
+    statusIdx: index("idx_reviews_status").on(table.status),
+  })
+);
+
+// ============================================================================
 // TESTIMONIALS
 // ============================================================================
 
@@ -263,6 +292,7 @@ export const testimonials = sqliteTable(
     content: text("content").notNull(),
     rating: integer("rating").notNull().default(5),
     avatar_url: text("avatar_url"),
+    user_id: text("user_id").references(() => users.id),
     is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
     ...timestamps,
   },
@@ -324,6 +354,9 @@ export type InsertSetting = typeof settings.$inferInsert;
 
 export type Image = typeof images.$inferSelect;
 export type InsertImage = typeof images.$inferInsert;
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = typeof reviews.$inferInsert;
 
 export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;

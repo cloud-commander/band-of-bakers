@@ -1,5 +1,5 @@
 /**
- * Legal Pages Mock Data
+ * Legal Pages Constants
  * Centralized content for Privacy Policy, Terms of Service, and Cookies Policy
  */
 

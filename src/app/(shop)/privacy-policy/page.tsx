@@ -1,4 +1,4 @@
-import { PRIVACY_POLICY } from "@/lib/mocks/legal";
+import { PRIVACY_POLICY } from "@/constants/legal";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { SectionDivider } from "@/components/section-divider";
 

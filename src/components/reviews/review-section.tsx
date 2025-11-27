@@ -1,15 +1,15 @@
-import { mockReviews } from "@/lib/mocks/reviews";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { StarRating } from "@/components/ui/star-rating";
 import { WriteReviewDialog } from "@/components/reviews/write-review-dialog";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { getProductReviews } from "@/actions/reviews";
 
 interface ReviewSectionProps {
   productId: string;
 }
 
-export function ReviewSection({ productId }: ReviewSectionProps) {
-  const reviews = mockReviews.filter((r) => r.product_id === productId);
+export async function ReviewSection({ productId }: ReviewSectionProps) {
+  const reviews = await getProductReviews(productId);
   const averageRating =
     reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0;
 

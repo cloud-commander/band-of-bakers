@@ -14,17 +14,19 @@ import {
   SIGNATURE_BAKES_SECTION,
   STORY_SECTION,
   CTA_SECTION,
-} from "@/lib/mocks/homepage";
+} from "@/constants/homepage";
 import { mockBakeSalesWithLocation } from "@/lib/mocks/bake-sales";
 import { mockProductCategories } from "@/lib/mocks/products";
+import { getActiveTestimonials } from "@/actions/testimonials";
 
-export default function Home() {
+export default async function Home() {
   const categories = mockProductCategories;
+  const testimonials = await getActiveTestimonials();
 
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-start overflow-hidden">
+      <section className="relative min-h-screen flex items-start justify-start overflow-hidden pt-32">
         {/* Full-width background image */}
         <div className="absolute inset-0 w-full h-full">
           <Image
@@ -45,9 +47,9 @@ export default function Home() {
         </div>
 
         {/* Text content overlaid on image */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <FadeIn>
-            <div className="max-w-2xl">
+            <div className="max-w-2xl backdrop-blur-sm bg-black/40 p-8 rounded-lg border border-white/20">
               <Heading level={1} className="text-white mb-6">
                 {HERO_SECTION.heading}
               </Heading>
@@ -229,7 +231,7 @@ export default function Home() {
                 Don&apos;t just take our word for it - hear from our happy customers
               </p>
             </div>
-            <TestimonialsCarousel />
+            <TestimonialsCarousel testimonials={testimonials} />
           </FadeIn>
         </div>
       </section>

@@ -14,8 +14,8 @@ export function StickyHero() {
       <div className="absolute top-[30vh] w-full max-w-4xl px-4 z-0">
         <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-2xl">
           <Image
-            src="/images/hero/artisan-bread.jpg"
-            alt="Artisan Sourdough Bread"
+            src="/images/hero/workspace-hero.jpg"
+            alt="Artisan Bakery Workspace"
             fill
             className="object-cover"
             priority

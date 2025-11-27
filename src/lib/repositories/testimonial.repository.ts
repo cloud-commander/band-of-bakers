@@ -10,12 +10,21 @@ export class TestimonialRepository extends BaseRepository<typeof testimonials> {
   /**
    * Find active testimonials
    */
-  async findActive(): Promise<Testimonial[]> {
+  async getActive(): Promise<Testimonial[]> {
     const db = await this.getDatabase();
     return await db
       .select()
       .from(testimonials)
       .where(eq(testimonials.is_active, true))
+      .orderBy(desc(testimonials.created_at));
+  }
+
+  async findByUserId(userId: string): Promise<Testimonial[]> {
+    const db = await this.getDatabase();
+    return await db
+      .select()
+      .from(testimonials)
+      .where(eq(testimonials.user_id, userId))
       .orderBy(desc(testimonials.created_at));
   }
 }

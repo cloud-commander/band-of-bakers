@@ -1,5 +1,5 @@
 /**
- * FAQ Page Mock Data
+ * FAQ Page Constants
  * Centralized content for frequently asked questions organized by category
  */
 

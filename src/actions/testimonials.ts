@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { testimonialRepository } from "@/lib/repositories/testimonial.repository";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { Testimonial } from "@/db/schema";
 import { nanoid } from "nanoid";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
@@ -27,6 +28,50 @@ async function checkAdminRole() {
     return false;
   }
   return true;
+}
+
+/**
+ * Get active testimonials (public)
+ */
+export async function getActiveTestimonials(): Promise<Testimonial[]> {
+  return await testimonialRepository.getActive();
+}
+
+/**
+ * Get all testimonials (admin)
+ */
+export async function getAllTestimonials() {
+  if (!(await checkAdminRole())) {
+    throw new Error("Unauthorized");
+  }
+  return await testimonialRepository.findAll();
+}
+
+/**
+ * Delete a testimonial
+ */
+/**
+ * Get testimonials by user ID
+ */
+export async function getUserTestimonials(userId: string): Promise<Testimonial[]> {
+  return await testimonialRepository.findByUserId(userId);
+}
+
+export async function deleteTestimonial(id: string): Promise<ActionResult<void>> {
+  try {
+    if (!(await checkAdminRole())) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await testimonialRepository.delete(id);
+    revalidatePath("/admin/testimonials");
+    revalidatePath("/"); // Homepage
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Delete testimonial error:", error);
+    return { success: false, error: "Failed to delete testimonial" };
+  }
 }
 
 /**

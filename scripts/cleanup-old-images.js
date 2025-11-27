@@ -27,7 +27,6 @@ const FILES_TO_DELETE = [
   'Bandofbakers-logo-removebg-preview.png',
   'mike.webp',
   'jon.webp',
-  '20250927_081454-EDIT.jpg', // Old unused image
   'instagram/instagram-1.jpg',
   'instagram/instagram-2.jpg',
   'instagram/instagram-3.jpg',

@@ -43,6 +43,13 @@
       "when": 1764233847667,
       "tag": "0005_sparkling_gambit",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1764240336146,
+      "tag": "0006_smart_midnight",
+      "breakpoints": true
     }
   ]
 }
