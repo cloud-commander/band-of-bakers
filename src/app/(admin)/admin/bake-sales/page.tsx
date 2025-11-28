@@ -11,7 +11,7 @@ import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BakeSaleDialog } from "@/components/admin/bake-sale-dialog";
 import { LocationDialog } from "@/components/admin/location-dialog";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, CalendarClock, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -24,6 +24,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CancelBakeSaleDialog } from "@/components/admin/cancel-bake-sale-dialog";
+import { RescheduleBakeSaleDialog } from "@/components/admin/reschedule-bake-sale-dialog";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_BAKE_SALES_ITEMS_PER_PAGE;
 
@@ -216,6 +218,36 @@ export default function AdminBakeSalesPage() {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
+
+                    {!isArchived && bakeSale.is_active && (
+                      <>
+                        <RescheduleBakeSaleDialog
+                          bakeSaleId={bakeSale.id}
+                          currentDate={bakeSale.date}
+                          onSuccess={fetchData}
+                          trigger={
+                            <Button variant="ghost" size="sm" title="Reschedule">
+                              <CalendarClock className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <CancelBakeSaleDialog
+                          bakeSaleId={bakeSale.id}
+                          date={bakeSale.date}
+                          onSuccess={fetchData}
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              title="Cancel"
+                            >
+                              <AlertTriangle className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                      </>
+                    )}
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

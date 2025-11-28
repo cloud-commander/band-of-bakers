@@ -1,5 +1,9 @@
 # Full Stack Next.js + Cloudflare: Development Phases
 
+> ⚠️ **ARCHIVED DOCUMENT** - This planning document has been superseded by **[ROADMAP.md](ROADMAP.md)** as of 2025-11-28.
+>
+> This file is kept for historical reference only. For the current, authoritative project roadmap, see **[ROADMAP.md](ROADMAP.md)**.
+
 ## Overview
 
 ```

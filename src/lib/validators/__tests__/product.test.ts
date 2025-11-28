@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { insertProductSchema } from "./product";
+import { insertProductSchema } from "../product";
 
 describe("insertProductSchema", () => {
   const validProduct = {

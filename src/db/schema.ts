@@ -27,6 +27,7 @@ export const users = sqliteTable(
     avatar_url: text("avatar_url"),
     email_verified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
     is_banned: integer("is_banned", { mode: "boolean" }).notNull().default(false),
+    newsletter_opt_in: integer("newsletter_opt_in", { mode: "boolean" }).notNull().default(false),
     ...timestamps,
   },
   (table) => ({
@@ -136,7 +137,7 @@ export const orders = sqliteTable(
     bake_sale_id: text("bake_sale_id")
       .notNull()
       .references(() => bakeSales.id),
-    status: text("status").notNull().default("pending"), // pending, processing, ready, fulfilled, cancelled, refunded
+    status: text("status").notNull().default("pending"), // pending, processing, ready, fulfilled, cancelled, refunded, action_required
     fulfillment_method: text("fulfillment_method").notNull().default("collection"), // collection, delivery
     payment_method: text("payment_method").notNull().default("payment_on_collection"), // stripe, paypal, bank_transfer, payment_on_collection
     payment_status: text("payment_status").notNull().default("pending"), // pending, completed, failed, refunded
@@ -305,6 +306,21 @@ export const testimonials = sqliteTable(
 );
 
 // ============================================================================
+// EMAIL TEMPLATES
+// ============================================================================
+
+export const emailTemplates = sqliteTable("email_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  subject: text("subject").notNull(),
+  content: text("content").notNull(), // HTML content
+  variables: text("variables", { mode: "json" }).$type<string[]>(), // List of available variables
+  updated_at: text("updated_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+// ============================================================================
 // SETTINGS
 // ============================================================================
 
@@ -351,6 +367,9 @@ export type InsertVoucher = typeof vouchers.$inferInsert;
 
 export type NewsPost = typeof newsPosts.$inferSelect;
 export type InsertNewsPost = typeof newsPosts.$inferInsert;
+
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
 
 export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;

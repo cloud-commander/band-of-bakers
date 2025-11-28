@@ -16,15 +16,15 @@ import {
   STORY_SECTION,
   CTA_SECTION,
 } from "@/constants/homepage";
-import { getCategories } from "@/actions/categories";
 import { getActiveTestimonials } from "@/actions/testimonials";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { getRecentNewsPosts } from "@/actions/news";
+import { getRandomProducts } from "@/actions/products";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const categories = await getCategories();
+  const featuredProducts = await getRandomProducts(3);
   const testimonials = await getActiveTestimonials();
   const upcomingBakeSales = await getUpcomingBakeSales();
   const recentNews = await getRecentNewsPosts(3);
@@ -87,9 +87,9 @@ export default async function Home() {
           </FadeIn>
 
           <div className={`grid grid-cols-1 md:grid-cols-3 ${DESIGN_TOKENS.sections.gap}`}>
-            {categories.slice(0, 6).map((category, index) => (
-              <FadeIn key={category.id} delay={index * 0.1}>
-                <Link href={`/menu?category=${category.slug}`}>
+            {featuredProducts.map((product, index) => (
+              <FadeIn key={product.id} delay={index * 0.1}>
+                <Link href={`/menu?product=${product.slug}`}>
                   <div
                     className={`${DESIGN_TOKENS.cards.base} cursor-pointer hover:shadow-lg transition-shadow overflow-hidden`}
                     style={{
@@ -97,12 +97,12 @@ export default async function Home() {
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                     }}
                   >
-                    {/* Category image */}
-                    {category.image_url && (
+                    {/* Product image */}
+                    {product.image_url && (
                       <div className="relative w-full h-48">
                         <Image
-                          src={category.image_url}
-                          alt={category.name}
+                          src={product.image_url}
+                          alt={product.name}
                           fill
                           className="object-cover"
                         />
@@ -116,7 +116,7 @@ export default async function Home() {
                           color: DESIGN_TOKENS.colors.text.main,
                         }}
                       >
-                        {category.name}
+                        {product.name}
                       </h3>
                       <p
                         className={`${DESIGN_TOKENS.typography.body.sm.size} text-center`}
@@ -125,7 +125,7 @@ export default async function Home() {
                           opacity: DESIGN_TOKENS.opacity.low,
                         }}
                       >
-                        {category.description}
+                        {product.description}
                       </p>
                     </div>
                   </div>

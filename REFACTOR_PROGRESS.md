@@ -1,5 +1,9 @@
 # Refactor Progress Tracker
 
+> ⚠️ **ARCHIVED DOCUMENT** - This progress tracker has been superseded by **[ROADMAP.md](ROADMAP.md)** as of 2025-11-28.
+>
+> This file is kept for historical reference only. For the current, authoritative project roadmap and progress tracking, see **[ROADMAP.md](ROADMAP.md)**.
+
 **Started**: 2025-11-26
 **Plan**: See [refactor-plan.md](./refactor-plan.md)
 

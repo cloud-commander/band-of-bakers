@@ -4,41 +4,6 @@
  */
 
 // ============================================================================
-// FEATURED BAKES
-// ============================================================================
-
-export interface FeaturedBake {
-  id: number;
-  name: string;
-  description: string;
-  image: string;
-}
-
-export const FEATURED_BAKES: FeaturedBake[] = [
-  {
-    id: 1,
-    name: "Sourdough",
-    description: "Classic artisan loaf",
-    image:
-      "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=600&h=600&fit=crop&auto=format",
-  },
-  {
-    id: 2,
-    name: "Croissant",
-    description: "Buttery layers of perfection",
-    image:
-      "https://images.pexels.com/photos/160802/pexels-photo-160802.jpeg?auto=compress&cs=tinysrgb&w=600&h=600&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Focaccia",
-    description: "Herb-infused Italian classic",
-    image:
-      "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=600&h=600&fit=crop&auto=format",
-  },
-];
-
-// ============================================================================
 // HERO SECTION
 // ============================================================================
 

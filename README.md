@@ -222,17 +222,32 @@ All major entities have comprehensive Zod schemas with type exports.
 
 ## 📚 Documentation
 
+### 📋 Project Planning & Tracking
+
+- **[ROADMAP.md](ROADMAP.md)** - 🎯 **Unified project roadmap** (single source of truth)
+- [SPEC.md](SPEC.md) - Product specification and requirements
+- [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design decisions
+
+### 🛠️ Implementation Guides
+
+- [SECURITY_IMPLEMENTATION_GUIDE.md](SECURITY_IMPLEMENTATION_GUIDE.md) - Security best practices (500+ lines)
+- [ANALYTICS_SETUP.md](ANALYTICS_SETUP.md) - Monitoring and analytics configuration
+- [PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md) - Performance optimization guide (400+ lines)
+- [CODE_TODOS.md](CODE_TODOS.md) - In-code TODO tracking and prioritization
+
+### 📖 Detailed Documentation
+
 Documentation is organized according to the [Diátaxis framework](https://diataxis.fr/) for better discoverability:
 
-### 🎯 [Tutorials](docs/tutorials/) - Step-by-step learning guides for beginners
+#### 🎯 [Tutorials](docs/tutorials/) - Step-by-step learning guides for beginners
 
-### 🛠️ [How-to Guides](docs/how-to-guides/) - Practical guides for specific tasks
+#### 🛠️ [How-to Guides](docs/how-to-guides/) - Practical guides for specific tasks
 
-### 📚 [Reference](docs/reference/) - Technical specifications and constants
+#### 📚 [Reference](docs/reference/) - Technical specifications and constants
 
-### 💡 [Explanation](docs/explanation/) - Architecture and design decisions
+#### 💡 [Explanation](docs/explanation/) - Architecture and design decisions
 
-**Quick Start:**
+**Quick Links:**
 
 - [Getting Started](docs/tutorials/getting-started.md) - Complete project setup
 - [Local Development](docs/tutorials/local-development-setup.md) - Development environment

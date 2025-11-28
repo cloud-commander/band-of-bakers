@@ -14,7 +14,6 @@ const productSchema = z.object({
   slug: z.string().min(1, "Slug is required").max(200),
   description: z.string().optional(),
   category_id: z.string().min(1, "Category is required"),
-  category_id: z.string().min(1, "Category is required"),
   // base_price is now optional in input because it's calculated from variants if they exist
   base_price: z.number().min(0, "Price must be positive").optional(),
   is_active: z.boolean().default(true),
@@ -514,6 +513,38 @@ export async function getMenu() {
     return menu;
   } catch (error) {
     console.error("Failed to fetch menu:", error);
+    return [];
+  }
+}
+
+/**
+ * Get random active products (for featured sections)
+ */
+export async function getRandomProducts(count: number = 3) {
+  try {
+    const allProducts = await productRepository.findActiveProducts();
+
+    if (allProducts.length === 0) return [];
+
+    // Shuffle array using Fisher-Yates algorithm
+    const shuffled = [...allProducts];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Take the first 'count' items and add variants
+    const selectedProducts = shuffled.slice(0, count);
+    const productsWithVariants = await Promise.all(
+      selectedProducts.map(async (product) => {
+        const variants = await productRepository.getActiveVariants(product.id);
+        return { ...product, variants };
+      })
+    );
+
+    return productsWithVariants;
+  } catch (error) {
+    console.error("Get random products error:", error);
     return [];
   }
 }

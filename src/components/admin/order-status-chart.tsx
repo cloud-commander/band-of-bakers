@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { mockNextBakeSale } from "@/lib/mocks/bake-sales";
 
 const data = [
   { name: "Pending", value: 12, color: "#fbbf24" },
@@ -13,13 +12,21 @@ const data = [
   { name: "Cancelled", value: 3, color: "#f87171" },
 ];
 
-export function OrderStatusChart() {
+interface OrderStatusChartProps {
+  nextBakeSale: {
+    date: string;
+  } | null;
+}
+
+export function OrderStatusChart({ nextBakeSale }: OrderStatusChartProps) {
   // Format the next bake sale date
-  const nextBakeSaleDate = new Date(mockNextBakeSale.date).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const nextBakeSaleDate = nextBakeSale
+    ? new Date(nextBakeSale.date).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "No upcoming bake sales";
 
   return (
     <Card className="col-span-1 md:col-span-2 border border-stone-200">

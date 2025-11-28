@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { sendOrderUpdateEmail } from "@/actions/notifications";
+import { markOrderReady, markOrderComplete } from "@/actions/admin/orders";
 
 export function OrderDetailContent({ order }: OrderDetailContentProps) {
   // State for managing item availability (quantity)
@@ -154,18 +155,36 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
   };
 
   // Status update handlers
-  const handleMarkReady = () => {
-    toast.success(`Order #${order.id.slice(0, 8)} marked as Ready for Collection`, {
-      description: "Customer has been notified via SMS",
-    });
-    // TODO: Implement server action
+  const handleMarkReady = async () => {
+    try {
+      const result = await markOrderReady(order.id);
+      if (result.success) {
+        toast.success(`Order #${order.id.slice(0, 8)} marked as Ready for Collection`, {
+          description: "Customer has been notified via email",
+        });
+      } else {
+        toast.error(result.error || "Failed to update order status");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred");
+    }
   };
 
-  const handleMarkComplete = () => {
-    toast.success(`Order #${order.id.slice(0, 8)} marked as Complete`, {
-      description: "Order archived successfully",
-    });
-    // TODO: Implement server action
+  const handleMarkComplete = async () => {
+    try {
+      const result = await markOrderComplete(order.id);
+      if (result.success) {
+        toast.success(`Order #${order.id.slice(0, 8)} marked as Complete`, {
+          description: "Order archived successfully",
+        });
+      } else {
+        toast.error(result.error || "Failed to update order status");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred");
+    }
   };
 
   const handleSendEmail = async () => {
@@ -260,8 +279,8 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                         isUnavailable
                           ? "bg-red-50 border-red-200 opacity-60"
                           : isPartiallyAvailable
-                          ? "bg-amber-50 border-amber-200"
-                          : "bg-white border-stone-200 hover:border-bakery-amber-200"
+                            ? "bg-amber-50 border-amber-200"
+                            : "bg-white border-stone-200 hover:border-bakery-amber-200"
                       )}
                     >
                       {/* Top Row: Info & Quantity Controls */}
@@ -273,8 +292,8 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                               isUnavailable
                                 ? "bg-red-100"
                                 : isPartiallyAvailable
-                                ? "bg-amber-100"
-                                : "bg-bakery-amber-100"
+                                  ? "bg-amber-100"
+                                  : "bg-bakery-amber-100"
                             )}
                           >
                             {isUnavailable ? (

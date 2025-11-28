@@ -24,6 +24,7 @@ export async function getDashboardStats() {
       totalUsers,
       recentOrders,
       upcomingBakeSalesCount: upcomingBakeSales.length,
+      nextBakeSale: upcomingBakeSales[0] || null,
       // Trends are still hardcoded for now as we don't have historical data logic yet
       trends: {
         orders: 12.5,
@@ -41,6 +42,7 @@ export async function getDashboardStats() {
       totalUsers: 0,
       recentOrders: [],
       upcomingBakeSalesCount: 0,
+      nextBakeSale: null,
       trends: {
         orders: 0,
         revenue: 0,

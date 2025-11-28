@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import { execSync } from "child_process";
 
 const DB_NAME = "bandofbakers-db";
@@ -30,14 +29,14 @@ async function main() {
         encoding: "utf-8",
       });
       console.log(`✅ Order ${i + 1} success`);
-    } catch (e: any) {
+    } catch {
       console.error(`❌ Order ${i + 1} failed!`);
       console.error(`Statement: ${statement}`);
 
       // Extract IDs to debug
       const match = statement.match(/VALUES \('([^']+)', '([^']+)', '([^']+)'/);
       if (match) {
-        const [_, orderId, userId, bakeSaleId] = match;
+        const [, orderId, userId, bakeSaleId] = match;
         console.log(`Debug info: Order=${orderId}, User=${userId}, BakeSale=${bakeSaleId}`);
 
         // Check User
@@ -47,7 +46,7 @@ async function main() {
             { encoding: "utf-8" }
           );
           console.log(`User check: ${userCheck.includes(userId) ? "EXISTS" : "MISSING"}`);
-        } catch (err) {
+        } catch {
           console.log("User check failed");
         }
 
@@ -58,7 +57,7 @@ async function main() {
             { encoding: "utf-8" }
           );
           console.log(`BakeSale check: ${bsCheck.includes(bakeSaleId) ? "EXISTS" : "MISSING"}`);
-        } catch (err) {
+        } catch {
           console.log("BakeSale check failed");
         }
       }

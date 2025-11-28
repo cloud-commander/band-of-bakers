@@ -10,7 +10,6 @@
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { MOCK_API_DELAY_MS } from "@/lib/constants/app";
 
 interface UseFormSubmissionOptions {
   successMessage: string;
@@ -38,9 +37,6 @@ export function useFormSubmission<TData = unknown>({
     try {
       if (apiCall) {
         await apiCall(data);
-      } else {
-        // Mock API call for development
-        await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
       }
 
       // Show success toast

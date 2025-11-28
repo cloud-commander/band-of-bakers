@@ -13,7 +13,7 @@ import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { ArrowRight, CreditCard, ShoppingBag, Truck } from "lucide-react";
-import { SHIPPING_COST, MOCK_API_DELAY_MS } from "@/lib/constants/app";
+import { SHIPPING_COST } from "@/lib/constants/app";
 import { createOrder } from "@/actions/orders";
 
 export const dynamic = "force-dynamic";
@@ -95,9 +95,6 @@ export default function CheckoutPage() {
       if (!result.success) {
         throw new Error(result.error);
       }
-
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
       clearCart();
       toast.success("Payment successful! Order placed.");

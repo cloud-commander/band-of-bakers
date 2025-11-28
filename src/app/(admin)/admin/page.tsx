@@ -43,6 +43,7 @@ export default async function AdminDashboard() {
     recentOrders,
     trends,
     upcomingBakeSalesCount,
+    nextBakeSale,
   } = await getDashboardStats();
   const topVouchers = await getTopVouchers(5);
 
@@ -121,7 +122,7 @@ export default async function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Order Status Chart */}
             <div className="lg:col-span-1">
-              <OrderStatusChart />
+              <OrderStatusChart nextBakeSale={nextBakeSale} />
             </div>
 
             {/* Recent Orders List */}

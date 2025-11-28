@@ -11,16 +11,16 @@ import { hashPassword } from "@/lib/crypto";
 // However, we are in scripts/ folder, so we need to adjust paths or use tsconfig paths.
 // Let's rely on tsx handling tsconfig paths.
 
-import { mockUsers } from "@/lib/mocks/users";
-import { mockProductCategories } from "@/lib/mocks/products";
-import { mockProducts, mockProductVariants } from "@/lib/mocks/products";
-import { mockLocations } from "@/lib/mocks/locations";
-import { mockBakeSales, mockPastBakeSales } from "@/lib/mocks/bake-sales";
-import { mockNewsPosts } from "@/lib/mocks/news";
+import { mockUsers } from "@/lib/seed-data/users";
+import { mockProductCategories } from "@/lib/seed-data/products";
+import { mockProducts, mockProductVariants } from "@/lib/seed-data/products";
+import { mockLocations } from "@/lib/seed-data/locations";
+import { mockBakeSales, mockPastBakeSales } from "@/lib/seed-data/bake-sales";
+import { mockNewsPosts } from "@/lib/seed-data/news";
 
-import { mockOrders, mockOrderItems } from "@/lib/mocks/orders";
-import { mockVouchers } from "@/lib/mocks/vouchers";
-import { mockTestimonials } from "@/lib/mocks/testimonials";
+import { mockOrders, mockOrderItems } from "@/lib/seed-data/orders";
+import { mockVouchers } from "@/lib/seed-data/vouchers";
+import { mockTestimonials } from "@/lib/seed-data/testimonials";
 
 // Import real products data (used when --real-products flag is set)
 import {
@@ -78,7 +78,7 @@ async function main() {
           console.log(`   Found ${objects.length} objects to delete.`);
           for (const obj of objects) {
             try {
-              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key}`, {
+              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key} --remote`, {
                 stdio: "ignore",
               });
               process.stdout.write("."); // Progress indicator
@@ -123,6 +123,105 @@ async function main() {
     sqlStatements.push("DELETE FROM vouchers;");
     sqlStatements.push("DELETE FROM users;");
     sqlStatements.push("DELETE FROM images;");
+    sqlStatements.push("DELETE FROM email_templates;");
+
+    // Email Templates
+    const defaultTemplates = [
+      {
+        id: "tmpl_order_ready",
+        name: "order_ready_for_collection",
+        subject: "Your Order is Ready for Collection! 🥖",
+        content: `
+          <h1>Your Order is Ready!</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>Great news! Your order #{{order_id}} is now ready for collection.</p>
+          <p><strong>Collection Details:</strong></p>
+          <ul>
+            <li>Location: {{location_name}}</li>
+            <li>Address: {{location_address}}</li>
+            <li>Time: {{collection_time}}</li>
+          </ul>
+          <p>Please bring your order number with you.</p>
+          <p>See you soon!</p>
+          <p>Band of Bakers</p>
+        `,
+        variables: [
+          "customer_name",
+          "order_id",
+          "location_name",
+          "location_address",
+          "collection_time",
+        ],
+      },
+      {
+        id: "tmpl_order_completed",
+        name: "order_completed",
+        subject: "Thank you for your order! 🌟",
+        content: `
+          <h1>Thank You!</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>Thanks for collecting your order #{{order_id}}. We hope you enjoy your bakes!</p>
+          <p>If you have a moment, we'd love to hear your feedback.</p>
+          <p>Best regards,</p>
+          <p>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "order_id"],
+      },
+      {
+        id: "tmpl_bake_sale_cancelled",
+        name: "bake_sale_cancelled",
+        subject: "Important: Bake Sale Cancelled ⚠️",
+        content: `
+          <h1>Bake Sale Update</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>We regret to inform you that the bake sale scheduled for {{date}} at {{location_name}} has been cancelled.</p>
+          <p><strong>Reason:</strong> {{reason}}</p>
+          <p>Your order #{{order_id}} has been cancelled and a full refund has been processed.</p>
+          <p>We apologize for any inconvenience caused.</p>
+          <p>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "date", "location_name", "reason", "order_id"],
+      },
+      {
+        id: "tmpl_bake_sale_rescheduled",
+        name: "bake_sale_rescheduled",
+        subject: "Action Required: Bake Sale Rescheduled 📅",
+        content: `
+          <h1>Bake Sale Rescheduled</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>The bake sale scheduled for {{old_date}} has been moved to <strong>{{new_date}}</strong>.</p>
+          <p><strong>Reason:</strong> {{reason}}</p>
+          <p>We have updated your order #{{order_id}} to the new date. If this doesn't work for you, please contact us to cancel for a full refund.</p>
+          <p>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "old_date", "new_date", "reason", "order_id"],
+      },
+      {
+        id: "tmpl_action_required",
+        name: "action_required",
+        subject: "Action Required: Update on your Order ⚠️",
+        content: `
+          <h1>Action Required</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>There has been a change to the bake sale scheduled for {{date}}.</p>
+          <p><strong>Please review your options:</strong></p>
+          <p><a href="{{resolution_link}}">Click here to view options</a></p>
+          <p>You can choose to transfer your order to another date or cancel for a full refund.</p>
+          <p>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "date", "resolution_link"],
+      },
+    ];
+
+    for (const tmpl of defaultTemplates) {
+      sqlStatements.push(
+        `INSERT OR REPLACE INTO email_templates (id, name, subject, content, variables, updated_at) VALUES ('${
+          tmpl.id
+        }', '${tmpl.name}', '${tmpl.subject.replace(/'/g, "''")}', '${tmpl.content
+          .replace(/'/g, "''")
+          .replace(/\n/g, "")}', '${JSON.stringify(tmpl.variables)}', CURRENT_TIMESTAMP);`
+      );
+    }
 
     // Users
     const usersToSeed = isAdminOnly ? mockUsers.filter((u) => u.role === "owner") : mockUsers;
@@ -162,17 +261,17 @@ async function main() {
         // Check if category has its own image (mock data has .image property)
         // We uploaded these to images/categories/{slug}.jpg in the R2 step
         if (!skipR2 && "image" in cat && cat.image) {
-          categoryImageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/categories/${cat.slug}.jpg`;
+          categoryImageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/categories/${cat.slug}.jpg`;
         }
         // Fallback to first product image if no category image
         else {
           const firstProduct = products.find((p) => p.category_id === cat.id);
           if (!skipR2 && firstProduct?.image_url) {
             if (useRealProducts) {
-              categoryImageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${cat.slug}/${firstProduct.slug}-card.webp`;
+              categoryImageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${cat.slug}/${firstProduct.slug}-card.webp`;
             } else {
               // Fix: Include category_id in path to match R2 upload structure
-              categoryImageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${firstProduct.category_id}/${firstProduct.slug}.jpg`;
+              categoryImageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${firstProduct.category_id}/${firstProduct.slug}.jpg`;
             }
           }
         }
@@ -199,11 +298,11 @@ async function main() {
             const category = productCategories.find((c) => c.id === prod.category_id);
             const categorySlug = category?.slug || "uncategorized";
             // Use R2 URL if not skipping R2
-            imageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${categorySlug}/${prod.slug}-card.webp`;
+            imageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${categorySlug}/${prod.slug}-card.webp`;
           } else {
             // For mock products, use old structure
             // Use R2 URL if not skipping R2
-            imageUrl = `https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/images/products/${prod.category_id}/${prod.slug}.jpg`;
+            imageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${prod.category_id}/${prod.slug}.jpg`;
           }
         } else if (skipR2) {
           imageUrl = prod.image_url || "NULL";
@@ -278,8 +377,8 @@ async function main() {
         const imageUrl = skipR2
           ? post.image_url
           : post.image_url
-          ? `/images/news/${post.slug}.jpg`
-          : "NULL";
+            ? `/images/news/${post.slug}.jpg`
+            : "NULL";
         const imageVal = imageUrl === "NULL" ? "NULL" : `'${imageUrl}'`;
 
         sqlStatements.push(
@@ -406,8 +505,9 @@ async function main() {
     phase1Statements.push("DELETE FROM vouchers;");
     phase1Statements.push("DELETE FROM users;");
     phase1Statements.push("DELETE FROM images;");
+    phase1Statements.push("DELETE FROM email_templates;");
 
-    // Add users, locations, vouchers, news, images
+    // Add users, locations, vouchers, news, images, email_templates
     phase1Statements.push(
       ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO users"))
     );
@@ -422,6 +522,9 @@ async function main() {
     );
     phase1Statements.push(
       ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO images"))
+    );
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO email_templates"))
     );
 
     const phase1File = path.join(TEMP_DIR, "seed_phase1.sql");
@@ -732,13 +835,16 @@ async function main() {
         try {
           // Upload
           console.log(`   Uploading to ${r2Path}...`);
-          execSync(`npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${tempPath}`, {
-            stdio: "ignore",
-          });
+          execSync(
+            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${tempPath} --remote`,
+            {
+              stdio: "ignore",
+            }
+          );
 
           // Add to SQL
           sqlStatements.push(
-            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
               tags
             )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
           );
@@ -780,9 +886,12 @@ async function main() {
 
         if (!shouldOverwrite) {
           try {
-            const checkResult = execSync(`npx wrangler r2 object get ${R2_BUCKET}/${r2Path}`, {
-              stdio: "pipe",
-            });
+            const checkResult = execSync(
+              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --remote`,
+              {
+                stdio: "pipe",
+              }
+            );
             if (checkResult) {
               console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping upload...`);
               return;
@@ -801,9 +910,12 @@ async function main() {
 
           // Upload to R2 directly from source (skipping optimization as requested)
           console.log(`   Uploading to ${r2Path}...`);
-          execSync(`npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath}`, {
-            stdio: "ignore",
-          });
+          execSync(
+            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath} --remote`,
+            {
+              stdio: "ignore",
+            }
+          );
 
           // ALSO save to public/ directory for local dev
           const publicPath = path.join(process.cwd(), "public", r2Path);
@@ -816,7 +928,7 @@ async function main() {
 
           // Add to SQL for images table
           sqlStatements.push(
-            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
               tags
             )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
           );

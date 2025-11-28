@@ -108,71 +108,111 @@ export function sanitizeFileName(filename: string): string {
  * Sanitize URL to ensure it's safe to use
  * @param url - URL string to sanitize
  * @param allowedProtocols - Allowed URL protocols (default: http, https)
- * @returns Sanitized URL or null if invalid
+ * @returns Sanitized URL
+ * @throws Error if URL is invalid or uses disallowed protocol
  */
 export function sanitizeUrl(
   url: string,
   allowedProtocols: string[] = ["http", "https"]
-): string | null {
+): string {
+  if (!url || url.trim().length === 0) {
+    throw new Error("URL cannot be empty");
+  }
+
   try {
     const parsed = new URL(url);
 
-    // Check if protocol is allowed
+    // Get protocol without colon
     const protocol = parsed.protocol.replace(":", "");
-    if (!allowedProtocols.includes(protocol)) {
-      return null;
+
+    // Prevent dangerous protocols
+    if (["javascript", "data", "vbscript"].includes(protocol)) {
+      throw new Error(`Dangerous protocol not allowed: ${protocol}`);
     }
 
-    // Prevent javascript: and data: URLs
-    if (["javascript", "data", "vbscript"].includes(protocol)) {
-      return null;
+    // Check if protocol is in allowed list
+    if (!allowedProtocols.includes(protocol)) {
+      throw new Error(`Protocol not allowed: ${protocol}`);
     }
 
     return parsed.toString();
-  } catch {
-    // Invalid URL
-    return null;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("not allowed")) {
+      throw error;
+    }
+    // Invalid URL format
+    throw new Error("Invalid URL format");
   }
 }
 
 /**
  * Sanitize email address
  * @param email - Email address to sanitize
- * @returns Sanitized email or null if invalid
+ * @returns Sanitized email (lowercased and trimmed)
+ * @throws Error if email is invalid
  */
-export function sanitizeEmail(email: string): string | null {
+export function sanitizeEmail(email: string): string {
   // Basic email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const trimmed = email.trim().toLowerCase();
 
   if (!emailRegex.test(trimmed)) {
-    return null;
+    throw new Error("Invalid email format");
   }
 
   // Additional checks
-  if (trimmed.length > 254) return null; // Email too long
-  if (trimmed.includes("..")) return null; // Consecutive dots
-  if (trimmed.startsWith(".") || trimmed.endsWith(".")) return null; // Leading/trailing dot
+  if (trimmed.length > 254) {
+    throw new Error("Email address too long");
+  }
+  if (trimmed.includes("..")) {
+    throw new Error("Email cannot contain consecutive dots");
+  }
+  if (trimmed.startsWith(".") || trimmed.endsWith(".")) {
+    throw new Error("Email cannot start or end with a dot");
+  }
 
   return trimmed;
 }
 
 /**
- * Sanitize phone number (UK format)
+ * Sanitize phone number (UK mobile format)
+ * Normalizes to E.164 format: +447xxxxxxxxx
  * @param phone - Phone number to sanitize
- * @returns Sanitized phone number or null if invalid
+ * @returns Sanitized phone number in E.164 format (+447xxxxxxxxx)
+ * @throws Error if phone number is invalid
  */
-export function sanitizePhone(phone: string): string | null {
+export function sanitizePhone(phone: string): string {
   // Remove all non-digit characters except +
-  const cleaned = phone.replace(/[^\d+]/g, "");
+  let cleaned = phone.replace(/[^\d+]/g, "");
 
-  // UK phone number validation (basic)
-  // Accepts: +44, 0, or 7/8 prefix
-  const ukPhoneRegex = /^(\+44|0)?[1-9]\d{8,9}$/;
+  // Handle different UK mobile number formats
+  // UK mobiles start with 07 (domestic) or +447/00447 (international)
 
-  if (!ukPhoneRegex.test(cleaned)) {
-    return null;
+  // Convert 0044 to +44
+  if (cleaned.startsWith("0044")) {
+    cleaned = "+44" + cleaned.substring(4);
+  }
+  // Convert 07 to +447
+  else if (cleaned.startsWith("07")) {
+    cleaned = "+44" + cleaned.substring(1);
+  }
+  // Already in +44 format - keep as is
+  else if (cleaned.startsWith("+447")) {
+    // Already correct
+  }
+  // 447 without + prefix
+  else if (cleaned.startsWith("447")) {
+    cleaned = "+" + cleaned;
+  }
+  else {
+    throw new Error("Invalid UK mobile number format");
+  }
+
+  // Validate final format: +447xxxxxxxxx (UK mobile)
+  const ukMobileRegex = /^\+447\d{9}$/;
+  if (!ukMobileRegex.test(cleaned)) {
+    throw new Error("Invalid UK mobile number");
   }
 
   return cleaned;

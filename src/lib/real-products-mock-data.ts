@@ -8,8 +8,8 @@ import type { InsertOrder, InsertOrderItem } from "@/db/schema";
 import type { InsertReview } from "@/db/schema";
 import type { InsertTestimonial } from "@/db/schema";
 import type { InsertBakeSale } from "@/db/schema";
-import { mockUsers } from "@/lib/mocks/users";
-import { mockLocations } from "@/lib/mocks/locations";
+import { mockUsers } from "@/lib/seed-data/users";
+import { mockLocations } from "@/lib/seed-data/locations";
 import { realProducts, realProductVariants } from "@/lib/real-products-data";
 
 // ============================================================================

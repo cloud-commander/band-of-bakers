@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { insertBakeSaleSchema, insertLocationSchema } from "./bake-sale";
+import { insertBakeSaleSchema, insertLocationSchema } from "../bake-sale";
 
 describe("insertBakeSaleSchema", () => {
   const validBakeSale = {

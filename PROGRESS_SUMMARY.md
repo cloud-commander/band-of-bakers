@@ -1,5 +1,9 @@
 # Band of Bakers v2 - Refactor Progress Summary
 
+> ⚠️ **ARCHIVED DOCUMENT** - This progress summary has been superseded by **[ROADMAP.md](ROADMAP.md)** as of 2025-11-28.
+>
+> This file is kept for historical reference only. For the current, authoritative project roadmap and progress tracking, see **[ROADMAP.md](ROADMAP.md)**.
+
 **Generated**: 2025-11-27
 **Original Plan Created**: 2025-11-26
 **Original Grade**: C+ (69/100)
