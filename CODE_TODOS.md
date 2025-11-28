@@ -59,6 +59,38 @@ export interface CloudflareEnv {
 
 ---
 
+### 2. Security Audit & Hardening
+
+**Location**: Global (admin routes, API routes, auth/session stack)
+
+**Issue**: Security review required across the platform to confirm protections are correctly implemented and consistent.
+
+**Scope/Tasks**:
+- Audit admin route protection and authentication
+- Examine cookie configuration and session management
+- Review authentication implementation and token handling
+- Check for CSRF protection
+- Audit API route security
+- Check for XSS vulnerabilities
+- Review database query security (SQL injection)
+- Check authorization logic and privilege escalation
+- Compile security findings and recommendations
+
+**Solution Required**:
+- Map current auth/authorization flow and verify guards on all admin routes/components.
+- Validate cookie/session flags (HttpOnly, Secure, SameSite, expiry) and rotation/invalidations.
+- Ensure CSRF tokens are enforced on mutations (forms, server actions, API routes).
+- Confirm input sanitization/escaping for user-facing content and template rendering (XSS).
+- Review API handlers for authentication/authorization, rate limiting, and validation gaps.
+- Confirm parameterized queries via Drizzle and absence of raw SQL injection vectors.
+- Produce a written findings doc with prioritized fixes and recommendations.
+
+**Estimated Effort**: 6-8 hours
+**Dependencies**: Auth/session implementation, API handlers, UI routes
+**Phase**: Phase 1 (Security & Infrastructure)
+
+---
+
 ## 🟡 High Priority - API Implementation
 
 ### 2. Checkout Page API Integration
@@ -292,14 +324,246 @@ export async function createBakeSale(formData: FormData) {
 
 ---
 
+## 🟢 Medium Priority - Operations & UX
+
+### 7. Delivery Fee Constant
+
+**Location**: [src/actions/orders.ts:103](src/actions/orders.ts#L103)
+
+**Issue**: Delivery fee hardcoded (`3.99`) instead of using shared configuration/constant.
+
+**Solution Required**:
+- Add delivery fee value to `src/lib/constants` (with env/config override if needed) and reuse in calculations.
+- Keep totals and revalidation intact; add regression test for totals.
+
+**Estimated Effort**: 30-45 minutes
+**Dependencies**: None
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 8. Bake Sale Transfer Stock Check
+
+**Location**: [src/actions/bake-sale-management.ts:81](src/actions/bake-sale-management.ts#L81)
+
+**Issue**: Order transfer to another bake sale skips stock availability validation.
+
+**Solution Required**:
+- Check product/variant availability for the target bake sale before transfer.
+- Block transfer (with clear error) when stock is insufficient; log/audit the attempt.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Stock/availability data
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 9. Menu Stock Indicators
+
+**Location**: [src/app/(shop)/menu/menu-content.tsx:320](src/app/(shop)/menu/menu-content.tsx#L320)
+
+**Issue**: Stock flags are stubbed (`isOutOfStock`, `isLowStock`) and not wired to real data.
+
+**Solution Required**:
+- Expose stock quantities in menu data and compute out-of-stock/low-stock thresholds.
+- Reflect states in UI and disable add-to-cart when unavailable.
+
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Stock data availability
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 10. Admin Order Quick Actions
+
+**Location**: [src/app/(admin)/admin/orders/orders-table.tsx:208-217](src/app/(admin)/admin/orders/orders-table.tsx#L208)
+
+**Issue**: Quick actions (Ready/Complete) only show toasts; no server action to update status.
+
+**Solution Required**:
+- Add server action to transition order status with auth/role guard and revalidation.
+- Optionally trigger customer notification (email/SMS) on Ready/Complete.
+
+**Estimated Effort**: 1.5-2 hours
+**Dependencies**: Order repository/service; notification channel
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 11. Voucher Discount Display
+
+**Location**: [src/app/(shop)/orders/[id]/page.tsx:136](src/app/(shop)/orders/[id]/page.tsx#L136)
+
+**Issue**: Voucher discount line missing in order summary despite schema support.
+
+**Solution Required**:
+- Read voucher discount from order payload and show in summary; keep total consistent.
+- Handle zero/absent discounts gracefully.
+
+**Estimated Effort**: 30-45 minutes
+**Dependencies**: Order payload fields
+**Phase**: Phase 2 (Core Features)
+
+---
+
+## 🔴/🟡 Launch Hardening (Quick Wins)
+
+### 12. CSRF & Session Hardening
+
+**Location**: Global (forms, server actions, API routes, cookie/session config)
+
+**Issue**: No explicit CSRF guard across mutations; cookie flags/rotation not confirmed.
+
+**Solution Required**:
+- Enforce CSRF tokens on mutating routes/forms/server actions.
+- Harden session cookies (HttpOnly, Secure, SameSite, rotation/invalidations).
+- Add regression coverage around auth flows.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Auth/session middleware
+**Phase**: Phase 1 (Security & Infrastructure)
+
+---
+
+### 13. Turnstile Rate Limiting
+
+**Location**: Auth flows, contact/signup forms, any high-risk POST endpoints
+
+**Issue**: No CAPTCHA/rate-limit guard; needs Cloudflare Turnstile for abuse protection.
+
+**Solution Required**:
+- Add Turnstile widget to relevant forms; verify token server-side before processing.
+- Fail closed with friendly error; log abuse attempts.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Turnstile keys, form surfaces
+**Phase**: Phase 1 (Security & Infrastructure)
+
+---
+
+### 14. Inventory Availability Enforcement
+
+**Location**: Menu data, checkout/order creation
+
+**Issue**: Stock is assumed available; no enforcement. Requirement: stock stays available until admin marks unavailable.
+
+**Solution Required**:
+- Add product availability flag and/or stock counts to order creation; block when unavailable.
+- Admin control to set unavailable; ensure menu/checkout reflects availability.
+
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Product model/repository, admin UI
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 15. Voucher Integrity Enforcement
+
+**Location**: Voucher application (backend) and order creation
+
+**Issue**: Usage limits/eligibility not enforced beyond display; risk of overuse.
+
+**Solution Required**:
+- Validate voucher applicability (date, uses, per-customer limits) at apply/checkout.
+- Atomically increment uses; rollback on failure; surface errors to UI.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Voucher repository/service
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 16. Input/Output Sanitization
+
+**Location**: Rich text (news/testimonials), user-provided strings (names/notes)
+
+**Issue**: No explicit HTML sanitization/escaping; XSS risk.
+
+**Solution Required**:
+- Sanitize rich text on input (allowlist) and escape user strings in renders.
+- Add tests covering XSS payloads.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Sanitizer utility (DOMPurify/similar)
+**Phase**: Phase 1 (Security & Infrastructure)
+
+---
+
+## 🟢 Additional Medium Priority
+
+### 17. Order Status Notifications
+
+**Location**: Order status transitions (Ready/Complete/Cancelled/Refunded)
+
+**Issue**: No customer notifications tied to status changes.
+
+**Solution Required**:
+- Trigger email (or SMS) on key status transitions; reuse templates if available.
+- Tie into admin quick actions and backend status updates.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Email/SMS provider, order status actions
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 18. Logging, Observability, and Audit Trails
+
+**Location**: Cross-cutting (API routes, server actions, admin actions)
+
+**Issue**: Lacks structured logging/error reporting and admin audit logging.
+
+**Solution Required**:
+- Add structured logs and error reporting (Sentry/console fallback).
+- Record admin-sensitive actions (status changes, deletions) with actor/time.
+
+**Estimated Effort**: 1-2 hours
+**Dependencies**: Logging/reporting choice
+**Phase**: Phase 1 (Security & Infrastructure)
+
+---
+
+### 19. SEO/Compliance Baseline
+
+**Location**: Global layout/footer, head tags
+
+**Issue**: Cookie/consent/privacy links and basic SEO/meta likely missing.
+
+**Solution Required**:
+- Add privacy/terms links and cookie/consent banner if required.
+- Ensure basic meta tags/og tags and accessibility checks on key pages.
+
+**Estimated Effort**: 0.5-1 hour
+**Dependencies**: Legal copy, layout components
+**Phase**: Phase 2 (Core Features)
+
+---
+
+### 20. Server-Side Pagination
+
+**Location**: Admin listings (orders, products, users, etc.) and any list APIs backed by D1
+
+**Issue**: Lists are loaded client-side; no server-side pagination despite D1 supporting `LIMIT/OFFSET`.
+
+**Solution Required**:
+- Add pagination parameters to repositories/queries (using `LIMIT/OFFSET`).
+- Update server actions/routes to accept pagination; adjust UI to request paged data.
+- Include total counts for pagination UI.
+
+**Estimated Effort**: 2-3 hours
+**Dependencies**: Relevant repositories/actions, UI wiring
+**Phase**: Phase 2 (Core Features)
+
+---
+
 ## 📊 TODO Summary by Priority
 
 | Priority | Count | Category | Estimated Time |
 |----------|-------|----------|----------------|
-| 🔴 Critical | 1 | TypeScript Types | 30 min |
-| 🟡 High | 2 | Checkout Flow | 7-10 hours |
-| 🟢 Medium | 3 | CMS Features | 5-8 hours |
-| **TOTAL** | **6** | - | **12.5-18.5 hours** |
+| 🔴 Critical | 3 | Types & Security | 7.5-10.5 hours |
+| 🟡 High | 6 | Security, Checkout, Integrity | 12-19 hours |
+| 🟢 Medium | 11 | CMS & Ops/UX | 16.5-22.5 hours |
+| **TOTAL** | **20** | - | **36-52 hours** |
 
 ---
 
@@ -307,10 +571,25 @@ export async function createBakeSale(formData: FormData) {
 
 ### Phase 1: Security & Infrastructure
 - ✅ Cloudflare Workers type definitions
+- 🔴 Security audit & hardening
+- 🔴 CSRF & session hardening
+- 🔴 Turnstile rate limiting
+- 🔴 Input/output sanitization
+- 🔴 Logging/observability (baseline)
 
 ### Phase 2: Core Features (E-commerce)
 - ✅ Checkout page API
 - ✅ Collection checkout API
+- 🟢 Delivery fee constant (orders)
+- 🟢 Bake sale transfer stock check
+- 🟢 Menu stock indicators
+- 🟢 Admin order quick actions
+- 🟢 Voucher discount display
+- 🟡 Inventory availability enforcement
+- 🟡 Voucher integrity enforcement
+- 🟢 Order status notifications
+- 🟢 SEO/compliance baseline
+- 🟢 Server-side pagination
 
 ### Phase 3: CMS Features
 - ✅ News post creation
@@ -322,12 +601,14 @@ export async function createBakeSale(formData: FormData) {
 ## 🎯 Implementation Plan
 
 ### Sprint 1: Critical Infrastructure (Week 1)
-**Goal**: Fix type safety issues
+**Goal**: Fix type safety issues and complete security audit
 
 1. ✅ Install `@cloudflare/workers-types`
 2. ✅ Update `src/lib/db.ts` with proper types
 3. ✅ Test all database operations
 4. ✅ Verify IntelliSense working
+5. 🔴 Run security audit (admin routes, cookies/sessions, CSRF, API routes, XSS, SQLi, authz)
+6. 🔴 Produce findings and recommended remediations
 
 **Time**: ~1 hour (including testing)
 
@@ -448,40 +729,60 @@ class EntityRepository extends BaseRepository<typeof table> {
 ## 🚀 Recommended Order of Implementation
 
 ### Phase 1 (Immediate - Week 1)
-1. **Cloudflare Types** (Critical) - 1 hour
-   - Fixes type safety across entire app
-   - Unblocks other development
+1. **CSRF & Session Hardening** (Critical) - 1-2 hours
+2. **Turnstile Rate Limiting** (Critical) - 1-2 hours
+3. **Input/Output Sanitization** (Critical) - 1-2 hours
+4. **Security Audit** (Critical) - 6-8 hours
+5. **Logging/Observability Baseline** (Critical) - 1-2 hours
+6. **Cloudflare Types** (Critical) - 1 hour
 
 ### Phase 2 (High Priority - Week 2-3)
-2. **Checkout API** (High) - 6 hours
-   - Core revenue feature
-   - Blocks production launch
-3. **Collection Checkout API** (High) - 4 hours
-   - Alternative order method
-   - Customer convenience
+7. **Checkout API (Pay on Collection)** (High) - 4-6 hours
+8. **Collection Checkout API (Pay on Collection)** (High) - 3-4 hours
+9. **Inventory Availability Enforcement** (High) - 2-3 hours
+10. **Voucher Integrity Enforcement** (High) - 1-2 hours
+11. **Delivery Fee Constant** (Medium) - 30-45 minutes
+12. **Bake Sale Transfer Stock Check** (Medium) - 1-2 hours
+13. **Admin Order Quick Actions** (Medium) - 1.5-2 hours
+14. **Order Status Notifications** (Medium) - 1-2 hours
+15. **Menu Stock Indicators** (Medium) - 2-3 hours
+16. **Voucher Discount Display** (Medium) - 30-45 minutes
+17. **SEO/Compliance Baseline** (Medium) - 0.5-1 hour
 
 ### Phase 3 (Medium Priority - Week 4)
-4. **News API** (Medium) - 2 hours
-   - Marketing/engagement feature
-5. **Testimonial API** (Medium) - 2 hours
-   - Social proof
-6. **Bake Sale API** (Medium) - 3 hours
-   - Event management
+18. **News API** (Medium) - 2 hours
+19. **Testimonial API** (Medium) - 2 hours
+20. **Bake Sale API** (Medium) - 3 hours
 
 ---
 
 ## 📈 Progress Tracking
 
-**Overall TODO Completion**: 0/6 (0%)
+**Overall TODO Completion**: 0/20 (0%)
 
 | TODO | Status | Assignee | Target Date | Completed |
 |------|--------|----------|-------------|-----------|
 | Cloudflare Types | ⏳ Pending | - | - | - |
+| Security Audit | ⏳ Pending | - | - | - |
+| CSRF & Session Hardening | ⏳ Pending | - | - | - |
+| Turnstile Rate Limiting | ⏳ Pending | - | - | - |
+| Input/Output Sanitization | ⏳ Pending | - | - | - |
+| Logging/Observability Baseline | ⏳ Pending | - | - | - |
 | Checkout API | ⏳ Pending | - | - | - |
 | Collection API | ⏳ Pending | - | - | - |
+| Inventory Availability Enforcement | ⏳ Pending | - | - | - |
+| Voucher Integrity Enforcement | ⏳ Pending | - | - | - |
 | News API | ⏳ Pending | - | - | - |
 | Testimonial API | ⏳ Pending | - | - | - |
 | Bake Sale API | ⏳ Pending | - | - | - |
+| Delivery Fee Constant | ⏳ Pending | - | - | - |
+| Bake Sale Transfer Stock | ⏳ Pending | - | - | - |
+| Menu Stock Indicators | ⏳ Pending | - | - | - |
+| Admin Order Quick Actions | ⏳ Pending | - | - | - |
+| Voucher Discount Display | ⏳ Pending | - | - | - |
+| Order Status Notifications | ⏳ Pending | - | - | - |
+| SEO/Compliance Baseline | ⏳ Pending | - | - | - |
+| Server-side Pagination | ⏳ Pending | - | - | - |
 
 ---
 
@@ -494,5 +795,5 @@ class EntityRepository extends BaseRepository<typeof table> {
 
 ---
 
-**Last Updated**: 2025-11-27
+**Last Updated**: 2025-11-27 (Launch hardening TODOs added)
 **Next Review**: After Sprint 1 completion

@@ -18,6 +18,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 
+export const dynamic = "force-static";
+
 export default function FAQPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
 

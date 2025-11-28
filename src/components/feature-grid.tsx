@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Wheat, Clock, Flame, Hand } from "lucide-react";
 import { ANIMATION_DURATIONS, ANIMATION_DELAYS } from "@/lib/constants/frontend";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
@@ -54,7 +54,7 @@ export function FeatureGrid() {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <motion.div
+              <m.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -81,7 +81,7 @@ export function FeatureGrid() {
                 >
                   {feature.description}
                 </p>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

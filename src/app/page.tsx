@@ -21,7 +21,7 @@ import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { getRecentNewsPosts } from "@/actions/news";
 import { getRandomProducts } from "@/actions/products";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function Home() {
   const featuredProducts = await getRandomProducts(3);

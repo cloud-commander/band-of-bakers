@@ -5,7 +5,7 @@ import { StarRating } from "@/components/ui/star-rating";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Testimonial } from "@/db/schema";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -72,7 +72,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
         <Quote className="absolute top-4 right-4 text-primary/10" size={80} strokeWidth={1.5} />
 
         <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div
+          <m.div
             key={currentIndex}
             custom={direction}
             variants={slideVariants}
@@ -112,7 +112,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
                 <p className="text-sm text-muted-foreground">{currentTestimonial.role}</p>
               )}
             </div>
-          </motion.div>
+          </m.div>
         </AnimatePresence>
 
         {/* Navigation Buttons */}

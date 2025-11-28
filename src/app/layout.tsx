@@ -106,6 +106,8 @@ import {
   LazyLogflareProvider,
   LazyWebVitalsProvider,
 } from "@/components/analytics/lazy-providers";
+import { Partytown } from "@builder.io/partytown/react";
+import { LazyMotionProvider } from "@/components/providers/lazy-motion-provider";
 
 export default function RootLayout({
   children,
@@ -115,6 +117,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfairDisplay.variable}`}>
       <head>
+        <link rel="preconnect" href="https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="manifest" href="/manifest.json" />
+        <Partytown debug={process.env.NODE_ENV === "development"} forward={["dataLayer.push"]} />
         <StructuredData />
         <GoogleAnalytics />
       </head>
@@ -132,13 +139,15 @@ export default function RootLayout({
         />
         <SessionProvider>
           <CartProvider>
-            <LazyRollbarProvider />
-            <LazyLogflareProvider />
-            <LazyWebVitalsProvider />
-            <Navbar />
-            {children}
-            <Footer />
-            <Toaster position="top-center" />
+            <LazyMotionProvider>
+              <LazyRollbarProvider />
+              <LazyLogflareProvider />
+              <LazyWebVitalsProvider />
+              <Navbar />
+              {children}
+              <Footer />
+              <Toaster position="top-center" />
+            </LazyMotionProvider>
           </CartProvider>
         </SessionProvider>
       </body>

@@ -52,6 +52,12 @@ type Product = {
   }>;
 };
 
+const isMissingImage = (value: string | null | undefined): boolean => {
+  if (value == null) return true;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "" || normalized === "null" || normalized === "undefined" || normalized === "none";
+};
+
 export default function AdminProductsPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -336,24 +342,19 @@ export default function AdminProductsPage() {
               </thead>
               <tbody>
                 {paginatedProducts.map((product) => {
-              const category = categories.find((c) => c.id === product.category_id);
-              const variantCount = product.variants?.length || 0;
-              const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
+                  const category = categories.find((c) => c.id === product.category_id);
+                  const variantCount = product.variants?.length || 0;
+                  const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
+                  const isImageMissing = isMissingImage(product.image_url);
 
-              // Debug: Log image check for products without images
-              const imageUrl = product.image_url ?? "";
-              const isImageMissing =
-                imageUrl.trim() === "" || imageUrl === "null" || product.image_url === null;
-
-              if (isImageMissing) {
-                console.log(`[DEBUG] Product ${product.name} has no image:`, {
-                  image_url: product.image_url,
-                  type: typeof product.image_url,
-                  check1: imageUrl.trim() === "",
-                  check2: imageUrl === "null",
-                  combined: isImageMissing
-                });
-              }
+                  if (isMissingImage(product.image_url)) {
+                    console.log(`[DEBUG] Product ${product.name} has no image:`, {
+                      image_url: product.image_url,
+                      type: typeof product.image_url,
+                      normalized: product.image_url?.trim().toLowerCase() ?? "<nullish>",
+                      combined: isImageMissing
+                    });
+                  }
 
                   return (
                     <tr key={product.id} className="border-t hover:bg-muted/30">
@@ -421,9 +422,7 @@ export default function AdminProductsPage() {
               const category = categories.find((c) => c.id === product.category_id);
               const variantCount = product.variants?.length || 0;
               const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
-              const imageUrl = product.image_url ?? "";
-              const isImageMissing =
-                imageUrl.trim() === "" || imageUrl === "null" || product.image_url === null;
+              const isImageMissing = isMissingImage(product.image_url);
 
               return (
                 <Link

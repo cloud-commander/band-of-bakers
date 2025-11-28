@@ -11,6 +11,8 @@ import {
   ABOUT_HOW_WE_WORK_SECTION,
 } from "@/constants/about";
 
+export const dynamic = "force-static";
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen">

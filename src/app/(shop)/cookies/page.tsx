@@ -7,6 +7,8 @@ export const metadata = {
   description: "Cookies Policy for Band of Bakers - Information about cookies and your privacy",
 };
 
+export const dynamic = "force-static";
+
 export default function CookiesPolicyPage() {
   return (
     <div className="min-h-screen">

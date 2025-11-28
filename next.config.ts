@@ -96,9 +96,19 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
     ];
   },
   experimental: {
+    reactCompiler: true,
     serverActions: {
       bodySizeLimit: "5mb",
     },
@@ -106,4 +116,16 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
 };
 
-export default nextConfig;
+import withBundleAnalyzer from "@next/bundle-analyzer";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+});
+
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default bundleAnalyzer(withSerwist(nextConfig));

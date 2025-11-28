@@ -7,6 +7,8 @@ export const metadata = {
   description: "Terms of Service for Band of Bakers - Please read before using our services",
 };
 
+export const dynamic = "force-static";
+
 export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen">

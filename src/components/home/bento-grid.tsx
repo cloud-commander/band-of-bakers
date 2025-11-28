@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ANIMATION_DURATIONS, ANIMATION_DELAYS } from "@/lib/constants/frontend";
@@ -46,7 +46,7 @@ export function BentoGrid() {
     <section className="w-full max-w-7xl mx-auto px-4 py-24">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px]">
         {items.map((item, index) => (
-          <motion.div
+          <m.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -79,7 +79,7 @@ export function BentoGrid() {
                 {item.title}
               </h3>
             </div>
-          </motion.div>
+          </m.div>
         ))}
       </div>
     </section>
