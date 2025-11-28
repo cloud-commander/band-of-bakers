@@ -61,7 +61,7 @@ export function SubmitTestimonialDialog() {
       formData.append("role", "Customer"); // Default role
       formData.append("content", data.content);
       formData.append("rating", String(data.rating));
-      formData.append("status", "inactive"); // Always inactive for user submissions
+      formData.append("status", "pending"); // Always pending for user submissions
       formData.append("avatar", session.user.image || "");
 
       const result = await createTestimonial(formData);

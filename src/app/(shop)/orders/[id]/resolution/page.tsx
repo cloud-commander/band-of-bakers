@@ -8,7 +8,7 @@ import { asc } from "drizzle-orm";
 import { Heading } from "@/components/ui/heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import { ResolutionOptions } from "./resolution-options";
+import { ResolutionOptions } from "./order-resolution-options";
 
 interface OrderResolutionPageProps {
   params: Promise<{
@@ -56,7 +56,8 @@ export default async function OrderResolutionPage({ params }: OrderResolutionPag
     with: {
       location: true,
     },
-    orderBy: (sales, { asc }: { asc: (column: unknown) => unknown }) => [asc(sales.date)],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    orderBy: (sales: any, { asc }: { asc: (column: unknown) => unknown }) => [asc(sales.date)],
     limit: 5,
   });
 

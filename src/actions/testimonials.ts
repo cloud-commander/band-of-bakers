@@ -15,7 +15,7 @@ const testimonialSchema = z.object({
   role: z.string().optional(),
   content: z.string().min(1, "Content is required").max(500),
   rating: z.number().min(1).max(5),
-  status: z.enum(["active", "inactive"]),
+  status: z.enum(["active", "inactive", "pending", "approved", "rejected"]),
   avatar: z.string().optional(),
 });
 
@@ -102,8 +102,8 @@ export async function createTestimonial(formData: FormData): Promise<ActionResul
       return { success: false, error: validated.error.issues[0].message };
     }
 
-    // If not admin, force status to inactive (pending)
-    const isActive = isAdmin ? validated.data.status === "active" : false;
+    // If not admin, force status to pending
+    const status = isAdmin ? validated.data.status : "pending";
 
     // Use user's name/avatar if not provided (or override if we want strictness, but let's trust form for now or use session)
     // For user submissions, we might want to enforce using their profile name/avatar?
@@ -117,7 +117,7 @@ export async function createTestimonial(formData: FormData): Promise<ActionResul
       content: validated.data.content,
       rating: validated.data.rating,
       avatar_url: validated.data.avatar || null,
-      is_active: isActive,
+      status: status,
       user_id: session.user.id || "",
     });
 
@@ -136,14 +136,14 @@ export async function createTestimonial(formData: FormData): Promise<ActionResul
  */
 export async function updateTestimonialStatus(
   id: string,
-  isActive: boolean
+  status: string
 ): Promise<ActionResult<void>> {
   try {
     if (!(await checkAdminRole())) {
       return { success: false, error: "Unauthorized" };
     }
 
-    await testimonialRepository.update(id, { is_active: isActive });
+    await testimonialRepository.update(id, { status: status });
     revalidatePath("/admin/testimonials");
     revalidatePath("/");
 

@@ -3,8 +3,6 @@ import { getDb } from "@/lib/db";
 import { emailTemplates } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendEmail(
   to: string,
   templateName: string,
@@ -49,11 +47,28 @@ export async function sendEmail(
   }
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // Use verified domain logic to prevent 403 errors
+    const verifiedDomain = "notifications.severnweb.net";
+    const envFrom = process.env.RESEND_FROM_EMAIL;
+    const fromEmail =
+      envFrom && envFrom.toLowerCase().endsWith(`@${verifiedDomain}`)
+        ? envFrom
+        : `no-reply@${verifiedDomain}`;
+
+    if (envFrom && !envFrom.toLowerCase().endsWith(`@${verifiedDomain}`)) {
+      console.warn(
+        `[WARN] RESEND_FROM_EMAIL (${envFrom}) is not on verified domain ${verifiedDomain}; using ${fromEmail}.`
+      );
+    }
+
     const data = await resend.emails.send({
-      from: "Band of Bakers <orders@bandofbakers.com>", // TODO: Verify domain
+      from: `${process.env.RESEND_FROM_NAME || "Band of Bakers"} <${fromEmail}>`,
       to,
       subject,
       html: content,
+      replyTo: process.env.RESEND_REPLY_TO_EMAIL || "support@bandofbakers.co.uk",
     });
 
     return { success: true, data };

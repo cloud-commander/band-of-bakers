@@ -39,7 +39,7 @@ export async function updateProfile(formData: FormData) {
     // Handle Avatar Upload to R2
     if (avatarFile && avatarFile instanceof File && avatarFile.size > 0) {
       console.log("Entering avatar upload block...");
-      const { env } = await getCloudflareContext();
+      const { env } = await getCloudflareContext({ async: true });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const r2 = (env as any).R2;
 

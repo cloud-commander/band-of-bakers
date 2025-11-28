@@ -2,10 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { validateCsrf, requireCsrf, CsrfError } from "../csrf";
 import { headers } from "next/headers";
 
-type MockHeaders = {
-  get: (name: string) => string | null;
-};
-
 // Mock next/headers
 vi.mock("next/headers", () => ({
   headers: vi.fn(),
@@ -16,148 +12,146 @@ describe("CSRF Protection", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   describe("validateCsrf", () => {
-    it("should return true for valid origin in production", () => {
-      mockHeaders.mockResolvedValue({
-        get: (name: string) => {
-          if (name === "origin") return "https://bandofbakers.co.uk";
-          if (name === "host") return "bandofbakers.co.uk";
-          return null;
-        },
-      } as MockHeaders);
+    it("should return true for valid origin in production", async () => {
+      mockHeaders.mockResolvedValue(
+        new Headers([
+          ["origin", "https://bandofbakers.co.uk"],
+          ["host", "bandofbakers.co.uk"],
+        ])
+      );
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(true);
     });
 
-    it("should return true for valid referer in production", () => {
-      mockHeaders.mockResolvedValue({
-        get: (name: string) => {
-          if (name === "referer") return "https://bandofbakers.co.uk/admin";
-          if (name === "host") return "bandofbakers.co.uk";
-          return null;
-        },
-      } as MockHeaders);
+    it("should return true for valid referer in production", async () => {
+      mockHeaders.mockResolvedValue(
+        new Headers([
+          ["referer", "https://bandofbakers.co.uk/admin"],
+          ["host", "bandofbakers.co.uk"],
+        ])
+      );
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(true);
     });
 
-    it("should return true for localhost in development", () => {
+    it("should return true for localhost in development", async () => {
+      vi.stubEnv("NODE_ENV", "development");
       mockHeaders.mockResolvedValue({
         get: (name: string) => {
           if (name === "origin") return "http://localhost:3000";
           if (name === "host") return "localhost:3000";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(true);
     });
 
-    it("should return true for 127.0.0.1 in development", () => {
-      mockHeaders.mockResolvedValue({
-        get: (name: string) => {
-          if (name === "origin") return "http://127.0.0.1:3000";
-          if (name === "host") return "127.0.0.1:3000";
-          return null;
-        },
-      } as MockHeaders);
+    it("should return true for 127.0.0.1 in development", async () => {
+      vi.stubEnv("NODE_ENV", "development");
+      mockHeaders.mockResolvedValue(
+        new Headers([
+          ["origin", "http://127.0.0.1:3000"],
+          ["host", "127.0.0.1:3000"],
+        ])
+      );
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(true);
     });
 
-    it("should return false for mismatched origin", () => {
+    it("should return false for mismatched origin", async () => {
       mockHeaders.mockResolvedValue({
         get: (name: string) => {
           if (name === "origin") return "https://evil.com";
           if (name === "host") return "bandofbakers.co.uk";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(false);
     });
 
-    it("should return false for mismatched referer", () => {
+    it("should return false for mismatched referer", async () => {
       mockHeaders.mockResolvedValue({
         get: (name: string) => {
           if (name === "referer") return "https://evil.com/attack";
           if (name === "host") return "bandofbakers.co.uk";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(false);
     });
 
-    it("should return false when origin and referer are missing", () => {
+    it("should return false when origin and referer are missing", async () => {
       mockHeaders.mockResolvedValue({
         get: (name: string) => {
           if (name === "host") return "bandofbakers.co.uk";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(false);
     });
 
-    it("should handle origin with path", () => {
-      mockHeaders.mockResolvedValue({
-        get: (name: string) => {
-          if (name === "origin") return "https://bandofbakers.co.uk";
-          if (name === "host") return "bandofbakers.co.uk";
-          return null;
-        },
-      } as MockHeaders);
+    it("should handle origin with path", async () => {
+      mockHeaders.mockResolvedValue(
+        new Headers([
+          ["origin", "https://bandofbakers.co.uk"],
+          ["host", "bandofbakers.co.uk"],
+        ])
+      );
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(true);
     });
 
-    it("should reject subdomain attacks", () => {
+    it("should reject subdomain attacks", async () => {
       mockHeaders.mockResolvedValue({
         get: (name: string) => {
           if (name === "origin") return "https://evil.bandofbakers.co.uk";
           if (name === "host") return "bandofbakers.co.uk";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(false);
     });
 
-    it("should allow Cloudflare preview URLs in development", () => {
-      mockHeaders.mockResolvedValue({
-        get: (name: string) => {
-          if (name === "origin") return "http://localhost:8788";
-          if (name === "host") return "localhost:8788";
-          return null;
-        },
-      } as MockHeaders);
+    it("should allow Cloudflare preview URLs in development", async () => {
+      vi.stubEnv("NODE_ENV", "development");
+      mockHeaders.mockResolvedValue(
+        new Headers([
+          ["origin", "http://localhost:8788"],
+          ["host", "localhost:8788"],
+        ])
+      );
 
-      const result = validateCsrf();
+      const result = await validateCsrf();
       expect(result).toBe(true);
     });
   });
 
   describe("requireCsrf", () => {
     it("should not throw for valid CSRF token", async () => {
-      mockHeaders.mockResolvedValue({
-        get: (name: string) => {
-          if (name === "origin") return "https://bandofbakers.co.uk";
-          if (name === "host") return "bandofbakers.co.uk";
-          return null;
-        },
-      } as MockHeaders);
+      mockHeaders.mockResolvedValue(
+        new Headers([
+          ["origin", "https://bandofbakers.co.uk"],
+          ["host", "bandofbakers.co.uk"],
+        ])
+      );
 
       await expect(requireCsrf()).resolves.not.toThrow();
     });
@@ -169,7 +163,7 @@ describe("CSRF Protection", () => {
           if (name === "host") return "bandofbakers.co.uk";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
       await expect(requireCsrf()).rejects.toThrow(CsrfError);
     });
@@ -181,7 +175,7 @@ describe("CSRF Protection", () => {
           if (name === "host") return "bandofbakers.co.uk";
           return null;
         },
-      } as MockHeaders);
+      } as Headers);
 
       try {
         await requireCsrf();

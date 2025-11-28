@@ -85,10 +85,10 @@ describe("ImageGallery", () => {
       expect(screen.queryByText("Loading images...")).not.toBeInTheDocument();
     });
 
-    const filterSelect = screen.getByLabelText("Filter:");
-    fireEvent.change(filterSelect, { target: { value: "cat-breads" } });
+    const filterSelect = screen.getByLabelText("Category:");
+    fireEvent.change(filterSelect, { target: { value: "products" } });
 
     // Should trigger new fetch with category
-    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("category=cat-breads"));
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("bucket=products"));
   });
 });

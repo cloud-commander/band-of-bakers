@@ -15,7 +15,7 @@ export async function getDb() {
 
   let env: CloudflareEnv | undefined;
   try {
-    const context = await getCloudflareContext();
+    const context = await getCloudflareContext({ async: true });
     env = context.env as CloudflareEnv;
   } catch (e) {
     console.warn("[DB] Failed to get Cloudflare context (expected in local scripts/dev):", e);
@@ -42,66 +42,72 @@ export async function getDb() {
     try {
       const { drizzle: drizzleProxy } = await import("drizzle-orm/sqlite-proxy");
       const Database = (await import("better-sqlite3")).default;
-      const fs = (await import("fs")).default;
       const path = (await import("path")).default;
 
-      // Find the SQLite file
-      const d1Dir = path.join(process.cwd(), ".wrangler/state/v3/d1/miniflare-D1DatabaseObject");
-      if (fs.existsSync(d1Dir)) {
-        const files = fs.readdirSync(d1Dir).filter((f) => f.endsWith(".sqlite"));
-        // Sort by modification time to get the most recent one
-        files.sort((a, b) => {
-          const statA = fs.statSync(path.join(d1Dir, a));
-          const statB = fs.statSync(path.join(d1Dir, b));
-          return statB.mtime.getTime() - statA.mtime.getTime();
-        });
+      // Try local.db first (for local development)
+      const localDbPath = path.join(process.cwd(), "local.db");
+      console.log(`[DB] Connecting to local SQLite: ${localDbPath}`);
+      const sqlite = new Database(localDbPath);
 
-        if (files.length > 0) {
-          const dbPath = path.join(d1Dir, files[0]);
-          console.log(`[DB] Connecting to local SQLite: ${dbPath}`);
-          const sqlite = new Database(dbPath);
+      // Use sqlite-proxy to mimic async D1 behavior
+      const db = drizzleProxy(
+        async (sql, params, method) => {
+          // Debug query shape to help troubleshoot local SQLite issues
+          if (process.env.DEBUG_SQLITE_PROXY === "1") {
+            console.log(`[DB][sqlite-proxy] ${method?.toUpperCase?.() ?? method}: ${sql}`);
+            if (params?.length) {
+              console.log("[DB][sqlite-proxy] params:", params);
+            }
+          }
+          try {
+            const stmt = sqlite.prepare(sql);
+            if (method === "run") {
+              const result = stmt.run(params);
+              // D1-like result shape
+              return {
+                rows: [],
+                success: true,
+                meta: {
+                  changed_db: false,
+                  changes: result.changes,
+                  duration: 0,
+                  last_row_id: Number(result.lastInsertRowid),
+                  rows_read: 0,
+                  rows_written: result.changes,
+                  size_after: 0,
+                },
+              };
+            }
 
-          // Use sqlite-proxy to mimic async D1 behavior
-          const db = drizzleProxy(
-            async (sql, params, method) => {
-              try {
-                const stmt = sqlite.prepare(sql);
-                if (method === "run") {
-                  const result = stmt.run(params);
-                  // D1-like result shape
-                  return {
-                    rows: [],
-                    success: true,
-                    meta: {
-                      changed_db: false,
-                      changes: result.changes,
-                      duration: 0,
-                      last_row_id: Number(result.lastInsertRowid),
-                      rows_read: 0,
-                      rows_written: result.changes,
-                      size_after: 0,
-                    },
-                  };
-                } else {
-                  // Force raw arrays for everything to see if Drizzle handles it
-                  const rows = stmt.raw().all(params);
-                  console.log("[DB] Proxy result (raw):", JSON.stringify(rows).slice(0, 200));
-                  return { rows: rows };
-                }
-              } catch (e) {
-                console.error("SQL Error:", e);
-                throw e;
-              }
-            },
-            { schema }
-          );
+            if (method === "get") {
+              const row = stmt.raw().get(params);
+              const rowLog =
+                row === undefined ? "undefined" : JSON.stringify(row).slice(0, 200);
+              console.log("[DB] Proxy result (raw):", rowLog);
+              return { rows: row ? [row] : [] };
+            }
 
-          // Cache the connection
-          globalForDb.__localDb = db;
-          return db;
-        }
-      }
-      console.error("[DB] Could not find local D1 SQLite file.");
+            if (method === "values") {
+              const rows = stmt.raw().all(params);
+              console.log("[DB] Proxy result (raw):", JSON.stringify(rows).slice(0, 200));
+              return { rows };
+            }
+
+            // Default: return raw arrays to mirror D1 driver format
+            const rows = stmt.raw().all(params);
+            console.log("[DB] Proxy result (raw):", JSON.stringify(rows).slice(0, 200));
+            return { rows };
+          } catch (e) {
+            console.error("SQL Error:", e);
+            throw e;
+          }
+        },
+        { schema }
+      );
+
+      // Cache the connection
+      globalForDb.__localDb = db;
+      return db;
     } catch (fallbackError) {
       console.error("[DB] Local fallback failed:", fallbackError);
     }

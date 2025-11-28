@@ -50,13 +50,20 @@ const args = process.argv.slice(2);
 const isAdminOnly = args.includes("--admin-only");
 const skipR2 = args.includes("--skip-r2");
 const useRealProducts = args.includes("--real-products");
+const r2Target = args.includes("--r2-remote") ? "remote" : "local";
+const r2Flag = r2Target === "remote" ? "--remote" : "--local";
+
+const normalizeR2Path = (r2Path: string) => (r2Path.startsWith("/") ? r2Path.slice(1) : r2Path);
+const publicUrlForR2Path = (r2Path: string) => `/${normalizeR2Path(r2Path)}`;
 // const forceR2 = args.includes("--force-r2"); // Unused for now
 
 async function main() {
   console.log("🌱 Starting seed process...");
   console.log(`   Mode: ${isAdminOnly ? "Admin Only" : "Full Seed"}`);
   console.log(`   Products: ${useRealProducts ? "Real Products" : "Mock Products"}`);
-  console.log(`   R2: ${skipR2 ? "Skipping" : "Enabled"}`);
+  console.log(
+    `   R2: ${skipR2 ? "Skipping" : r2Target === "remote" ? "Enabled (remote)" : "Enabled (local)"}`
+  );
 
   // Create temp directory
   if (!fs.existsSync(TEMP_DIR)) {
@@ -64,11 +71,27 @@ async function main() {
   }
 
   try {
+    // 0a. Schema guardrails for older local DBs (add columns used by current app code)
+    const schemaFixes = [
+      "ALTER TABLE testimonials ADD COLUMN status text DEFAULT 'pending' NOT NULL;",
+      "CREATE INDEX IF NOT EXISTS idx_testimonials_status ON testimonials(status);",
+    ];
+    for (const statement of schemaFixes) {
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --command="${statement}"`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+      } catch {
+        // Ignore if column/index already exists
+      }
+    }
+
     // 0. Clear R2 if requested
     if (args.includes("--clear")) {
       console.log("\n🧹 Clearing R2 bucket...");
       try {
-        const listOutput = execSync(`npx wrangler r2 object list ${R2_BUCKET}`, {
+        const listOutput = execSync(`npx wrangler r2 object list ${R2_BUCKET} ${r2Flag}`, {
           encoding: "utf-8",
           stdio: ["ignore", "pipe", "ignore"], // Suppress stderr
         });
@@ -78,7 +101,7 @@ async function main() {
           console.log(`   Found ${objects.length} objects to delete.`);
           for (const obj of objects) {
             try {
-              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key} --remote`, {
+              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key} ${r2Flag}`, {
                 stdio: "ignore",
               });
               process.stdout.write("."); // Progress indicator
@@ -101,6 +124,7 @@ async function main() {
     // 1. Generate SQL
     console.log("\n📝 Generating SQL...");
     const sqlStatements: string[] = [];
+    const imageInsertStatements: string[] = [];
 
     // Clear existing data (order matters for foreign keys)
     // We use DELETE FROM to clear data but keep structure
@@ -211,6 +235,38 @@ async function main() {
         `,
         variables: ["customer_name", "date", "resolution_link"],
       },
+      {
+        id: "tmpl_order_update_bakery",
+        name: "order_update_bakery",
+        subject: "Important Update to Your Order #{{order_id}} ⚠️",
+        content: `
+          <h1>Order Update Required</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>We need to inform you of some changes to your order #{{order_id}}.</p>
+          <p><strong>Changes:</strong></p>
+          {{change_details}}
+          <p><strong>Updated Total:</strong> £{{new_total}}</p>
+          <p>We apologize for any inconvenience this may cause. If you have any questions or concerns, please don't hesitate to contact us.</p>
+          <p>Best regards,<br>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "order_id", "change_details", "new_total"],
+      },
+      {
+        id: "tmpl_order_update_customer",
+        name: "order_update_customer",
+        subject: "Confirmation: Your Order Changes #{{order_id}} ✓",
+        content: `
+          <h1>Order Changes Confirmed</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>As requested, we've made the following changes to your order #{{order_id}}:</p>
+          <p><strong>Changes:</strong></p>
+          {{change_details}}
+          <p><strong>Updated Total:</strong> £{{new_total}}</p>
+          <p>Thank you for letting us know. If you need any further changes, please contact us.</p>
+          <p>Best regards,<br>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "order_id", "change_details", "new_total"],
+      },
     ];
 
     for (const tmpl of defaultTemplates) {
@@ -258,20 +314,28 @@ async function main() {
       for (const cat of productCategories) {
         let categoryImageUrl = "NULL";
 
+        // Check if category has its own image_url (real products data)
+        if (!skipR2 && "image_url" in cat && cat.image_url) {
+          categoryImageUrl = publicUrlForR2Path(cat.image_url.replace(/^\//, ""));
+        }
         // Check if category has its own image (mock data has .image property)
         // We uploaded these to images/categories/{slug}.jpg in the R2 step
-        if (!skipR2 && "image" in cat && cat.image) {
-          categoryImageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/categories/${cat.slug}.jpg`;
+        else if (!skipR2 && "image" in cat && cat.image) {
+          categoryImageUrl = publicUrlForR2Path(`images/categories/${cat.slug}.jpg`);
         }
         // Fallback to first product image if no category image
         else {
           const firstProduct = products.find((p) => p.category_id === cat.id);
           if (!skipR2 && firstProduct?.image_url) {
             if (useRealProducts) {
-              categoryImageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${cat.slug}/${firstProduct.slug}-card.webp`;
+              categoryImageUrl = publicUrlForR2Path(
+                `images/products/${cat.slug}/${firstProduct.slug}-card.webp`
+              );
             } else {
               // Fix: Include category_id in path to match R2 upload structure
-              categoryImageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${firstProduct.category_id}/${firstProduct.slug}.jpg`;
+              categoryImageUrl = publicUrlForR2Path(
+                `images/products/${firstProduct.category_id}/${firstProduct.slug}.jpg`
+              );
             }
           }
         }
@@ -298,11 +362,15 @@ async function main() {
             const category = productCategories.find((c) => c.id === prod.category_id);
             const categorySlug = category?.slug || "uncategorized";
             // Use R2 URL if not skipping R2
-            imageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${categorySlug}/${prod.slug}-card.webp`;
+            imageUrl = publicUrlForR2Path(
+              `images/products/${categorySlug}/${prod.slug}-card.webp`
+            );
           } else {
             // For mock products, use old structure
             // Use R2 URL if not skipping R2
-            imageUrl = `https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/images/products/${prod.category_id}/${prod.slug}.jpg`;
+            imageUrl = publicUrlForR2Path(
+              `images/products/${prod.category_id}/${prod.slug}.jpg`
+            );
           }
         } else if (skipR2) {
           imageUrl = prod.image_url || "NULL";
@@ -474,15 +542,15 @@ async function main() {
       const testimonialsToSeed = useRealProducts ? realTestimonials : mockTestimonials;
       for (const testimonial of testimonialsToSeed) {
         sqlStatements.push(
-          `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, user_id, is_active, created_at, updated_at) VALUES ('${
+          `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, user_id, status, created_at, updated_at) VALUES ('${
             testimonial.id
           }', '${testimonial.name?.replace(/'/g, "''")}', ${
             testimonial.role ? `'${testimonial.role.replace(/'/g, "''")}'` : "NULL"
           }, '${testimonial.content?.replace(/'/g, "''")}', ${testimonial.rating}, ${
             testimonial.avatar_url ? `'${testimonial.avatar_url}'` : "NULL"
-          }, ${testimonial.user_id ? `'${testimonial.user_id}'` : "NULL"}, ${
-            testimonial.is_active ? 1 : 0
-          }, '${testimonial.created_at}', '${testimonial.updated_at}');`
+          }, ${testimonial.user_id ? `'${testimonial.user_id}'` : "NULL"}, '${
+            testimonial.status
+          }', '${testimonial.created_at}', '${testimonial.updated_at}');`
         );
       }
     }
@@ -740,7 +808,7 @@ async function main() {
         if (!shouldOverwrite) {
           try {
             const checkResult = execSync(
-              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --local`,
+              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} ${r2Flag}`,
               { stdio: "pipe" }
             );
             if (checkResult) {
@@ -749,8 +817,10 @@ async function main() {
               // Since we don't have size easily without downloading, we might skip size or set dummy
               // But let's try to get size from checkResult if possible, or just default.
               // For now, let's just insert into DB.
-              sqlStatements.push(
-                `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-83c559424755490cb53e8df3d93994d8.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+              imageInsertStatements.push(
+                `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', '${publicUrlForR2Path(
+                  r2Path
+                )}', '${filename}', '${category}', '${JSON.stringify(
                   tags
                 )}', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
               );
@@ -836,15 +906,17 @@ async function main() {
           // Upload
           console.log(`   Uploading to ${r2Path}...`);
           execSync(
-            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${tempPath} --remote`,
+            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${tempPath} ${r2Flag}`,
             {
               stdio: "ignore",
             }
           );
 
           // Add to SQL
-          sqlStatements.push(
-            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
+          imageInsertStatements.push(
+            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', '${publicUrlForR2Path(
+              r2Path
+            )}', '${filename}', '${category}', '${JSON.stringify(
               tags
             )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
           );
@@ -877,9 +949,10 @@ async function main() {
           return;
         }
 
-        let size = 0;
         const filename = path.basename(r2Path);
         const id = `img_${path.basename(r2Path, path.extname(r2Path))}`;
+        const stats = fs.statSync(fullLocalPath);
+        const size = stats.size;
 
         // Check if image already exists in R2 (unless overwriting)
         const shouldOverwrite = args.includes("--overwrite") || args.includes("--clear");
@@ -887,13 +960,20 @@ async function main() {
         if (!shouldOverwrite) {
           try {
             const checkResult = execSync(
-              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} --remote`,
+              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} ${r2Flag}`,
               {
                 stdio: "pipe",
               }
             );
             if (checkResult) {
               console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping upload...`);
+              imageInsertStatements.push(
+                `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', '${publicUrlForR2Path(
+                  r2Path
+                )}', '${filename}', '${category}', '${JSON.stringify(
+                  tags
+                )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+              );
               return;
             }
           } catch {
@@ -904,33 +984,20 @@ async function main() {
         try {
           console.log(`   Processing local image: ${localFilePath}...`);
 
-          // Get file stats directly from source
-          const stats = fs.statSync(fullLocalPath);
-          size = stats.size;
-
           // Upload to R2 directly from source (skipping optimization as requested)
           console.log(`   Uploading to ${r2Path}...`);
           execSync(
-            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath} --remote`,
+            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath} ${r2Flag}`,
             {
               stdio: "ignore",
             }
           );
 
-          // ALSO save to public/ directory for local dev
-          const publicPath = path.join(process.cwd(), "public", r2Path);
-          const publicDir = path.dirname(publicPath);
-          if (!fs.existsSync(publicDir)) {
-            fs.mkdirSync(publicDir, { recursive: true });
-          }
-          fs.copyFileSync(fullLocalPath, publicPath);
-          console.log(`      Saved to public/${r2Path}`);
-
           // Add to SQL for images table
-          sqlStatements.push(
-            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', 'https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev/${r2Path}', '${filename}', '${category}', '${JSON.stringify(
-              tags
-            )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+          imageInsertStatements.push(
+            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', '${publicUrlForR2Path(
+              r2Path
+            )}', '${filename}', '${category}', '${JSON.stringify(tags)}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
           );
         } catch (uploadError) {
           console.error(`   ❌ Failed to process/upload local image:`, uploadError);
@@ -962,21 +1029,21 @@ async function main() {
           await processLocalImage(
             imageFiles.card,
             `images/products/${categorySlug}/${imageFiles.card}`,
-            "product",
+            categorySlug,
             ["product", prod.category_id, prod.slug, "card"]
           );
 
           await processLocalImage(
             imageFiles.detail,
             `images/products/${categorySlug}/${imageFiles.detail}`,
-            "product",
+            categorySlug,
             ["product", prod.category_id, prod.slug, "detail"]
           );
 
           await processLocalImage(
             imageFiles.thumbnail,
             `images/products/${categorySlug}/${imageFiles.thumbnail}`,
-            "product",
+            categorySlug,
             ["product", prod.category_id, prod.slug, "thumbnail"]
           );
         }
@@ -987,7 +1054,7 @@ async function main() {
             await processImage(
               prod.image_url,
               `images/products/${prod.category_id}/${prod.slug}.jpg`,
-              "product",
+              prod.category_id,
               ["product", prod.category_id, prod.slug]
             );
           }
@@ -1002,6 +1069,28 @@ async function main() {
             post.slug,
           ]);
         }
+      }
+    }
+
+    // 4. Persist image metadata after uploads
+    if (imageInsertStatements.length > 0) {
+      console.log(`\n🖼️  Writing ${imageInsertStatements.length} image records to DB...`);
+      const imagesFile = path.join(TEMP_DIR, "seed_images.sql");
+      fs.writeFileSync(imagesFile, imageInsertStatements.join("\n"));
+
+      try {
+        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${imagesFile}`, {
+          stdio: "pipe",
+          encoding: "utf-8",
+        });
+        console.log("   ✅ Image metadata inserted");
+      } catch (e: unknown) {
+        console.error("\n❌ Failed to insert image metadata:");
+        if (e && typeof e === "object" && "stdout" in e && "stderr" in e) {
+          console.error((e as { stdout?: string }).stdout);
+          console.error((e as { stderr?: string }).stderr);
+        }
+        throw e;
       }
     }
   } catch (error) {

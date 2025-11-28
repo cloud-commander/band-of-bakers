@@ -10,7 +10,7 @@ export const mockTestimonials: Partial<Testimonial>[] = [
     rating: 5,
     avatar_url:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=faces",
-    is_active: true,
+    status: "approved",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -23,7 +23,7 @@ export const mockTestimonials: Partial<Testimonial>[] = [
     rating: 5,
     avatar_url:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces",
-    is_active: true,
+    status: "approved",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -35,7 +35,7 @@ export const mockTestimonials: Partial<Testimonial>[] = [
     rating: 4,
     avatar_url:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=faces",
-    is_active: true,
+    status: "approved",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },

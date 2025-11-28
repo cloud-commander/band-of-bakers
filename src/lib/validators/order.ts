@@ -170,9 +170,11 @@ export const updateOrderItemSchema = insertOrderItemSchema.partial().extend({
 // COMBINED SCHEMAS
 // ============================================================================
 
-export const orderWithItemsSchema = orderSchema.extend({
-  items: z.array(orderItemSchema),
-});
+export const orderWithItemsSchema = orderSchema.merge(
+  z.object({
+    items: z.array(orderItemSchema),
+  })
+);
 
 // Type exports
 export type Order = z.infer<typeof orderSchema>;

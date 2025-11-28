@@ -31,7 +31,7 @@ export async function DELETE(request: NextRequest) {
     const key = url.startsWith("/") ? url.substring(1) : url;
 
     // 3. Delete from R2
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(env as any).R2) {

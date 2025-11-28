@@ -57,8 +57,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { sendOrderUpdateEmail } from "@/actions/notifications";
-import { markOrderReady, markOrderComplete } from "@/actions/admin/orders";
+import { markOrderReady, markOrderComplete, updateOrderItems } from "@/actions/admin/orders";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function OrderDetailContent({ order }: OrderDetailContentProps) {
   // State for managing item availability (quantity)
@@ -70,6 +71,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     qty: number;
   } | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [changeType, setChangeType] = useState<"bakery" | "customer">("bakery");
 
   // Helper function to get product name
   const getProductName = (item: OrderDetailContentProps["order"]["items"][0]) => {
@@ -195,38 +197,30 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
 
     setIsSendingEmail(true);
     try {
-      // Construct change description
-      const changes = order.items
-        .filter((item) => {
-          const availableQty = availableQuantities[item.id];
-          return availableQty !== undefined && availableQty < item.quantity;
-        })
-        .map((item) => {
-          const availableQty = availableQuantities[item.id]!;
-          const productName = getProductName(item);
-          if (availableQty === 0) {
-            return `- ${productName}: Marked as unavailable (ordered ${item.quantity})`;
-          }
-          return `- ${productName}: Quantity reduced from ${item.quantity} to ${availableQty}`;
-        })
-        .join("\n");
+      // Build updated items list
+      const updatedItems = order.items.map((item) => ({
+        itemId: item.id,
+        newQuantity: availableQuantities[item.id] ?? item.quantity,
+      }));
 
-      const description = `The following items in your order have been updated:\n\n${changes}\n\nNew Total: £${adjustedTotal.toFixed(
-        2
-      )}`;
-
-      await sendOrderUpdateEmail({
+      // Call the server action to update order and send email
+      const result = await updateOrderItems({
         orderId: order.id,
-        customerEmail: order.user.email,
-        customerName: order.user.name || "Customer",
-        changeDescription: description,
+        updatedItems,
+        changeType,
       });
 
-      toast.success("Email sent to customer", {
-        description: `Notification sent to ${order.user.email}`,
-      });
+      if (result.success) {
+        toast.success("Order updated and email sent", {
+          description: `${changeType === "customer" ? "Confirmation" : "Update"} sent to ${order.user.email}`,
+        });
+        // Reset the available quantities state
+        setAvailableQuantities({});
+      } else {
+        toast.error(result.error || "Failed to update order");
+      }
     } catch (error) {
-      toast.error("Failed to send email");
+      toast.error("Failed to update order");
       console.error(error);
     } finally {
       setIsSendingEmail(false);
@@ -252,6 +246,35 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
           })}`}
         />
       </div>
+
+      {/* Change Type Selection */}
+      <Card className="mb-4">
+        <CardContent className="pt-6">
+          <RadioGroup
+            value={changeType}
+            onValueChange={(value) => setChangeType(value as "bakery" | "customer")}
+            className="flex flex-col sm:flex-row gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="bakery" id="bakery" />
+              <Label htmlFor="bakery" className="cursor-pointer font-medium">
+                Bakery Initiated Change
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="customer" id="customer" />
+              <Label htmlFor="customer" className="cursor-pointer font-medium">
+                Customer Requested Change
+              </Label>
+            </div>
+          </RadioGroup>
+          <p className="text-sm text-muted-foreground mt-2">
+            {changeType === "bakery"
+              ? "Changes will be communicated to the customer as bakery-initiated updates."
+              : "Changes will be confirmed to the customer as per their request."}
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main Content */}
@@ -283,9 +306,9 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                             : "bg-white border-stone-200 hover:border-bakery-amber-200"
                       )}
                     >
-                      {/* Top Row: Info & Quantity Controls */}
+                      {/* Top Row: Info */}
                       <div className="flex justify-between items-start w-full">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1">
                           <div
                             className={cn(
                               "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
@@ -306,14 +329,14 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                               <Check className="w-4 h-4 text-bakery-amber-700" />
                             )}
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <p
                               className={cn("font-medium text-sm", isUnavailable && "line-through")}
                             >
                               {productName}
                             </p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>Qty: {item.quantity}</span>
+                              <span>Ordered: {item.quantity}</span>
                               <span>×</span>
                               <span>£{item.unit_price.toFixed(2)}</span>
                               {isPartiallyAvailable && (
@@ -328,60 +351,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                           </div>
                         </div>
 
-                        {/* Quantity Controls - Top Right */}
-                        {item.quantity > 1 && !isUnavailable && (
-                          <div className="flex items-center border rounded-md bg-white h-7">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => adjustQuantity(item.id, -1, item.quantity)}
-                              disabled={availableQty <= 0}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="w-6 text-center text-xs font-medium">
-                              {availableQty}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => adjustQuantity(item.id, 1, item.quantity)}
-                              disabled={availableQty >= item.quantity}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Bottom Row: Actions & Total */}
-                      <div className="flex items-center justify-between pl-11">
-                        <Button
-                          variant={isUnavailable ? "outline" : "destructive"}
-                          size="sm"
-                          onClick={() => {
-                            if (isUnavailable) {
-                              toggleItemAvailability(item.id, productName, item.quantity);
-                            } else {
-                              setItemToMarkUnavailable({
-                                id: item.id,
-                                name: productName,
-                                qty: item.quantity,
-                              });
-                            }
-                          }}
-                          className={cn(
-                            "h-7 text-xs px-3",
-                            isUnavailable &&
-                              "text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                          )}
-                        >
-                          {isUnavailable ? "Mark Available" : "Mark Unavailable"}
-                        </Button>
-
-                        <div className="text-right min-w-[60px]">
+                        <div className="text-right min-w-[80px]">
                           <p
                             className={cn(
                               "font-serif font-bold text-sm",
@@ -390,6 +360,65 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                           >
                             £{(item.unit_price * availableQty).toFixed(2)}
                           </p>
+                        </div>
+                      </div>
+
+                      {/* Bottom Row: Quantity Controls & Actions */}
+                      <div className="flex items-center justify-between pl-11">
+                        <div className="flex items-center gap-3">
+                          {/* Quantity Controls */}
+                          {!isUnavailable && (
+                            <div className="flex items-center border rounded-md bg-white">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-r-none"
+                                onClick={() => adjustQuantity(item.id, -1, item.quantity)}
+                                disabled={availableQty <= 0}
+                              >
+                                <Minus className="h-3.5 w-3.5" />
+                              </Button>
+                              <div className="px-3 min-w-[40px] text-center border-x">
+                                <span className="text-sm font-medium">{availableQty}</span>
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  / {item.quantity}
+                                </span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-l-none"
+                                onClick={() => adjustQuantity(item.id, 1, item.quantity)}
+                                disabled={availableQty >= item.quantity}
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Mark Available/Unavailable Button */}
+                          <Button
+                            variant={isUnavailable ? "outline" : "destructive"}
+                            size="sm"
+                            onClick={() => {
+                              if (isUnavailable) {
+                                toggleItemAvailability(item.id, productName, item.quantity);
+                              } else {
+                                setItemToMarkUnavailable({
+                                  id: item.id,
+                                  name: productName,
+                                  qty: item.quantity,
+                                });
+                              }
+                            }}
+                            className={cn(
+                              "h-8 text-xs px-3",
+                              isUnavailable &&
+                                "text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                            )}
+                          >
+                            {isUnavailable ? "Mark Available" : "Mark Unavailable"}
+                          </Button>
                         </div>
                       </div>
                     </div>

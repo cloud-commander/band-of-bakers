@@ -297,11 +297,11 @@ export const testimonials = sqliteTable(
     rating: integer("rating").notNull().default(5),
     avatar_url: text("avatar_url"),
     user_id: text("user_id").references(() => users.id),
-    is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    status: text("status").notNull().default("pending"), // pending, approved, rejected
     ...timestamps,
   },
   (table) => ({
-    isActiveIdx: index("idx_testimonials_is_active").on(table.is_active),
+    statusIdx: index("idx_testimonials_status").on(table.status),
   })
 );
 

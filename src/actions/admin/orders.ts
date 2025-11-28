@@ -72,3 +72,102 @@ export async function markOrderReady(orderId: string) {
 export async function markOrderComplete(orderId: string) {
   return updateOrderStatus(orderId, "completed");
 }
+
+interface UpdatedItem {
+  itemId: string;
+  newQuantity: number;
+}
+
+interface UpdateOrderItemsParams {
+  orderId: string;
+  updatedItems: UpdatedItem[];
+  changeType: "bakery" | "customer";
+}
+
+export async function updateOrderItems({
+  orderId,
+  updatedItems,
+  changeType,
+}: UpdateOrderItemsParams): Promise<ActionResult<void>> {
+  if (!(await checkAdmin())) return { success: false, error: "Unauthorized" };
+
+  try {
+    const db = await getDb();
+
+    // Get the full order with items
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.id, orderId),
+      with: {
+        user: true,
+        items: {
+          with: {
+            product: true,
+            variant: true,
+          },
+        },
+      },
+    });
+
+    if (!order) return { success: false, error: "Order not found" };
+
+    // Import orderItems schema
+    const { orderItems } = await import("@/db/schema");
+
+    // Update each item's quantity
+    let newTotal = 0;
+    const changesList: string[] = [];
+
+    for (const update of updatedItems) {
+      const item = order.items.find((i: { id: string }) => i.id === update.itemId);
+      if (!item) continue;
+
+      const oldQuantity = item.quantity;
+      const newQuantity = update.newQuantity;
+
+      // Update the item quantity in the database
+      if (newQuantity !== oldQuantity) {
+        await db
+          .update(orderItems)
+          .set({ quantity: newQuantity })
+          .where(eq(orderItems.id, update.itemId));
+
+        // Build change description
+        const productName = item.product?.name || "Unknown Product";
+        const variantName = item.variant?.name ? ` - ${item.variant.name}` : "";
+        const fullName = `${productName}${variantName}`;
+
+        if (newQuantity === 0) {
+          changesList.push(`<li>${fullName}: Removed (was ${oldQuantity})</li>`);
+        } else {
+          changesList.push(
+            `<li>${fullName}: Quantity changed from ${oldQuantity} to ${newQuantity}</li>`
+          );
+        }
+      }
+
+      // Calculate new total
+      newTotal += item.unit_price * newQuantity;
+    }
+
+    // Update order total
+    await db.update(orders).set({ total: newTotal }).where(eq(orders.id, orderId));
+
+    // Send appropriate email based on change type
+    const templateName = changeType === "customer" ? "order_update_customer" : "order_update_bakery";
+    const changeDetails = changesList.length > 0 ? `<ul>${changesList.join("")}</ul>` : "<p>No changes</p>";
+
+    await sendEmail(order.user.email, templateName, {
+      customer_name: order.user.name || "Customer",
+      order_id: order.id.slice(0, 8),
+      change_details: changeDetails,
+      new_total: newTotal.toFixed(2),
+    });
+
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${orderId}`);
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Update order items error:", error);
+    return { success: false, error: "Failed to update order items" };
+  }
+}

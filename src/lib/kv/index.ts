@@ -27,7 +27,7 @@ export interface RateLimitData {
 
 export class KVService {
   private async getKV() {
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (env as any).KV;
   }

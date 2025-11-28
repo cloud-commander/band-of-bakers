@@ -112,10 +112,13 @@ export default function EditProductForm({ productId, categories }: EditProductFo
         }
 
         // Calculate absolute prices for variants
-        const variantsWithPrices = product.variants.map((v) => ({
-          id: v.id,
-          name: v.name,
-          price: product.base_price + v.price_adjustment,
+        const variantsWithPrices = product.variants.map((v: unknown) => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (v as any).id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          name: (v as any).name,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          price: product.base_price + (v as any).price_adjustment,
         }));
 
         // Set form values

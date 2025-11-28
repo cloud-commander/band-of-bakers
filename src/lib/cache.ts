@@ -14,37 +14,40 @@ export const CACHE_TAGS = {
 };
 
 /**
- * Cached function to fetch images
- * Revalidates every hour or when 'images' tag is invalidated
+ * Cached fetch for images; cache key includes category/tag so filters work.
+ * Revalidates every hour or when 'images' tag is invalidated.
  */
-export const getCachedImages = unstable_cache(
-  async (category?: string, tag?: string) => {
-    const db = await getDb();
+export async function getCachedImages(category?: string, tag?: string) {
+  const categoryKey = category ?? "all";
+  const tagKey = tag ?? "all";
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (db as any).select().from(images).orderBy(desc(images.created_at));
+  return unstable_cache(
+    async () => {
+      const db = await getDb();
 
-    if (category && category !== "all") {
-      query = query.where(eq(images.category, category));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (db as any).select().from(images).orderBy(desc(images.created_at));
+
+      if (category && category !== "all") {
+        query = query.where(eq(images.category, category));
+      }
+
+      const allImages = (await query) as (typeof images.$inferSelect)[];
+
+      // Filter by tag in memory if needed (since tags are JSON/array)
+      if (tag && tag !== "all") {
+        return allImages.filter((img) => {
+          const tags = Array.isArray(img.tags) ? img.tags : [];
+          return tags.includes(tag);
+        });
+      }
+
+      return allImages;
+    },
+    ["get-images", categoryKey, tagKey],
+    {
+      revalidate: 3600, // 1 hour
+      tags: [CACHE_TAGS.images],
     }
-
-    const allImages = (await query) as (typeof images.$inferSelect)[];
-
-    // Filter by tag in memory if needed (since tags are JSON/array)
-    // Note: If we had a proper many-to-many relation, we could filter in SQL.
-    // For now, this matches the API logic.
-    if (tag && tag !== "all") {
-      return allImages.filter((img) => {
-        const tags = Array.isArray(img.tags) ? img.tags : [];
-        return tags.includes(tag);
-      });
-    }
-
-    return allImages;
-  },
-  ["get-images"], // Key parts
-  {
-    revalidate: 3600, // 1 hour
-    tags: [CACHE_TAGS.images],
-  }
-);
+  )();
+}

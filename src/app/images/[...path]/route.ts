@@ -11,7 +11,7 @@ export async function GET(
   const objectKey = path.join("/"); // e.g., "avatars/user-123.jpg" or "categories/bread.jpg"
 
   try {
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r2 = (env as any).R2;
 

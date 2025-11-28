@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { insertNewsSchema, updateNewsSchema } from "../news";
+import { insertNewsPostSchema, updateNewsPostSchema } from "../news";
 
 describe("News Validators", () => {
-  describe("insertNewsSchema", () => {
+  describe("insertNewsPostSchema", () => {
     const validNews = {
       title: "New Bakery Opening",
       slug: "new-bakery-opening",
@@ -12,12 +12,12 @@ describe("News Validators", () => {
     };
 
     it("should validate a correct news post", () => {
-      const result = insertNewsSchema.safeParse(validNews);
+      const result = insertNewsPostSchema.safeParse(validNews);
       expect(result.success).toBe(true);
     });
 
     it("should fail if title is empty", () => {
-      const result = insertNewsSchema.safeParse({
+      const result = insertNewsPostSchema.safeParse({
         ...validNews,
         title: "",
       });
@@ -25,7 +25,7 @@ describe("News Validators", () => {
     });
 
     it("should fail if slug has invalid format", () => {
-      const result = insertNewsSchema.safeParse({
+      const result = insertNewsPostSchema.safeParse({
         ...validNews,
         slug: "Invalid Slug!",
       });
@@ -40,13 +40,13 @@ describe("News Validators", () => {
       ];
 
       validSlugs.forEach((slug) => {
-        const result = insertNewsSchema.safeParse({ ...validNews, slug });
+        const result = insertNewsPostSchema.safeParse({ ...validNews, slug });
         expect(result.success).toBe(true);
       });
     });
 
     it("should allow optional fields", () => {
-      const result = insertNewsSchema.safeParse({
+      const result = insertNewsPostSchema.safeParse({
         title: "Minimal News",
         slug: "minimal-news",
         content: "Content",
@@ -55,7 +55,7 @@ describe("News Validators", () => {
     });
 
     it("should allow optional image_url", () => {
-      const result = insertNewsSchema.safeParse({
+      const result = insertNewsPostSchema.safeParse({
         ...validNews,
         image_url: "https://example.com/image.jpg",
       });
@@ -63,7 +63,7 @@ describe("News Validators", () => {
     });
 
     it("should default is_published to false", () => {
-      const result = insertNewsSchema.safeParse({
+      const result = insertNewsPostSchema.safeParse({
         title: "Draft News",
         slug: "draft-news",
         content: "Content",
@@ -75,9 +75,9 @@ describe("News Validators", () => {
     });
   });
 
-  describe("updateNewsSchema", () => {
+  describe("updateNewsPostSchema", () => {
     it("should allow partial updates", () => {
-      const result = updateNewsSchema.safeParse({
+      const result = updateNewsPostSchema.safeParse({
         id: "123e4567-e89b-12d3-a456-426614174000",
         title: "Updated Title",
       });
@@ -85,7 +85,7 @@ describe("News Validators", () => {
     });
 
     it("should require valid UUID for id", () => {
-      const result = updateNewsSchema.safeParse({
+      const result = updateNewsPostSchema.safeParse({
         id: "invalid-uuid",
         title: "Updated Title",
       });
@@ -93,7 +93,7 @@ describe("News Validators", () => {
     });
 
     it("should validate slug format in updates", () => {
-      const result = updateNewsSchema.safeParse({
+      const result = updateNewsPostSchema.safeParse({
         id: "123e4567-e89b-12d3-a456-426614174000",
         slug: "Invalid Slug!",
       });

@@ -15,7 +15,7 @@ export class TestimonialRepository extends BaseRepository<typeof testimonials> {
     return await db
       .select()
       .from(testimonials)
-      .where(eq(testimonials.is_active, true))
+      .where(eq(testimonials.status, "approved"))
       .orderBy(desc(testimonials.created_at));
   }
 

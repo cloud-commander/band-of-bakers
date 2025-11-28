@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getNewsPostById } from "@/actions/news";
-import { EditNewsPostClient } from "./client";
+import { EditNewsPostClient } from "./edit-client";
 
 export default async function EditNewsPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

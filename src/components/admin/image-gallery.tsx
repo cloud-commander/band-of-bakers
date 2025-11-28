@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { Upload, Check, Loader2, Trash2, Edit, Tag, RefreshCw } from "lucide-react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { Upload, Check, Loader2, Trash2, Edit, RefreshCw, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -25,16 +25,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+const knownProductCategories = [
+  "breads-loaves",
+  "pastries",
+  "pies-tarts",
+  "cakes-slices",
+  "savory",
+  "biscuits-bars",
+];
 
 interface ImageRecord {
   id: string;
@@ -96,10 +96,19 @@ export function ImageGallery({
   maxSizeMB = 5,
   mode = "picker",
 }: ImageGalleryProps) {
+  const bucketFromCategory = (cat?: string | null) => {
+    if (!cat || cat === "all") return "all";
+    if (cat === "uncategorized") return "uncategorized";
+    if (cat === "news") return "news";
+    return "products";
+  };
+
+  const initialBucket = category ? bucketFromCategory(category) : "products";
+
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<ImageRecord[]>([]);
   const [loadingImages, setLoadingImages] = useState(true);
-  const [selectedFilter, setSelectedFilter] = useState<string>(category || "all");
+  const [selectedFilter, setSelectedFilter] = useState<string>(initialBucket);
 
   // Dialog states
   const [imageToDelete, setImageToDelete] = useState<ImageRecord | null>(null);
@@ -108,14 +117,21 @@ export function ImageGallery({
   const [isEditing, setIsEditing] = useState(false);
 
   // Edit form state
-  const [editTags, setEditTags] = useState<string>("");
+  const [editProductCategory, setEditProductCategory] = useState<string>("");
   const [editCategory, setEditCategory] = useState<string>("");
+  const [selectedProductCategory, setSelectedProductCategory] = useState<string>("");
 
   // Fetch existing images
   const fetchImages = useCallback(async () => {
     try {
       setLoadingImages(true);
-      const response = await fetch(`/api/list-images?category=${selectedFilter}`);
+      const params = new URLSearchParams();
+      params.set("bucket", selectedFilter);
+      if (selectedFilter === "products" && selectedProductCategory) {
+        params.set("category", selectedProductCategory);
+      }
+      params.set("limit", "48");
+      const response = await fetch(`/api/list-images?${params.toString()}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -138,7 +154,7 @@ export function ImageGallery({
     } finally {
       setLoadingImages(false);
     }
-  }, [selectedFilter]);
+  }, [selectedFilter, selectedProductCategory]);
 
   useEffect(() => {
     fetchImages();
@@ -243,11 +259,16 @@ export function ImageGallery({
 
     setIsEditing(true);
     try {
-      // Parse tags
-      const tagsArray = editTags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
+      const resolvedProductCategory =
+        editCategory === "products"
+          ? editProductCategory || productCategoryOptions[0] || imageToEdit.category || null
+          : null;
+
+      if (editCategory === "products" && !resolvedProductCategory) {
+        toast.error("Select a product category for product images.");
+        setIsEditing(false);
+        return;
+      }
 
       const response = await fetch("/api/update-image", {
         method: "PATCH",
@@ -256,8 +277,25 @@ export function ImageGallery({
         },
         body: JSON.stringify({
           url: imageToEdit.url,
-          category: editCategory,
-          tags: tagsArray,
+          category:
+            editCategory === "uncategorized"
+              ? null
+              : editCategory === "products"
+                ? resolvedProductCategory
+                : "news",
+          tags: (() => {
+            const intrinsic = (imageToEdit.tags || []).filter((t) =>
+              ["card", "detail", "thumbnail", "featured"].includes(t)
+            );
+            const result = new Set<string>([...intrinsic]);
+            if (editCategory === "products") {
+              result.add("product");
+              if (resolvedProductCategory) result.add(resolvedProductCategory);
+            } else if (editCategory === "news") {
+              result.add("news");
+            }
+            return Array.from(result);
+          })(),
         }),
       });
 
@@ -278,8 +316,8 @@ export function ImageGallery({
 
   const openEditDialog = (image: ImageRecord) => {
     setImageToEdit(image);
-    setEditCategory(image.category || "all");
-    setEditTags(image.tags ? image.tags.join(", ") : "");
+    setEditCategory(bucketFromCategory(image.category));
+    setEditProductCategory(image.category && image.category !== "news" ? image.category : "");
   };
 
   // Pagination state
@@ -297,14 +335,54 @@ export function ImageGallery({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const formatLabel = (value: string) =>
+    value
+      .replace(/[-_]/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim();
+
+  const productCategoryOptions = useMemo(() => {
+    const set = new Set<string>(knownProductCategories);
+    images.forEach((img) => {
+      const cat = img.category || "";
+      if (cat && cat !== "news") set.add(cat);
+    });
+    return Array.from(set)
+      .filter((cat) => !["products", "news", "uncategorized", "all", "category"].includes(cat))
+      .sort();
+  }, [images]);
+
   // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedFilter]);
+  }, [selectedFilter, selectedProductCategory]);
+
+  const visibleImages = useMemo(() => {
+    if (selectedFilter === "products" && selectedProductCategory) {
+      return images.filter((img) => img.category === selectedProductCategory);
+    }
+    return images;
+  }, [images, selectedFilter, selectedProductCategory]);
 
   // Pagination logic
-  const totalPages = Math.ceil(images.length / pageSize);
-  const paginatedImages = images.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.ceil(visibleImages.length / pageSize);
+  const paginatedImages = visibleImages.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const getPreviewUrl = (image: ImageRecord) => {
+    const url = image.url;
+    const tags = image.tags || [];
+    if (tags.includes("thumbnail") || url.includes("-thumbnail")) {
+      return url;
+    }
+    if (url.includes("/images/products/")) {
+      if (url.includes("-detail")) return url.replace("-detail", "-thumbnail");
+      if (url.includes("-card")) return url.replace("-card", "-thumbnail");
+    }
+    return url;
+  };
 
   return (
     <div className="space-y-4">
@@ -313,7 +391,7 @@ export function ImageGallery({
         {!loadingImages && (
           <div className="flex items-center gap-2">
             <label htmlFor="category-filter" className="text-sm font-medium">
-              Filter:
+              Category:
             </label>
             <select
               id="category-filter"
@@ -321,12 +399,10 @@ export function ImageGallery({
               onChange={(e) => setSelectedFilter(e.target.value)}
               className="px-3 py-1.5 text-sm border border-input rounded-md bg-background"
             >
-              <option value="all">All Categories</option>
-              <option value="cat-breads">Breads</option>
-              <option value="cat-pastries-bakes">Pastries & Bakes</option>
-              <option value="cat-cakes-loaves">Cakes & Loaves</option>
-              <option value="cat-tarts-pies">Tarts & Pies</option>
-              <option value="cat-savoury-specialities">Savoury & Specialities</option>
+              <option value="all">All</option>
+              <option value="products">Products</option>
+              <option value="news">News</option>
+              <option value="uncategorized">Uncategorized</option>
             </select>
             <Button variant="ghost" size="icon" onClick={fetchImages} title="Refresh">
               <RefreshCw className="h-4 w-4" />
@@ -393,6 +469,7 @@ export function ImageGallery({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
             {paginatedImages.map((image, index) => {
               const isSelected = mode === "picker" && image.url === selectedImage;
+              const previewUrl = getPreviewUrl(image);
 
               return (
                 <div key={`${image.id}-${index}`} className="relative group">
@@ -412,7 +489,15 @@ export function ImageGallery({
                         : "border-muted hover:border-muted-foreground/50"
                     )}
                   >
-                    <Image src={image.url} alt={image.filename} fill className="object-cover" />
+                    <Image
+                      src={previewUrl}
+                      alt={image.filename}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 40vw, (max-width: 1200px) 25vw, 200px"
+                      loading="lazy"
+                      unoptimized
+                    />
 
                     {/* Selection Indicator (Picker Mode) */}
                     {isSelected && (
@@ -535,32 +620,66 @@ export function ImageGallery({
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-category">Category</Label>
-              <Select value={editCategory} onValueChange={setEditCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Uncategorized</SelectItem>
-                  <SelectItem value="cat-breads">Breads</SelectItem>
-                  <SelectItem value="cat-pastries-bakes">Pastries & Bakes</SelectItem>
-                  <SelectItem value="cat-cakes-loaves">Cakes & Loaves</SelectItem>
-                  <SelectItem value="cat-tarts-pies">Tarts & Pies</SelectItem>
-                  <SelectItem value="cat-savoury-specialities">Savoury & Specialities</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Image Type</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "products", label: "Product" },
+                  { value: "news", label: "News" },
+                  { value: "uncategorized", label: "Uncategorized" },
+                ].map((type) => (
+                  <Button
+                    key={type.value}
+                    type="button"
+                    size="sm"
+                    variant={editCategory === type.value ? "default" : "outline"}
+                    className="rounded-full"
+                    onClick={() => {
+                      setEditCategory(type.value);
+                      if (type.value !== "products") {
+                        setEditProductCategory("");
+                      } else if (!editProductCategory && productCategoryOptions.length > 0) {
+                        setEditProductCategory(productCategoryOptions[0]);
+                      }
+                    }}
+                  >
+                    {type.label}
+                  </Button>
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-tags">Tags</Label>
-              <Input
-                id="edit-tags"
-                value={editTags}
-                onChange={(e) => setEditTags(e.target.value)}
-                placeholder="e.g. sourdough, organic, featured (comma separated)"
-              />
-              <p className="text-xs text-muted-foreground">Separate tags with commas</p>
-            </div>
+            {editCategory === "products" && (
+              <div className="space-y-2">
+                <Label>Product Category</Label>
+                <div className="flex flex-wrap gap-2">
+                  {productCategoryOptions.map((cat) => (
+                    <Button
+                      key={cat}
+                      type="button"
+                      size="sm"
+                      variant={editProductCategory === cat ? "default" : "outline"}
+                      className="rounded-full"
+                      onClick={() => setEditProductCategory(cat)}
+                    >
+                      {formatLabel(cat)}
+                    </Button>
+                  ))}
+                  {productCategoryOptions.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      No product categories detected. Save will fail without one.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {editCategory === "news" && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  This image will be tagged for News. Existing thumbnail/detail tags are kept.
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter>

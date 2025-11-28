@@ -34,9 +34,8 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
 
   // Filter testimonials based on tab
   const filteredTestimonials = testimonials.filter((t) => {
-    if (activeTab === "active") return t.is_active;
-    if (activeTab === "pending") return !t.is_active;
-    return true;
+    if (activeTab === "all") return true;
+    return t.status === activeTab;
   });
 
   // Calculate pagination
@@ -62,13 +61,26 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
     }
   };
 
-  const handleStatusUpdate = async (id: string, isActive: boolean) => {
-    const result = await updateTestimonialStatus(id, isActive);
+  const handleStatusUpdate = async (id: string, status: string) => {
+    const result = await updateTestimonialStatus(id, status);
     if (result.success) {
-      setTestimonials(testimonials.map((t) => (t.id === id ? { ...t, is_active: isActive } : t)));
-      toast.success(isActive ? "Testimonial approved" : "Testimonial rejected/deactivated");
+      setTestimonials(testimonials.map((t) => (t.id === id ? { ...t, status: status } : t)));
+      toast.success(`Testimonial marked as ${status}`);
     } else {
       toast.error(result.error || "Failed to update status");
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "approved":
+        return "default";
+      case "pending":
+        return "secondary";
+      case "rejected":
+        return "destructive";
+      default:
+        return "outline";
     }
   };
 
@@ -77,8 +89,9 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
       <Tabs defaultValue="all" className="mb-6" onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="approved">Approved</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="rejected">Rejected</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -136,8 +149,8 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                     </div>
                   </TableCell>
                   <TableCell className="p-4">
-                    <Badge variant={testimonial.is_active ? "default" : "secondary"}>
-                      {testimonial.is_active ? "Active" : "Pending"}
+                    <Badge variant={getStatusBadgeVariant(testimonial.status)}>
+                      {testimonial.status.charAt(0).toUpperCase() + testimonial.status.slice(1)}
                     </Badge>
                   </TableCell>
                   <TableCell className="p-4">
@@ -150,24 +163,24 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                   </TableCell>
                   <TableCell className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {!testimonial.is_active && (
+                      {testimonial.status !== "approved" && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleStatusUpdate(testimonial.id, true)}
+                          onClick={() => handleStatusUpdate(testimonial.id, "approved")}
                           className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                           title="Approve"
                         >
                           <CheckCircle className="w-4 h-4" />
                         </Button>
                       )}
-                      {testimonial.is_active && (
+                      {testimonial.status !== "rejected" && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleStatusUpdate(testimonial.id, false)}
-                          className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                          title="Deactivate"
+                          onClick={() => handleStatusUpdate(testimonial.id, "rejected")}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Reject"
                         >
                           <XCircle className="w-4 h-4" />
                         </Button>
@@ -218,8 +231,8 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                     <div className="text-sm text-muted-foreground">{testimonial.role}</div>
                   </div>
                 </div>
-                <Badge variant={testimonial.is_active ? "default" : "secondary"}>
-                  {testimonial.is_active ? "Active" : "Pending"}
+                <Badge variant={getStatusBadgeVariant(testimonial.status)}>
+                  {testimonial.status.charAt(0).toUpperCase() + testimonial.status.slice(1)}
                 </Badge>
               </div>
 
@@ -230,24 +243,24 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                   <Star className="w-4 h-4 fill-bakery-amber-400 text-bakery-amber-400" />
                 </div>
                 <div className="flex items-center gap-1">
-                  {!testimonial.is_active && (
+                  {testimonial.status !== "approved" && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleStatusUpdate(testimonial.id, true)}
+                      onClick={() => handleStatusUpdate(testimonial.id, "approved")}
                       className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                       title="Approve"
                     >
                       <CheckCircle className="w-4 h-4" />
                     </Button>
                   )}
-                  {testimonial.is_active && (
+                  {testimonial.status !== "rejected" && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleStatusUpdate(testimonial.id, false)}
-                      className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                      title="Deactivate"
+                      onClick={() => handleStatusUpdate(testimonial.id, "rejected")}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      title="Reject"
                     >
                       <XCircle className="w-4 h-4" />
                     </Button>

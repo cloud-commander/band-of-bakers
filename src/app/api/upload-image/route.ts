@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Upload to R2
-    const { env } = await getCloudflareContext();
+    const { env } = await getCloudflareContext({ async: true });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(env as any).R2) {

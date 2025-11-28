@@ -5,9 +5,14 @@ describe("Order Validators", () => {
   describe("insertOrderSchema", () => {
     const validOrder = {
       user_id: "123e4567-e89b-12d3-a456-426614174000",
+      bake_sale_id: "223e4567-e89b-12d3-a456-426614174001",
+      subtotal: 25.99,
       total: 25.99,
       status: "pending" as const,
-      fulfillment_method: "delivery" as const,
+      fulfillment_method: "collection" as const,
+      billing_address_line1: "123 Main Street",
+      billing_city: "London",
+      billing_postcode: "SW1A 1AA",
     };
 
     it("should validate a correct order", () => {
@@ -43,6 +48,9 @@ describe("Order Validators", () => {
       const deliveryResult = insertOrderSchema.safeParse({
         ...validOrder,
         fulfillment_method: "delivery",
+        shipping_address_line1: "456 Delivery St",
+        shipping_city: "Manchester",
+        shipping_postcode: "M1 1AA",
       });
       const collectionResult = insertOrderSchema.safeParse({
         ...validOrder,
@@ -69,6 +77,7 @@ describe("Order Validators", () => {
       product_id: "123e4567-e89b-12d3-a456-426614174001",
       quantity: 2,
       unit_price: 4.99,
+      total_price: 9.98,
     };
 
     it("should validate a correct order item", () => {
@@ -98,10 +107,10 @@ describe("Order Validators", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should allow optional variant_id", () => {
+    it("should allow optional product_variant_id", () => {
       const result = insertOrderItemSchema.safeParse({
         ...validItem,
-        variant_id: "123e4567-e89b-12d3-a456-426614174002",
+        product_variant_id: "123e4567-e89b-12d3-a456-426614174002",
       });
       expect(result.success).toBe(true);
     });

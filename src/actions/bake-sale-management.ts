@@ -105,6 +105,27 @@ export async function cancelBakeSale(
     // 5. Deactivate bake sale
     await db.update(bakeSales).set({ is_active: false }).where(eq(bakeSales.id, id));
 
+    // 6. Check if any future bake sales remain
+    const remainingSales = await db.query.bakeSales.findMany({
+      where: and(
+        gt(bakeSales.date, new Date().toISOString().split("T")[0]),
+        eq(bakeSales.is_active, true)
+      ),
+      limit: 1,
+    });
+
+    if (remainingSales.length === 0) {
+      // Send warning email to admin
+      // We send to the current user (who is admin) or a configured admin email
+      // For now, sending to the user performing the action if they have an email
+      const session = await auth();
+      if (session?.user?.email) {
+        await sendEmail(session.user.email, "admin_warning_no_bake_sales", {
+          admin_name: session.user.name || "Admin",
+        });
+      }
+    }
+
     revalidatePath("/admin/bake-sales");
     return { success: true, data: { affectedOrders: affectedOrders.length } };
   } catch (error) {

@@ -14,8 +14,8 @@ afterEach(() => {
 });
 
 // Mock environment variables for tests
-process.env.NODE_ENV = "test";
-process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3000";
+vi.stubEnv("NODE_ENV", "test");
+vi.stubEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000");
 
 // Mock Next.js router
 vi.mock("next/navigation", () => ({

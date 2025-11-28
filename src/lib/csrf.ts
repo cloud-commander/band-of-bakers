@@ -9,7 +9,7 @@ import { headers } from "next/headers";
  * CSRF Error - thrown when origin validation fails
  */
 export class CsrfError extends Error {
-  constructor(message: string = "Invalid request origin") {
+  constructor(message: string = "CSRF validation failed") {
     super(message);
     this.name = "CsrfError";
   }
@@ -19,7 +19,9 @@ export class CsrfError extends Error {
  * Get allowed origins for CSRF validation
  */
 function getAllowedOrigins(): string[] {
-  const origins = [process.env.NEXT_PUBLIC_SITE_URL || "https://bandofbakers.co.uk"];
+  const origins = [
+    (process.env.NEXT_PUBLIC_SITE_URL || "https://bandofbakers.co.uk").replace(/\/$/, ""),
+  ];
 
   // Add localhost for development
   if (process.env.NODE_ENV === "development") {
