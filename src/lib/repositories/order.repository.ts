@@ -13,10 +13,9 @@ export class OrderRepository extends BaseRepository<typeof orders> {
   async createWithItems(order: InsertOrder, items: InsertOrderItem[]) {
     const db = await this.getDatabase();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return await db.transaction(async (tx: any) => {
+    try {
       // Create order
-      const [newOrder] = await tx.insert(orders).values(order).returning();
+      const [newOrder] = await db.insert(orders).values(order).returning();
 
       // Create items
       if (items.length > 0) {
@@ -24,11 +23,14 @@ export class OrderRepository extends BaseRepository<typeof orders> {
           ...item,
           order_id: newOrder.id,
         }));
-        await tx.insert(orderItems).values(itemsWithOrderId);
+        await db.insert(orderItems).values(itemsWithOrderId);
       }
 
       return newOrder;
-    });
+    } catch (error) {
+      console.error("Error creating order with items:", error);
+      throw error;
+    }
   }
 
   /**

@@ -344,6 +344,7 @@ export default function NewProductForm({ categories }: NewProductFormProps) {
             selectedImage={selectedImage}
             onImageSelect={setSelectedImage}
             category={selectedCategory}
+            productOnly
             allowUpload={true}
           />
         </div>

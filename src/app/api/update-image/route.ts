@@ -3,8 +3,10 @@ import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { images } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 /**
  * Update image metadata
@@ -44,6 +46,9 @@ export async function PATCH(request: Request) {
         updated_at: new Date().toISOString(), // Manual update for now as trigger might not work in D1 same way
       })
       .where(eq(images.id, image.id));
+
+    // Invalidate cached image lists
+    revalidateTag(CACHE_TAGS.images);
 
     return NextResponse.json({ success: true });
   } catch (error) {

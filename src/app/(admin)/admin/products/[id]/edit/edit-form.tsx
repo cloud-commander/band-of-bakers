@@ -471,6 +471,7 @@ export default function EditProductForm({ productId, categories }: EditProductFo
             selectedImage={selectedImage}
             onImageSelect={setSelectedImage}
             category={selectedCategory}
+            productOnly
             allowUpload={true}
           />
         </div>

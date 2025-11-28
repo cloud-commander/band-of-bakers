@@ -61,10 +61,9 @@ export class ProductRepository extends BaseRepository<typeof products> {
   ): Promise<Product> {
     const db = await this.getDatabase();
 
-    // Use transaction to ensure data consistency
-    const result = await db.transaction(async (tx: typeof db) => {
+    try {
       // Create product
-      const [newProduct] = await tx.insert(products).values(product).returning();
+      const [newProduct] = await db.insert(products).values(product).returning();
 
       // Create variants if provided
       if (variants.length > 0) {
@@ -73,13 +72,14 @@ export class ProductRepository extends BaseRepository<typeof products> {
           product_id: newProduct.id,
         }));
 
-        await tx.insert(productVariants).values(variantsWithProductId);
+        await db.insert(productVariants).values(variantsWithProductId);
       }
 
       return newProduct;
-    });
-
-    return result;
+    } catch (error) {
+      console.error("Error creating product with variants:", error);
+      throw error;
+    }
   }
 
   /**

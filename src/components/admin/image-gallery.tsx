@@ -75,6 +75,11 @@ interface ImageGalleryProps {
    * Mode of operation
    */
   mode?: "picker" | "manager";
+
+  /**
+   * When true (e.g., on product edit), restrict to product images and filter by product categories only.
+   */
+  productOnly?: boolean;
 }
 
 /**
@@ -95,6 +100,7 @@ export function ImageGallery({
   allowUpload = true,
   maxSizeMB = 5,
   mode = "picker",
+  productOnly = false,
 }: ImageGalleryProps) {
   const bucketFromCategory = (cat?: string | null) => {
     if (!cat || cat === "all") return "all";
@@ -103,7 +109,12 @@ export function ImageGallery({
     return "products";
   };
 
-  const initialBucket = category ? bucketFromCategory(category) : "products";
+  const enforcedProductOnly = productOnly;
+  const initialBucket = enforcedProductOnly ? "products" : category ? bucketFromCategory(category) : "products";
+  const initialProductCategory =
+    enforcedProductOnly && category && category !== "news" && category !== "uncategorized"
+      ? category
+      : "";
 
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<ImageRecord[]>([]);
@@ -117,17 +128,22 @@ export function ImageGallery({
   const [isEditing, setIsEditing] = useState(false);
 
   // Edit form state
-  const [editProductCategory, setEditProductCategory] = useState<string>("");
-  const [editCategory, setEditCategory] = useState<string>("");
-  const [selectedProductCategory, setSelectedProductCategory] = useState<string>("");
+  const [editProductCategory, setEditProductCategory] = useState<string>(
+    enforcedProductOnly ? initialProductCategory : ""
+  );
+  const [editCategory, setEditCategory] = useState<string>(enforcedProductOnly ? "products" : "");
+  const [selectedProductCategory, setSelectedProductCategory] = useState<string>(
+    enforcedProductOnly ? initialProductCategory : ""
+  );
 
   // Fetch existing images
   const fetchImages = useCallback(async () => {
     try {
       setLoadingImages(true);
       const params = new URLSearchParams();
-      params.set("bucket", selectedFilter);
-      if (selectedFilter === "products" && selectedProductCategory) {
+      const bucketParam = enforcedProductOnly ? "products" : selectedFilter;
+      params.set("bucket", bucketParam);
+      if (bucketParam === "products" && selectedProductCategory && selectedProductCategory !== "all") {
         params.set("category", selectedProductCategory);
       }
       params.set("limit", "48");
@@ -154,7 +170,7 @@ export function ImageGallery({
     } finally {
       setLoadingImages(false);
     }
-  }, [selectedFilter, selectedProductCategory]);
+  }, [selectedFilter, selectedProductCategory, enforcedProductOnly]);
 
   useEffect(() => {
     fetchImages();
@@ -259,12 +275,13 @@ export function ImageGallery({
 
     setIsEditing(true);
     try {
+      const effectiveEditCategory = enforcedProductOnly ? "products" : editCategory || "products";
       const resolvedProductCategory =
-        editCategory === "products"
+        effectiveEditCategory === "products"
           ? editProductCategory || productCategoryOptions[0] || imageToEdit.category || null
           : null;
 
-      if (editCategory === "products" && !resolvedProductCategory) {
+      if (effectiveEditCategory === "products" && !resolvedProductCategory) {
         toast.error("Select a product category for product images.");
         setIsEditing(false);
         return;
@@ -278,9 +295,9 @@ export function ImageGallery({
         body: JSON.stringify({
           url: imageToEdit.url,
           category:
-            editCategory === "uncategorized"
+            effectiveEditCategory === "uncategorized"
               ? null
-              : editCategory === "products"
+              : effectiveEditCategory === "products"
                 ? resolvedProductCategory
                 : "news",
           tags: (() => {
@@ -288,10 +305,10 @@ export function ImageGallery({
               ["card", "detail", "thumbnail", "featured"].includes(t)
             );
             const result = new Set<string>([...intrinsic]);
-            if (editCategory === "products") {
+            if (effectiveEditCategory === "products") {
               result.add("product");
               if (resolvedProductCategory) result.add(resolvedProductCategory);
-            } else if (editCategory === "news") {
+            } else if (effectiveEditCategory === "news") {
               result.add("news");
             }
             return Array.from(result);
@@ -304,6 +321,9 @@ export function ImageGallery({
       }
 
       toast.success("Image updated successfully");
+      if (enforcedProductOnly && resolvedProductCategory) {
+        setSelectedProductCategory(resolvedProductCategory);
+      }
       fetchImages(); // Refresh to get updated data
       setImageToEdit(null);
     } catch (error) {
@@ -316,8 +336,10 @@ export function ImageGallery({
 
   const openEditDialog = (image: ImageRecord) => {
     setImageToEdit(image);
-    setEditCategory(bucketFromCategory(image.category));
-    setEditProductCategory(image.category && image.category !== "news" ? image.category : "");
+    setEditCategory(enforcedProductOnly ? "products" : bucketFromCategory(image.category));
+    setEditProductCategory(
+      image.category && image.category !== "news" ? image.category : enforcedProductOnly ? initialProductCategory : ""
+    );
   };
 
   // Pagination state
@@ -357,8 +379,16 @@ export function ImageGallery({
     setCurrentPage(1);
   }, [selectedFilter, selectedProductCategory]);
 
+  // Enforce product bucket when productOnly is true
+  useEffect(() => {
+    if (enforcedProductOnly && selectedFilter !== "products") {
+      setSelectedFilter("products");
+    }
+  }, [enforcedProductOnly, selectedFilter]);
+
   const visibleImages = useMemo(() => {
-    if (selectedFilter === "products" && selectedProductCategory) {
+    const bucket = enforcedProductOnly ? "products" : selectedFilter;
+    if (bucket === "products" && selectedProductCategory && selectedProductCategory !== "all") {
       return images.filter((img) => img.category === selectedProductCategory);
     }
     return images;
@@ -386,24 +416,51 @@ export function ImageGallery({
 
   return (
     <div className="space-y-4">
-      {/* Filter Dropdown */}
+      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {!loadingImages && (
-          <div className="flex items-center gap-2">
-            <label htmlFor="category-filter" className="text-sm font-medium">
-              Category:
-            </label>
-            <select
-              id="category-filter"
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="px-3 py-1.5 text-sm border border-input rounded-md bg-background"
-            >
-              <option value="all">All</option>
-              <option value="products">Products</option>
-              <option value="news">News</option>
-              <option value="uncategorized">Uncategorized</option>
-            </select>
+          <div className="flex items-center gap-3 flex-wrap">
+            {enforcedProductOnly ? (
+              <>
+                <span className="text-sm font-medium">Product category:</span>
+                <div className="flex flex-wrap gap-2">
+                  {["all", ...productCategoryOptions].map((cat) => (
+                    <Button
+                      key={cat}
+                      type="button"
+                      size="sm"
+                      variant={
+                        (!selectedProductCategory && cat === "all") ||
+                        selectedProductCategory === cat
+                          ? "default"
+                          : "outline"
+                      }
+                      className="rounded-full text-xs"
+                      onClick={() => setSelectedProductCategory(cat === "all" ? "" : cat)}
+                    >
+                      {cat === "all" ? "All" : formatLabel(cat)}
+                    </Button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <label htmlFor="category-filter" className="text-sm font-medium">
+                  Category:
+                </label>
+                <select
+                  id="category-filter"
+                  value={selectedFilter}
+                  onChange={(e) => setSelectedFilter(e.target.value)}
+                  className="px-3 py-1.5 text-sm border border-input rounded-md bg-background"
+                >
+                  <option value="all">All</option>
+                  <option value="products">Products</option>
+                  <option value="news">News</option>
+                  <option value="uncategorized">Uncategorized</option>
+                </select>
+              </>
+            )}
             <Button variant="ghost" size="icon" onClick={fetchImages} title="Refresh">
               <RefreshCw className="h-4 w-4" />
             </Button>

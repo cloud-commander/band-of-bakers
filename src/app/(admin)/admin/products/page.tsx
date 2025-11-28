@@ -8,6 +8,7 @@ import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
@@ -22,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { ProductCategory } from "@/lib/repositories/category.repository";
 import type { BakeSaleWithLocation } from "@/lib/repositories/bake-sale.repository";
+import { CategoriesManagement } from "./categories-management";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_PRODUCTS_ITEMS_PER_PAGE;
 
@@ -174,15 +176,22 @@ export default function AdminProductsPage() {
         }
       />
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading products...</p>
-          </div>
-        </div>
-      ) : (
-        <>
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="products">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading products...</p>
+              </div>
+            </div>
+          ) : (
+            <>
           {/* Filters and Sort */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {/* Search */}
@@ -450,6 +459,15 @@ export default function AdminProductsPage() {
           )}
         </>
       )}
+        </TabsContent>
+
+        <TabsContent value="categories">
+          <CategoriesManagement
+            categories={categories}
+            onCategoriesChange={(newCategories) => setCategories(newCategories)}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
