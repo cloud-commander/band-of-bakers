@@ -1,6 +1,6 @@
 import { products, productVariants } from "@/db/schema";
 import { BaseRepository } from "./base.repository";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, like } from "drizzle-orm";
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
@@ -130,12 +130,10 @@ export class ProductRepository extends BaseRepository<typeof products> {
    */
   async searchByName(searchTerm: string): Promise<Product[]> {
     const db = await this.getDatabase();
-    const allProducts = await db.select().from(products);
-
-    // Simple case-insensitive search
-    return allProducts.filter((p: Product) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return await db
+      .select()
+      .from(products)
+      .where(like(products.name, `%${searchTerm}%`));
   }
 
   /**

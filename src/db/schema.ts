@@ -73,6 +73,7 @@ export const products = sqliteTable(
   (table) => ({
     categoryIdIdx: index("idx_products_category_id").on(table.category_id),
     isActiveIdx: index("idx_products_is_active").on(table.is_active),
+    catActiveIdx: index("idx_products_cat_active").on(table.category_id, table.is_active),
   })
 );
 
@@ -80,17 +81,23 @@ export const products = sqliteTable(
 // PRODUCT VARIANTS
 // ============================================================================
 
-export const productVariants = sqliteTable("product_variants", {
-  id: text("id").primaryKey(),
-  product_id: text("product_id")
-    .notNull()
-    .references(() => products.id, { onDelete: "cascade" }),
-  name: text("name").notNull(), // Small, Medium, Large
-  price_adjustment: real("price_adjustment").notNull().default(0), // Added to base_price
-  sort_order: integer("sort_order").notNull().default(0),
-  is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  ...timestamps,
-});
+export const productVariants = sqliteTable(
+  "product_variants",
+  {
+    id: text("id").primaryKey(),
+    product_id: text("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    name: text("name").notNull(), // Small, Medium, Large
+    price_adjustment: real("price_adjustment").notNull().default(0), // Added to base_price
+    sort_order: integer("sort_order").notNull().default(0),
+    is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    productIdIdx: index("idx_product_variants_product_id").on(table.product_id),
+  })
+);
 
 // ============================================================================
 // LOCATIONS
@@ -112,16 +119,22 @@ export const locations = sqliteTable("locations", {
 // BAKE SALES
 // ============================================================================
 
-export const bakeSales = sqliteTable("bake_sales", {
-  id: text("id").primaryKey(),
-  date: text("date").notNull(), // ISO date string (YYYY-MM-DD)
-  location_id: text("location_id")
-    .notNull()
-    .references(() => locations.id),
-  cutoff_datetime: text("cutoff_datetime").notNull(), // ISO datetime string
-  is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  ...timestamps,
-});
+export const bakeSales = sqliteTable(
+  "bake_sales",
+  {
+    id: text("id").primaryKey(),
+    date: text("date").notNull(), // ISO date string (YYYY-MM-DD)
+    location_id: text("location_id")
+      .notNull()
+      .references(() => locations.id),
+    cutoff_datetime: text("cutoff_datetime").notNull(), // ISO datetime string
+    is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    locationIdIdx: index("idx_bake_sales_location_id").on(table.location_id),
+  })
+);
 
 // ============================================================================
 // ORDERS
@@ -164,6 +177,7 @@ export const orders = sqliteTable(
     userIdIdx: index("idx_orders_user_id").on(table.user_id),
     statusIdx: index("idx_orders_status").on(table.status),
     createdAtIdx: index("idx_orders_created_at").on(table.created_at),
+    userCreatedIdx: index("idx_orders_user_created").on(table.user_id, table.created_at),
   })
 );
 
@@ -171,22 +185,29 @@ export const orders = sqliteTable(
 // ORDER ITEMS
 // ============================================================================
 
-export const orderItems = sqliteTable("order_items", {
-  id: text("id").primaryKey(),
-  order_id: text("order_id")
-    .notNull()
-    .references(() => orders.id, { onDelete: "cascade" }),
-  product_id: text("product_id")
-    .notNull()
-    .references(() => products.id),
-  product_variant_id: text("product_variant_id").references(() => productVariants.id),
-  quantity: integer("quantity").notNull(),
-  unit_price: real("unit_price").notNull(), // Price at time of order
-  total_price: real("total_price").notNull(), // unit_price * quantity
-  is_available: integer("is_available", { mode: "boolean" }).notNull().default(true),
-  unavailable_reason: text("unavailable_reason"),
-  ...timestamps,
-});
+export const orderItems = sqliteTable(
+  "order_items",
+  {
+    id: text("id").primaryKey(),
+    order_id: text("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    product_id: text("product_id")
+      .notNull()
+      .references(() => products.id),
+    product_variant_id: text("product_variant_id").references(() => productVariants.id),
+    quantity: integer("quantity").notNull(),
+    unit_price: real("unit_price").notNull(), // Price at time of order
+    total_price: real("total_price").notNull(), // unit_price * quantity
+    is_available: integer("is_available", { mode: "boolean" }).notNull().default(true),
+    unavailable_reason: text("unavailable_reason"),
+    ...timestamps,
+  },
+  (table) => ({
+    orderIdIdx: index("idx_order_items_order_id").on(table.order_id),
+    productIdIdx: index("idx_order_items_product_id").on(table.product_id),
+  })
+);
 
 // ============================================================================
 // VOUCHERS

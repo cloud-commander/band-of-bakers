@@ -5,6 +5,7 @@ import { productRepository, categoryRepository } from "@/lib/repositories";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Product } from "@/db/schema";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -367,17 +368,20 @@ export async function getProducts() {
     const products = await productRepository.findAll();
 
     // Debug: Check for products with null/empty image_url
-    const productsWithoutImages = products.filter((p: any) => !p.image_url || p.image_url === "");
+    const productsWithoutImages = products.filter(
+      (p: Product) => !p.image_url || p.image_url === ""
+    );
     if (productsWithoutImages.length > 0) {
-      console.log("[SERVER DEBUG] Products without images from DB:",
-        productsWithoutImages.map((p: any) => ({
+      console.log(
+        "[SERVER DEBUG] Products without images from DB:",
+        productsWithoutImages.map((p: Product) => ({
           id: p.id,
           name: p.name,
           image_url: p.image_url,
           image_url_type: typeof p.image_url,
           is_null: p.image_url === null,
           is_undefined: p.image_url === undefined,
-          is_empty: p.image_url === ""
+          is_empty: p.image_url === "",
         }))
       );
     }

@@ -336,21 +336,24 @@ export default function AdminProductsPage() {
               </thead>
               <tbody>
                 {paginatedProducts.map((product) => {
-                  const category = categories.find((c) => c.id === product.category_id);
-                  const variantCount = product.variants?.length || 0;
-                  const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
+              const category = categories.find((c) => c.id === product.category_id);
+              const variantCount = product.variants?.length || 0;
+              const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
 
-                  // Debug: Log image check for products without images
-                  const hasNoImage = !product.image_url || product.image_url === "";
-                  if (hasNoImage) {
-                    console.log(`[DEBUG] Product ${product.name} has no image:`, {
-                      image_url: product.image_url,
-                      type: typeof product.image_url,
-                      check1: !product.image_url,
-                      check2: product.image_url === "",
-                      combined: hasNoImage
-                    });
-                  }
+              // Debug: Log image check for products without images
+              const imageUrl = product.image_url ?? "";
+              const isImageMissing =
+                imageUrl.trim() === "" || imageUrl === "null" || product.image_url === null;
+
+              if (isImageMissing) {
+                console.log(`[DEBUG] Product ${product.name} has no image:`, {
+                  image_url: product.image_url,
+                  type: typeof product.image_url,
+                  check1: imageUrl.trim() === "",
+                  check2: imageUrl === "null",
+                  combined: isImageMissing
+                });
+              }
 
                   return (
                     <tr key={product.id} className="border-t hover:bg-muted/30">
@@ -387,13 +390,13 @@ export default function AdminProductsPage() {
                                 : "secondary"
                             }
                           >
-                            {upcomingBakeSales.length === 0
-                              ? "Unavailable"
-                              : product.is_active
-                              ? "Active"
-                              : "Inactive"}
+                          {upcomingBakeSales.length === 0
+                            ? "Unavailable"
+                            : product.is_active
+                            ? "Active"
+                            : "Inactive"}
                           </Badge>
-                          {(!product.image_url || product.image_url === "") && (
+                          {isImageMissing && (
                             <div className="flex items-center text-amber-600" title="No image">
                               <ImageOff className="h-4 w-4" />
                             </div>
@@ -418,6 +421,9 @@ export default function AdminProductsPage() {
               const category = categories.find((c) => c.id === product.category_id);
               const variantCount = product.variants?.length || 0;
               const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
+              const imageUrl = product.image_url ?? "";
+              const isImageMissing =
+                imageUrl.trim() === "" || imageUrl === "null" || product.image_url === null;
 
               return (
                 <Link
@@ -446,7 +452,7 @@ export default function AdminProductsPage() {
                           ? "Active"
                           : "Inactive"}
                       </Badge>
-                      {(!product.image_url || product.image_url === "") && (
+                      {isImageMissing && (
                         <div className="flex items-center text-amber-600" title="No image">
                           <ImageOff className="h-4 w-4" />
                         </div>
