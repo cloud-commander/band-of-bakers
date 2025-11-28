@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EmailTemplate } from "@/db/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,25 +28,18 @@ export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
 
-  // Update form when selection changes
-  if (selectedTemplate && selectedTemplate.id !== selectedTemplateId) {
-    // This logic is flawed because it runs on render.
-    // Better to use useEffect or handle selection change explicitly.
-  }
-
   const handleSelect = (template: EmailTemplate) => {
     setSelectedTemplateId(template.id);
     setSubject(template.subject);
     setContent(template.content);
   };
 
-  // Initialize form on first load
-  useState(() => {
+  useEffect(() => {
     if (selectedTemplate) {
       setSubject(selectedTemplate.subject);
       setContent(selectedTemplate.content);
     }
-  });
+  }, [selectedTemplate?.id]);
 
   const handleSave = async () => {
     if (!selectedTemplate) return;

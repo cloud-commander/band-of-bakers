@@ -26,6 +26,7 @@ import { SearchBar } from "@/components/search-bar";
 import { Product, ProductCategory, ProductVariant, BakeSaleWithLocation } from "@/lib/repositories";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.MENU_ITEMS_PER_PAGE;
+const LOW_STOCK_THRESHOLD = 5;
 
 type SortOption = "name" | "price-low" | "price-high" | "rating";
 
@@ -317,13 +318,12 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
           className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${DESIGN_TOKENS.sections.gap}`}
         >
           {paginatedProducts.map((product) => {
-            // TODO: Implement stock logic properly
-            const isOutOfStock = false; // product.stock_quantity === 0;
-            const isLowStock = false;
-            // product.stock_quantity !== null &&
-            // product.stock_quantity !== undefined &&
-            // product.stock_quantity > 0 &&
-            // product.stock_quantity < 5;
+            const hasStockValue = typeof product.stock_quantity === "number";
+            const isOutOfStock = hasStockValue ? product.stock_quantity <= 0 : false;
+            const isLowStock =
+              hasStockValue && product.stock_quantity > 0
+                ? product.stock_quantity <= LOW_STOCK_THRESHOLD
+                : false;
 
             return (
               <div key={product.id}>

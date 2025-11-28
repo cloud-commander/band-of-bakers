@@ -234,7 +234,32 @@ export async function resolveOrderIssue(
     } else if (resolution === "transfer") {
       if (!newBakeSaleId) return { success: false, error: "New bake sale ID required" };
 
-      // TODO: Check stock availability for new bake sale (omitted for MVP as per plan)
+      // Check stock availability before transferring
+      const orderWithItems = await db.query.orders.findFirst({
+        where: eq(orders.id, orderId),
+        with: {
+          items: {
+            with: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      if (!orderWithItems) return { success: false, error: "Order not found" };
+
+      for (const item of orderWithItems.items) {
+        const product = item.product;
+        if (!product) continue;
+
+        const stockTracked = typeof product.stock_quantity === "number";
+        if (stockTracked && product.stock_quantity! < item.quantity) {
+          return {
+            success: false,
+            error: `Not enough stock for ${product.name} to transfer to the selected bake sale`,
+          };
+        }
+      }
 
       await db
         .update(orders)

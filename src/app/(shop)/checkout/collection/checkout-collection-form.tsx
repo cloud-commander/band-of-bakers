@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,18 +14,11 @@ import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { useCart } from "@/context/cart-context";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import {
-  ArrowRight,
-  MapPin,
-  Calendar,
-  ShoppingBag,
-  User,
-  CreditCard,
-  Banknote,
-} from "lucide-react";
+import { ArrowRight, MapPin, Calendar, ShoppingBag, User } from "lucide-react";
 import { createOrder } from "@/actions/orders";
 import type { BakeSaleWithLocation } from "@/lib/repositories/bake-sale.repository";
 import type { User as AuthUser } from "next-auth";
+import { TurnstileWidget } from "@/components/turnstile/turnstile-widget";
 
 // Collection checkout validation schema
 const checkoutCollectionSchema = z.object({
@@ -51,6 +45,8 @@ export function CheckoutCollectionForm({
 }: CheckoutCollectionFormProps) {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const turnstileEnabled = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const {
     register,
@@ -69,22 +65,25 @@ export function CheckoutCollectionForm({
   });
 
   // Group items by bake sale for collection info
-  const collectionGroups = items.reduce((groups, item) => {
-    if (!item.bakeSaleId) return groups;
-    if (!groups[item.bakeSaleId]) {
-      const bakeSale = upcomingBakeSales.find((bs) => bs.id === item.bakeSaleId);
-      if (bakeSale) {
-        groups[item.bakeSaleId] = {
-          bakeSale,
-          items: [],
-        };
+  const collectionGroups = items.reduce(
+    (groups, item) => {
+      if (!item.bakeSaleId) return groups;
+      if (!groups[item.bakeSaleId]) {
+        const bakeSale = upcomingBakeSales.find((bs) => bs.id === item.bakeSaleId);
+        if (bakeSale) {
+          groups[item.bakeSaleId] = {
+            bakeSale,
+            items: [],
+          };
+        }
       }
-    }
-    if (groups[item.bakeSaleId]) {
-      groups[item.bakeSaleId].items.push(item);
-    }
-    return groups;
-  }, {} as Record<string, { bakeSale: BakeSaleWithLocation; items: typeof items }>);
+      if (groups[item.bakeSaleId]) {
+        groups[item.bakeSaleId].items.push(item);
+      }
+      return groups;
+    },
+    {} as Record<string, { bakeSale: BakeSaleWithLocation; items: typeof items }>
+  );
 
   const handlePrepopulate = () => {
     if (!currentUser?.name || !currentUser?.email) {
@@ -108,7 +107,7 @@ export function CheckoutCollectionForm({
       const orderData = {
         ...data,
         fulfillment_method: "collection" as const,
-        payment_method: "payment_on_collection",
+        payment_method: "payment_on_collection" as const,
         bake_sale_id: bakeSaleId,
         notes: data.note,
         items: items.map((item) => ({
@@ -116,6 +115,7 @@ export function CheckoutCollectionForm({
           variantId: item.variantId,
           quantity: item.quantity,
         })),
+        turnstileToken,
       };
 
       const result = await createOrder(orderData);
@@ -269,26 +269,24 @@ export function CheckoutCollectionForm({
                 ))}
               </div>
             </div>
-            {/* Payment Methods */}
-            <div className={`${DESIGN_TOKENS.cards.base} p-6`}>
-              <h2 className={`${DESIGN_TOKENS.typography.h4.size} mb-4`}>Payment Methods</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center p-4 border rounded-lg bg-muted/50">
-                  <Banknote className="w-6 h-6 mr-3 text-bakery-amber-600" />
-                  <div>
-                    <p className="font-medium">Cash on Collection</p>
-                    <p className="text-sm text-muted-foreground">Pay when you pick up your order</p>
-                  </div>
-                </div>
-                <div className="flex items-center p-4 border rounded-lg bg-muted/50">
-                  <CreditCard className="w-6 h-6 mr-3 text-bakery-amber-600" />
-                  <div>
-                    <p className="font-medium">Card on Collection</p>
-                    <p className="text-sm text-muted-foreground">We accept all major cards</p>
-                  </div>
-                </div>
+            {/* Verification */}
+            {turnstileEnabled && (
+              <div className={`${DESIGN_TOKENS.cards.base} p-6`}>
+                <h2 className={`${DESIGN_TOKENS.typography.h4.size} mb-2`}>Verify you’re human</h2>
+                <TurnstileWidget
+                  onSuccess={(token) => setTurnstileToken(token)}
+                  onError={() => {
+                    setTurnstileToken(undefined);
+                    toast.error("Verification failed, please retry");
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken(undefined);
+                    toast.error("Verification expired, please retry");
+                  }}
+                  theme="light"
+                />
               </div>
-            </div>
+            )}
           </div>
 
           {/* Order Summary */}

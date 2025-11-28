@@ -1,6 +1,6 @@
 import { products, productVariants } from "@/db/schema";
 import { BaseRepository } from "./base.repository";
-import { eq, and, sql, like } from "drizzle-orm";
+import { eq, and, sql, like, gte, isNotNull } from "drizzle-orm";
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
@@ -39,6 +39,27 @@ export class ProductRepository extends BaseRepository<typeof products> {
   async findActiveProducts(): Promise<Product[]> {
     const db = await this.getDatabase();
     return await db.select().from(products).where(eq(products.is_active, true));
+  }
+
+  /**
+   * Paginated products with optional active filter.
+   */
+  async findPaginated(limit: number, offset: number, onlyActive = false) {
+    const db = await this.getDatabase();
+    const whereClause = onlyActive ? eq(products.is_active, true) : undefined;
+
+    const data = await db.query.products.findMany({
+      limit,
+      offset,
+      where: whereClause,
+      orderBy: eq(products.is_active, true) ? undefined : undefined,
+    });
+
+    const totalResult = whereClause
+      ? await db.select({ count: sql<number>`count(*)` }).from(products).where(whereClause)
+      : await db.select({ count: sql<number>`count(*)` }).from(products);
+
+    return { data, total: Number(totalResult[0]?.count || 0) };
   }
 
   /**
@@ -100,6 +121,47 @@ export class ProductRepository extends BaseRepository<typeof products> {
       .select()
       .from(productVariants)
       .where(and(eq(productVariants.product_id, productId), eq(productVariants.is_active, true)));
+  }
+
+  /**
+   * Decrement product stock by a quantity if stock is tracked and sufficient.
+   * Returns the updated product row or null if the update was not applied.
+   */
+  async decrementStock(productId: string, quantity: number): Promise<Product | null> {
+    const db = await this.getDatabase();
+    const [updated] = await db
+      .update(products)
+      .set({
+        stock_quantity: sql`${products.stock_quantity} - ${quantity}`,
+        updated_at: new Date().toISOString(),
+      })
+      .where(
+        and(
+          eq(products.id, productId),
+          isNotNull(products.stock_quantity),
+          gte(products.stock_quantity, quantity)
+        )
+      )
+      .returning();
+
+    return updated || null;
+  }
+
+  /**
+   * Increment product stock by a quantity. Intended for rollback scenarios.
+   */
+  async incrementStock(productId: string, quantity: number): Promise<Product | null> {
+    const db = await this.getDatabase();
+    const [updated] = await db
+      .update(products)
+      .set({
+        stock_quantity: sql`${products.stock_quantity} + ${quantity}`,
+        updated_at: new Date().toISOString(),
+      })
+      .where(and(eq(products.id, productId), isNotNull(products.stock_quantity)))
+      .returning();
+
+    return updated || null;
   }
 
   /**

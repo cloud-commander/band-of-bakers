@@ -17,7 +17,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Facebook, Twitter } from "lucide-react";
-import { STORE, PAYMENT_METHOD_LOGOS, SOCIAL_MEDIA_LOGOS } from "@/lib/constants";
+import { STORE, SOCIAL_MEDIA_LOGOS } from "@/lib/constants";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { Heading } from "@/components/ui/heading";
 
@@ -73,7 +73,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="mailto:support@bandofbakers.co.uk"
                   className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Contact Us
@@ -89,28 +89,28 @@ export function Footer() {
             </Heading>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/privacy-policy"
                   className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/terms-of-service"
                   className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/cookies"
                   className="text-stone-600 hover:text-bakery-amber-700 transition-colors font-sans text-sm"
                 >
                   Cookies
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -197,7 +197,8 @@ export function Footer() {
             )}
           </div>
 
-          {/* Payment Methods */}
+          {/* Payment Methods (hidden) */}
+          {/*
           <div className="text-center">
             <Heading level={4} className="mb-4">
               We Accept
@@ -259,6 +260,7 @@ export function Footer() {
               />
             </div>
           </div>
+          */}
         </div>
 
         {/* Copyright */}

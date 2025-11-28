@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +13,10 @@ import { Label } from "@/components/ui/label";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
-import { ArrowRight, CreditCard, ShoppingBag, Truck } from "lucide-react";
+import { ArrowRight, ShoppingBag, Truck } from "lucide-react";
 import { SHIPPING_COST } from "@/lib/constants/app";
 import { createOrder } from "@/actions/orders";
+import { TurnstileWidget } from "@/components/turnstile/turnstile-widget";
 
 export const dynamic = "force-dynamic";
 
@@ -34,18 +36,6 @@ const checkoutDeliverySchema = z.object({
     .string()
     .min(1, "Postcode is required")
     .regex(/^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i, "Please enter a valid UK postcode"),
-  cardNumber: z
-    .string()
-    .min(1, "Card number is required")
-    .regex(/^[0-9]{13,19}$/, "Please enter a valid card number"),
-  expiry: z
-    .string()
-    .min(1, "Expiry date is required")
-    .regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, "Format: MM/YY"),
-  cvc: z
-    .string()
-    .min(1, "CVC is required")
-    .regex(/^[0-9]{3,4}$/, "Please enter a valid CVC"),
 });
 
 type CheckoutDeliveryForm = z.infer<typeof checkoutDeliverySchema>;
@@ -53,6 +43,8 @@ type CheckoutDeliveryForm = z.infer<typeof checkoutDeliverySchema>;
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_BANDOFBAKERS_TURNSTILE_SITEKEY);
 
   const {
     register,
@@ -69,9 +61,6 @@ export default function CheckoutPage() {
       address2: "",
       city: "",
       postcode: "",
-      cardNumber: "",
-      expiry: "",
-      cvc: "",
     },
   });
 
@@ -79,10 +68,16 @@ export default function CheckoutPage() {
 
   const onSubmit = async (data: CheckoutDeliveryForm) => {
     try {
+      if (turnstileEnabled && !turnstileToken) {
+        toast.error("Please complete the verification");
+        return;
+      }
+
       const orderData = {
         ...data,
         fulfillment_method: "delivery" as const,
-        payment_method: "stripe",
+        payment_method: "payment_on_collection",
+        turnstileToken: turnstileToken || undefined,
         items: items.map((item) => ({
           productId: item.productId,
           variantId: item.variantId,
@@ -210,43 +205,24 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment Details */}
-              <div className={`${DESIGN_TOKENS.cards.base} p-6`}>
-                <h2 className={`${DESIGN_TOKENS.typography.h4.size} mb-6`}>Payment Details</h2>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      {...register("cardNumber")}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength={19}
-                    />
-                    {errors.cardNumber && (
-                      <p className="text-sm text-red-600">{errors.cardNumber.message}</p>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="expiry">Expiry Date</Label>
-                      <Input
-                        id="expiry"
-                        {...register("expiry")}
-                        placeholder="MM/YY"
-                        maxLength={5}
-                      />
-                      {errors.expiry && (
-                        <p className="text-sm text-red-600">{errors.expiry.message}</p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cvc">CVC</Label>
-                      <Input id="cvc" {...register("cvc")} placeholder="123" maxLength={4} />
-                      {errors.cvc && <p className="text-sm text-red-600">{errors.cvc.message}</p>}
-                    </div>
-                  </div>
+              {/* Verification */}
+              {turnstileEnabled && (
+                <div className={`${DESIGN_TOKENS.cards.base} p-6`}>
+                  <h2 className={`${DESIGN_TOKENS.typography.h4.size} mb-2`}>Verify you’re human</h2>
+                  <TurnstileWidget
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onError={() => {
+                      setTurnstileToken(null);
+                      toast.error("Verification failed, please retry");
+                    }}
+                    onExpire={() => {
+                      setTurnstileToken(null);
+                      toast.error("Verification expired, please retry");
+                    }}
+                    theme="light"
+                  />
                 </div>
-              </div>
+              )}
             </form>
           </div>
 
@@ -274,7 +250,7 @@ export default function CheckoutPage() {
               </div>
 
               <p className="text-sm text-muted-foreground mb-6 bg-stone-50 p-3 rounded border">
-                Your payment is secure and encrypted. We accept all major credit and debit cards.
+                Payment is taken on delivery or collection. No card details are needed online.
               </p>
 
               <Button
@@ -284,14 +260,7 @@ export default function CheckoutPage() {
                 size="lg"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? (
-                  "Processing Payment..."
-                ) : (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Pay £{totalToPay.toFixed(2)}
-                  </>
-                )}
+                {isSubmitting ? "Placing Order..." : `Place Order (£${totalToPay.toFixed(2)})`}
                 {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
               </Button>
 

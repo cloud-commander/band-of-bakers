@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Link from "next/link";
-import { Home, ShoppingBag, Info, Newspaper, HelpCircle, UserCircle } from "lucide-react";
+import { Home, ShoppingBag, Info, Newspaper, HelpCircle, UserCircle, Mail } from "lucide-react";
 import { FlourIcon } from "@/components/ui/flour-icon";
 import type { Session } from "next-auth";
 
@@ -80,18 +80,32 @@ export const DesktopNav = memo(function DesktopNav({ session }: DesktopNavProps)
 
       {/* Admin Link */}
       {isAdmin && (
-        <Link
-          href="/admin"
-          className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group text-red-700"
-        >
-          <FlourIcon
-            icon={UserCircle}
-            size="sm"
-            variant="award"
-            className="group-hover:scale-110 transition-transform"
-          />
-          Admin
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin"
+            className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group text-red-700"
+          >
+            <FlourIcon
+              icon={UserCircle}
+              size="sm"
+              variant="award"
+              className="group-hover:scale-110 transition-transform"
+            />
+            Admin
+          </Link>
+          <Link
+            href="/admin/settings/email-templates"
+            className="font-sans text-sm font-medium transition-colors hover:text-bakery-amber-700 flex items-center gap-2 group text-red-700"
+          >
+            <FlourIcon
+              icon={Mail}
+              size="sm"
+              variant="default"
+              className="group-hover:scale-110 transition-transform"
+            />
+            Email Templates
+          </Link>
+        </div>
       )}
     </div>
   );

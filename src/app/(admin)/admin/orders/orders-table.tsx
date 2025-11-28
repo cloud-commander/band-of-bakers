@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,20 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Search, ChevronUp, ChevronDown, X, Check, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_ORDERS_ITEMS_PER_PAGE;
+import { updateOrderStatus } from "@/actions/orders";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type SortField = "created_at" | "bake_sale_date" | "total" | "status";
 type SortDirection = "asc" | "desc";
-type StatusFilter = "all" | "pending" | "processing" | "ready" | "completed" | "cancelled";
+type StatusFilter =
+  | "all"
+  | "pending"
+  | "processing"
+  | "ready"
+  | "fulfilled"
+  | "cancelled"
+  | "refunded"
+  | "action_required";
 
 // Define the shape of the order with relations
 interface OrderWithRelations {
@@ -40,13 +48,23 @@ interface OrderWithRelations {
 
 interface OrdersTableProps {
   initialOrders: OrderWithRelations[];
+  totalCount: number;
+  currentPage: number;
+  pageSize?: number;
 }
 
-export function OrdersTable({ initialOrders }: OrdersTableProps) {
+export function OrdersTable({
+  initialOrders,
+  totalCount,
+  currentPage: currentPageProp,
+  pageSize = PAGINATION_CONFIG.ADMIN_ORDERS_ITEMS_PER_PAGE,
+}: OrdersTableProps) {
+  const [orders, setOrders] = useState(initialOrders);
+  const [currentPage, setCurrentPage] = useState(currentPageProp);
   // Get all unique bake sales from orders
   const allBakeSales = useMemo(() => {
     const uniqueBakeSales = new Map();
-    initialOrders.forEach((order) => {
+    orders.forEach((order) => {
       if (order.bakeSale && order.bakeSale.date) {
         // Use date as key or ID if available. Order has bake_sale_id.
         // But here we want to list unique bake sales.
@@ -59,7 +77,7 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
     return Array.from(uniqueBakeSales.entries())
       .map(([id, bakeSale]) => ({ id, ...bakeSale }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [initialOrders]);
+  }, [orders]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,6 +86,10 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [bakeSaleFilter, setBakeSaleFilter] = useState<string>("");
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // Determine the active bake sale filter
   // If a user has selected a filter, use it. Otherwise, default to the first available bake sale.
@@ -90,7 +112,7 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
 
   // Filter and sort orders
   const filteredAndSortedOrders = useMemo(() => {
-    let filtered = initialOrders;
+    let filtered = orders;
 
     // Apply search filter
     if (debouncedSearchTerm) {
@@ -149,22 +171,24 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [
-    initialOrders,
-    debouncedSearchTerm,
-    statusFilter,
-    activeBakeSaleId,
-    sortField,
-    sortDirection,
-  ]);
+  }, [orders, debouncedSearchTerm, statusFilter, activeBakeSaleId, sortField, sortDirection]);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredAndSortedOrders.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedOrders = filteredAndSortedOrders.slice(startIndex, endIndex);
+  // Sync page state with incoming props when navigation happens
+  useEffect(() => {
+    setCurrentPage(currentPageProp);
+  }, [currentPageProp]);
+
+  // Calculate pagination using server-provided totals when no client-side filters/search are applied.
+  const hasClientFilters = Boolean(debouncedSearchTerm || statusFilter !== "all" || bakeSaleFilter);
+  const totalPages = hasClientFilters
+    ? Math.max(1, Math.ceil(filteredAndSortedOrders.length / pageSize))
+    : Math.max(1, Math.ceil(totalCount / pageSize));
 
   const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    router.push(`${pathname}?${params.toString()}`);
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -198,28 +222,55 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
     return sortDirection === "asc" ? "ascending" : "descending";
   };
 
+  const handleStatusUpdate = async (
+    orderId: string,
+    nextStatus: "ready" | "fulfilled",
+    successMessage: string
+  ) => {
+    setUpdatingOrderId(orderId);
+    try {
+      const result = await updateOrderStatus(orderId, nextStatus);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, status: result.data.status } : order
+        )
+      );
+
+      toast.success(successMessage);
+    } catch (error) {
+      toast.error("Failed to update order", {
+        description: error instanceof Error ? error.message : "Please try again",
+      });
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
   // Quick action handlers
   const handleMarkReady = (orderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toast.success(`Order #${orderId.slice(0, 8)} marked as Ready for Collection`, {
-      description: "Customer has been notified via SMS",
-    });
-    // TODO: Implement server action for status update
+    void handleStatusUpdate(orderId, "ready", `Order #${orderId.slice(0, 8)} marked as Ready`);
   };
 
   const handleMarkComplete = (orderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toast.success(`Order #${orderId.slice(0, 8)} marked as Complete`, {
-      description: "Order archived successfully",
-    });
-    // TODO: Implement server action for status update
+    void handleStatusUpdate(
+      orderId,
+      "fulfilled",
+      `Order #${orderId.slice(0, 8)} marked as Fulfilled`
+    );
   };
 
   // Get quick action button for order status
   const getQuickAction = (order: OrderWithRelations) => {
     const status = order.status.toLowerCase();
+    const isUpdating = updatingOrderId === order.id;
 
     if (status === "pending" || status === "processing") {
       return (
@@ -228,9 +279,11 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
           variant="outline"
           className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
           onClick={(e) => handleMarkReady(order.id, e)}
+          disabled={isUpdating}
+          aria-busy={isUpdating}
         >
           <Package className="w-4 h-4 mr-1" />
-          Ready
+          {isUpdating ? "Updating..." : "Ready"}
         </Button>
       );
     }
@@ -242,9 +295,11 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
           variant="outline"
           className="bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
           onClick={(e) => handleMarkComplete(order.id, e)}
+          disabled={isUpdating}
+          aria-busy={isUpdating}
         >
           <Check className="w-4 h-4 mr-1" />
-          Complete
+          {isUpdating ? "Updating..." : "Complete"}
         </Button>
       );
     }
@@ -313,8 +368,10 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
             <option value="pending">Pending</option>
             <option value="processing">Processing</option>
             <option value="ready">Ready for Collection</option>
-            <option value="completed">Completed</option>
+            <option value="fulfilled">Fulfilled</option>
             <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+            <option value="action_required">Action Required</option>
           </select>
         </div>
       </div>
@@ -370,7 +427,7 @@ export function OrdersTable({ initialOrders }: OrdersTableProps) {
             </tr>
           </thead>
           <tbody>
-            {paginatedOrders.map((order) => (
+            {filteredAndSortedOrders.map((order) => (
               <tr key={order.id} className="border-t hover:bg-muted/30 transition-colors">
                 <td className="p-4 text-sm text-muted-foreground">
                   {new Date(order.created_at).toLocaleDateString("en-GB", {

@@ -27,6 +27,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
   }
 
   const bakeSale = order.bakeSale;
+  const voucherDiscount = order.voucher_discount ?? 0;
+  const hasVoucherDiscount = voucherDiscount > 0;
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -133,7 +135,12 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 <span>£{order.delivery_fee.toFixed(2)}</span>
               </div>
             )}
-            {/* TODO: Add voucher discount if available in schema/data */}
+            {hasVoucherDiscount && (
+              <div className="flex justify-between text-emerald-700">
+                <span>Voucher Discount</span>
+                <span>-£{voucherDiscount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="border-t pt-2 mt-2">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total</span>
