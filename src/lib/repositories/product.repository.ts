@@ -67,8 +67,9 @@ export class ProductRepository extends BaseRepository<typeof products> {
 
       // Create variants if provided
       if (variants.length > 0) {
-        const variantsWithProductId = variants.map((v) => ({
+        const variantsWithProductId = variants.map((v, index) => ({
           ...v,
+          id: v.id || `var-${Date.now()}-${index}`,
           product_id: newProduct.id,
         }));
 
@@ -162,10 +163,9 @@ export class ProductRepository extends BaseRepository<typeof products> {
   ): Promise<Product | null> {
     const db = await this.getDatabase();
 
-    // Use transaction to ensure data consistency
-    const result = await db.transaction(async (tx: typeof db) => {
+    try {
       // 1. Update product
-      const [updatedProduct] = await tx
+      const [updatedProduct] = await db
         .update(products)
         .set({ ...productUpdates, updated_at: new Date().toISOString() })
         .where(eq(products.id, productId))
@@ -175,12 +175,8 @@ export class ProductRepository extends BaseRepository<typeof products> {
 
       // 2. Delete removed variants
       if (variants.delete.length > 0) {
-        // SQLite doesn't support WHERE IN with multiple values nicely in all drivers,
-        // but Drizzle handles it.
-        // However, for safety and simplicity with D1, we'll iterate or use a specialized query if needed.
-        // Drizzle's `inArray` is the standard way.
         const { inArray } = await import("drizzle-orm");
-        await tx.delete(productVariants).where(inArray(productVariants.id, variants.delete));
+        await db.delete(productVariants).where(inArray(productVariants.id, variants.delete));
       }
 
       // 3. Create new variants
@@ -189,22 +185,23 @@ export class ProductRepository extends BaseRepository<typeof products> {
           ...v,
           product_id: productId,
         }));
-        await tx.insert(productVariants).values(variantsWithProductId);
+        await db.insert(productVariants).values(variantsWithProductId);
       }
 
       // 4. Update existing variants
       for (const variant of variants.update) {
         const { id, ...updates } = variant;
-        await tx
+        await db
           .update(productVariants)
           .set({ ...updates, updated_at: new Date().toISOString() })
           .where(eq(productVariants.id, id));
       }
 
       return updatedProduct;
-    });
-
-    return result;
+    } catch (error) {
+      console.error("Error updating product with variants:", error);
+      throw error;
+    }
   }
 }
 

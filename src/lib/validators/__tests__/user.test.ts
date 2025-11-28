@@ -6,7 +6,7 @@ describe("User Validators", () => {
     const validUser = {
       email: "test@example.com",
       name: "Test User",
-      password: "SecurePass123!",
+      password_hash: "hashed_password_123",
     };
 
     it("should validate a correct user", () => {
@@ -33,7 +33,7 @@ describe("User Validators", () => {
     it("should fail if password is too short", () => {
       const result = insertUserSchema.safeParse({
         ...validUser,
-        password: "short",
+        password_hash: "short",
       });
       expect(result.success).toBe(false);
     });

@@ -82,9 +82,35 @@ export const insertVoucherSchema = z
     }
   );
 
-export const updateVoucherSchema = insertVoucherSchema.partial().extend({
-  id: z.string().uuid(),
-});
+export const updateVoucherSchema = insertVoucherSchema
+  .partial()
+  .extend({
+    id: z.string().uuid(),
+  })
+  .refine(
+    (data) => {
+      if (data.type === "percentage" && data.value !== undefined) {
+        return data.value > 0 && data.value <= 100;
+      }
+      return true;
+    },
+    {
+      message: "Percentage value must be between 0 and 100",
+      path: ["value"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.valid_from && data.valid_until) {
+        return new Date(data.valid_until) > new Date(data.valid_from);
+      }
+      return true;
+    },
+    {
+      message: "Valid until date must be after valid from date",
+      path: ["valid_until"],
+    }
+  );
 
 // Voucher application schema (for checking at checkout)
 export const applyVoucherSchema = z.object({

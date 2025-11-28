@@ -9,6 +9,7 @@ describe("News Validators", () => {
       content: "<p>We're excited to announce...</p>",
       excerpt: "We're excited to announce our new location",
       is_published: true,
+      author_id: "123e4567-e89b-12d3-a456-426614174000",
     };
 
     it("should validate a correct news post", () => {
@@ -33,11 +34,7 @@ describe("News Validators", () => {
     });
 
     it("should allow valid slug formats", () => {
-      const validSlugs = [
-        "simple-slug",
-        "slug-with-numbers-123",
-        "another-valid-slug",
-      ];
+      const validSlugs = ["simple-slug", "slug-with-numbers-123", "another-valid-slug"];
 
       validSlugs.forEach((slug) => {
         const result = insertNewsPostSchema.safeParse({ ...validNews, slug });
@@ -50,6 +47,7 @@ describe("News Validators", () => {
         title: "Minimal News",
         slug: "minimal-news",
         content: "Content",
+        author_id: "123e4567-e89b-12d3-a456-426614174000",
       });
       expect(result.success).toBe(true);
     });
@@ -67,6 +65,7 @@ describe("News Validators", () => {
         title: "Draft News",
         slug: "draft-news",
         content: "Content",
+        author_id: "123e4567-e89b-12d3-a456-426614174000",
       });
       expect(result.success).toBe(true);
       if (result.success) {

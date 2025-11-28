@@ -110,7 +110,11 @@ export function ImageGallery({
   };
 
   const enforcedProductOnly = productOnly;
-  const initialBucket = enforcedProductOnly ? "products" : category ? bucketFromCategory(category) : "products";
+  const initialBucket = enforcedProductOnly
+    ? "products"
+    : category
+      ? bucketFromCategory(category)
+      : "products";
   const initialProductCategory =
     enforcedProductOnly && category && category !== "news" && category !== "uncategorized"
       ? category
@@ -143,7 +147,11 @@ export function ImageGallery({
       const params = new URLSearchParams();
       const bucketParam = enforcedProductOnly ? "products" : selectedFilter;
       params.set("bucket", bucketParam);
-      if (bucketParam === "products" && selectedProductCategory && selectedProductCategory !== "all") {
+      if (
+        bucketParam === "products" &&
+        selectedProductCategory &&
+        selectedProductCategory !== "all"
+      ) {
         params.set("category", selectedProductCategory);
       }
       params.set("limit", "48");
@@ -338,7 +346,11 @@ export function ImageGallery({
     setImageToEdit(image);
     setEditCategory(enforcedProductOnly ? "products" : bucketFromCategory(image.category));
     setEditProductCategory(
-      image.category && image.category !== "news" ? image.category : enforcedProductOnly ? initialProductCategory : ""
+      image.category && image.category !== "news"
+        ? image.category
+        : enforcedProductOnly
+          ? initialProductCategory
+          : ""
     );
   };
 
@@ -392,14 +404,11 @@ export function ImageGallery({
       return images.filter((img) => img.category === selectedProductCategory);
     }
     return images;
-  }, [images, selectedFilter, selectedProductCategory]);
+  }, [images, selectedFilter, selectedProductCategory, enforcedProductOnly]);
 
   // Pagination logic
   const totalPages = Math.ceil(visibleImages.length / pageSize);
-  const paginatedImages = visibleImages.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const paginatedImages = visibleImages.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getPreviewUrl = (image: ImageRecord) => {
     const url = image.url;
@@ -461,7 +470,7 @@ export function ImageGallery({
                 </select>
               </>
             )}
-            <Button variant="ghost" size="icon" onClick={fetchImages} title="Refresh">
+            <Button type="button" variant="ghost" size="icon" onClick={fetchImages} title="Refresh">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -580,6 +589,7 @@ export function ImageGallery({
                   <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     {mode === "manager" && (
                       <Button
+                        type="button"
                         size="icon"
                         variant="secondary"
                         className="h-7 w-7 rounded-full shadow-sm"
@@ -593,6 +603,7 @@ export function ImageGallery({
                       </Button>
                     )}
                     <Button
+                      type="button"
                       size="icon"
                       variant="destructive"
                       className="h-7 w-7 rounded-full shadow-sm"
@@ -740,10 +751,10 @@ export function ImageGallery({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setImageToEdit(null)} disabled={isEditing}>
+            <Button type="button" variant="outline" onClick={() => setImageToEdit(null)} disabled={isEditing}>
               Cancel
             </Button>
-            <Button onClick={handleUpdateImage} disabled={isEditing}>
+            <Button type="button" onClick={handleUpdateImage} disabled={isEditing}>
               {isEditing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -178,12 +178,15 @@ export default function EditProductForm({ productId, categories }: EditProductFo
 
       // Handle image if changed
       if (selectedImage) {
-        // Only append if it's a blob URL (newly selected), not an existing R2 URL
+        // If it's a blob URL (newly uploaded), convert to file
         if (selectedImage.startsWith("blob:")) {
           const response = await fetch(selectedImage);
           const blob = await response.blob();
           const file = new File([blob], "product-image.jpg", { type: blob.type });
           formData.append("image", file);
+        } else {
+          // If it's a path from the gallery, send it as image_url
+          formData.append("image_url", selectedImage);
         }
       }
 

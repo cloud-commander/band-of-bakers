@@ -113,14 +113,18 @@ export default function NewProductForm({ categories }: NewProductFormProps) {
         formData.append("base_price", data.base_price || "0");
       }
 
-      // If an image was selected from gallery, we need to handle it differently
-      // For now, we'll create a mock File from the URL
+      // Handle image if selected
       if (selectedImage) {
-        // Fetch the image and convert to File
-        const response = await fetch(selectedImage);
-        const blob = await response.blob();
-        const file = new File([blob], "product-image.jpg", { type: blob.type });
-        formData.append("image", file);
+        // If it's a blob URL (newly uploaded), convert to file
+        if (selectedImage.startsWith("blob:")) {
+          const response = await fetch(selectedImage);
+          const blob = await response.blob();
+          const file = new File([blob], "product-image.jpg", { type: blob.type });
+          formData.append("image", file);
+        } else {
+          // If it's a path from the gallery, send it as image_url
+          formData.append("image_url", selectedImage);
+        }
       }
 
       const result = await createProduct(formData);

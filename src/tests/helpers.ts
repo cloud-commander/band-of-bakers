@@ -4,8 +4,8 @@
  * Reusable utilities for testing across the application.
  */
 
-import { render, RenderOptions } from '@testing-library/react';
-import { ReactElement } from 'react';
+import { render, RenderOptions } from "@testing-library/react";
+import { ReactElement } from "react";
 
 /**
  * Custom render function that wraps components with necessary providers
@@ -15,10 +15,7 @@ import { ReactElement } from 'react';
  * const { getByText } = renderWithProviders(<MyComponent />);
  * ```
  */
-export function renderWithProviders(
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) {
+export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptions, "wrapper">) {
   // Add providers here when needed (e.g., CartContext, ThemeProvider, etc.)
   // For now, just use standard render
   return render(ui, options);
@@ -46,13 +43,13 @@ export async function waitForAsync() {
  * Mock product data for tests
  */
 export const mockProduct = {
-  id: 'test-product-1',
-  name: 'Test Sourdough Bread',
-  slug: 'test-sourdough-bread',
-  description: 'A delicious test bread',
+  id: "test-product-1",
+  name: "Test Sourdough Bread",
+  slug: "test-sourdough-bread",
+  description: "A delicious test bread",
   price: 5.99,
-  category_id: 'test-category-1',
-  image_url: '/images/test-bread.jpg',
+  category_id: "test-category-1",
+  image_url: "/images/test-bread.jpg",
   is_active: true,
   stock: 10,
   created_at: new Date().toISOString(),
@@ -63,10 +60,10 @@ export const mockProduct = {
  * Mock user data for tests
  */
 export const mockUser = {
-  id: 'test-user-1',
-  email: 'test@example.com',
-  name: 'Test User',
-  role: 'user' as const,
+  id: "test-user-1",
+  email: "test@example.com",
+  name: "Test User",
+  role: "user" as const,
   email_verified: false,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -77,10 +74,10 @@ export const mockUser = {
  */
 export const mockAdmin = {
   ...mockUser,
-  id: 'test-admin-1',
-  email: 'admin@example.com',
-  name: 'Test Admin',
-  role: 'admin' as const,
+  id: "test-admin-1",
+  email: "admin@example.com",
+  name: "Test Admin",
+  role: "admin" as const,
 };
 
 /**
@@ -90,8 +87,8 @@ export const XSS_ATTACK_VECTORS = [
   '<script>alert("XSS")</script>',
   '<img src=x onerror=alert("XSS")>',
   '<svg/onload=alert("XSS")>',
-  'javascript:alert("XSS")',
-  '<iframe src="javascript:alert(\'XSS\')">',
+  "<a href=\"javascript:alert('XSS')\">Click</a>",
+  "<iframe src=\"javascript:alert('XSS')\">",
   '<body onload=alert("XSS")>',
   '<input onfocus=alert("XSS") autofocus>',
   '<select onfocus=alert("XSS") autofocus>',
@@ -114,10 +111,10 @@ export const SQL_INJECTION_VECTORS = [
  * Path traversal attack vectors for testing
  */
 export const PATH_TRAVERSAL_VECTORS = [
-  '../../../etc/passwd',
-  '..\\..\\..\\windows\\system32',
-  '....//....//....//etc/passwd',
-  '../../../../../../../../../../etc/passwd',
+  "../../../etc/passwd",
+  "..\\..\\..\\windows\\system32",
+  "....//....//....//etc/passwd",
+  "../../../../../../../../../../etc/passwd",
 ];
 
 /**

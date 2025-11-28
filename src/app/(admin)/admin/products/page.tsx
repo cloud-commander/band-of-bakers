@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ImageOff } from "lucide-react";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import {
   Select,
@@ -68,6 +68,13 @@ export default function AdminProductsPage() {
           getCategories(),
           getUpcomingBakeSales(),
         ]);
+
+        // Debug: Check if any products have null/empty image_url
+        console.log("[DEBUG] Products with missing images:",
+          productsData.filter(p => !p.image_url || p.image_url === "")
+            .map(p => ({ id: p.id, name: p.name, image_url: p.image_url }))
+        );
+
         setAllProducts(productsData);
         setCategories(categoriesData);
         setUpcomingBakeSales(bakeSalesData);
@@ -333,6 +340,18 @@ export default function AdminProductsPage() {
                   const variantCount = product.variants?.length || 0;
                   const activeVariants = product.variants?.filter((v) => v.is_active).length || 0;
 
+                  // Debug: Log image check for products without images
+                  const hasNoImage = !product.image_url || product.image_url === "";
+                  if (hasNoImage) {
+                    console.log(`[DEBUG] Product ${product.name} has no image:`, {
+                      image_url: product.image_url,
+                      type: typeof product.image_url,
+                      check1: !product.image_url,
+                      check2: product.image_url === "",
+                      combined: hasNoImage
+                    });
+                  }
+
                   return (
                     <tr key={product.id} className="border-t hover:bg-muted/30">
                       <td className="p-4 font-medium">{product.name}</td>
@@ -352,27 +371,34 @@ export default function AdminProductsPage() {
                           </div>
                         ) : (
                           <div className="flex items-center justify-center">
-                            <span className="text-xs text-muted-foreground">No variants</span>
+                            <span className="text-xs text-muted-foreground">—</span>
                           </div>
                         )}
                       </td>
 
                       <td className="p-4">
-                        <Badge
-                          variant={
-                            upcomingBakeSales.length === 0
-                              ? "destructive"
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              upcomingBakeSales.length === 0
+                                ? "destructive"
+                                : product.is_active
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {upcomingBakeSales.length === 0
+                              ? "Unavailable"
                               : product.is_active
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {upcomingBakeSales.length === 0
-                            ? "Unavailable"
-                            : product.is_active
-                            ? "Active"
-                            : "Inactive"}
-                        </Badge>
+                              ? "Active"
+                              : "Inactive"}
+                          </Badge>
+                          {(!product.image_url || product.image_url === "") && (
+                            <div className="flex items-center text-amber-600" title="No image">
+                              <ImageOff className="h-4 w-4" />
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4 text-right">
                         <Button asChild variant="ghost" size="sm">
@@ -404,21 +430,28 @@ export default function AdminProductsPage() {
                       <h3 className="font-medium text-base mb-1">{product.name}</h3>
                       <p className="text-sm text-muted-foreground">{category?.name}</p>
                     </div>
-                    <Badge
-                      variant={
-                        upcomingBakeSales.length === 0
-                          ? "destructive"
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          upcomingBakeSales.length === 0
+                            ? "destructive"
+                            : product.is_active
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {upcomingBakeSales.length === 0
+                          ? "Unavailable"
                           : product.is_active
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {upcomingBakeSales.length === 0
-                        ? "Unavailable"
-                        : product.is_active
-                        ? "Active"
-                        : "Inactive"}
-                    </Badge>
+                          ? "Active"
+                          : "Inactive"}
+                      </Badge>
+                      {(!product.image_url || product.image_url === "") && (
+                        <div className="flex items-center text-amber-600" title="No image">
+                          <ImageOff className="h-4 w-4" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-3 border-t">
@@ -438,7 +471,7 @@ export default function AdminProductsPage() {
                           {activeVariants} / {variantCount}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">No variants</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </div>
                   </div>

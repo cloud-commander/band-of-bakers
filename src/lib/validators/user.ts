@@ -30,7 +30,7 @@ export const userSchema = z.object({
 
 // Insert schema (without id and timestamps)
 export const insertUserSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().toLowerCase(),
   password_hash: z.string().min(8, "Password must be at least 8 characters").nullable().optional(),
   name: z.string().min(1, "Name is required"),
   phone: z

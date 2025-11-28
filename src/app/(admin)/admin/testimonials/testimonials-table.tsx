@@ -165,6 +165,7 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                     <div className="flex items-center justify-end gap-2">
                       {testimonial.status !== "approved" && (
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => handleStatusUpdate(testimonial.id, "approved")}
@@ -176,6 +177,7 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                       )}
                       {testimonial.status !== "rejected" && (
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => handleStatusUpdate(testimonial.id, "rejected")}
@@ -191,6 +193,7 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                         </Link>
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(testimonial.id)}
@@ -245,6 +248,7 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                 <div className="flex items-center gap-1">
                   {testimonial.status !== "approved" && (
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => handleStatusUpdate(testimonial.id, "approved")}
@@ -256,6 +260,7 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                   )}
                   {testimonial.status !== "rejected" && (
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => handleStatusUpdate(testimonial.id, "rejected")}
@@ -271,6 +276,7 @@ export function TestimonialsTable({ initialTestimonials }: TestimonialsTableProp
                     </Link>
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDelete(testimonial.id)}

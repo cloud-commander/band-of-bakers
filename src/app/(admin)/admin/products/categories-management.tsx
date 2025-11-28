@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -23,12 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2, GripVertical, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { toast } from "sonner";
-import {
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from "@/actions/categories";
+import { createCategory, updateCategory, deleteCategory } from "@/actions/categories";
 import type { ProductCategory } from "@/lib/repositories/category.repository";
 import { ImageGallery } from "@/components/admin/image-gallery";
 
@@ -213,11 +209,9 @@ export function CategoriesManagement({
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">Product Categories</h2>
-          <p className="text-muted-foreground">
-            Manage product categories and their display order
-          </p>
+          <p className="text-muted-foreground">Manage product categories and their display order</p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button type="button" onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Category
         </Button>
@@ -250,11 +244,14 @@ export function CategoriesManagement({
                   </TableCell>
                   <TableCell>
                     {category.image_url ? (
-                      <img
-                        src={category.image_url}
-                        alt={category.name}
-                        className="h-10 w-10 rounded object-cover"
-                      />
+                      <div className="relative h-10 w-10 rounded overflow-hidden">
+                        <Image
+                          src={category.image_url}
+                          alt={category.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
                         <ImageIcon className="h-5 w-5 text-muted-foreground" />
@@ -268,18 +265,10 @@ export function CategoriesManagement({
                     )}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(category)}
-                    >
+                    <Button type="button" variant="ghost" size="sm" onClick={() => openEditDialog(category)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openDeleteDialog(category)}
-                    >
+                    <Button type="button" variant="ghost" size="sm" onClick={() => openDeleteDialog(category)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>
@@ -302,11 +291,14 @@ export function CategoriesManagement({
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1">
                   {category.image_url ? (
-                    <img
-                      src={category.image_url}
-                      alt={category.name}
-                      className="h-12 w-12 rounded object-cover"
-                    />
+                    <div className="relative h-12 w-12 rounded overflow-hidden">
+                      <Image
+                        src={category.image_url}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   ) : (
                     <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
                       <ImageIcon className="h-6 w-6 text-muted-foreground" />
@@ -323,6 +315,7 @@ export function CategoriesManagement({
               )}
               <div className="flex gap-2 pt-2 border-t">
                 <Button
+                  type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => openEditDialog(category)}
@@ -332,6 +325,7 @@ export function CategoriesManagement({
                   Edit
                 </Button>
                 <Button
+                  type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => openDeleteDialog(category)}
@@ -378,11 +372,9 @@ export function CategoriesManagement({
               <div className="flex gap-3 items-start">
                 {formData.image_url ? (
                   <div className="relative">
-                    <img
-                      src={formData.image_url}
-                      alt="Preview"
-                      className="h-24 w-24 rounded object-cover border"
-                    />
+                    <div className="relative h-24 w-24 rounded overflow-hidden border">
+                      <Image src={formData.image_url} alt="Preview" fill className="object-cover" />
+                    </div>
                     <Button
                       type="button"
                       variant="secondary"
@@ -412,6 +404,7 @@ export function CategoriesManagement({
           </div>
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 setIsCreateDialogOpen(false);
@@ -421,7 +414,7 @@ export function CategoriesManagement({
             >
               Cancel
             </Button>
-            <Button onClick={handleCreateCategory} disabled={isSubmitting}>
+            <Button type="button" onClick={handleCreateCategory} disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Create Category"}
             </Button>
           </DialogFooter>
@@ -460,11 +453,9 @@ export function CategoriesManagement({
               <div className="flex gap-3 items-start">
                 {formData.image_url ? (
                   <div className="relative">
-                    <img
-                      src={formData.image_url}
-                      alt="Preview"
-                      className="h-24 w-24 rounded object-cover border"
-                    />
+                    <div className="relative h-24 w-24 rounded overflow-hidden border">
+                      <Image src={formData.image_url} alt="Preview" fill className="object-cover" />
+                    </div>
                     <Button
                       type="button"
                       variant="secondary"
@@ -494,6 +485,7 @@ export function CategoriesManagement({
           </div>
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 setIsEditDialogOpen(false);
@@ -504,7 +496,7 @@ export function CategoriesManagement({
             >
               Cancel
             </Button>
-            <Button onClick={handleEditCategory} disabled={isSubmitting}>
+            <Button type="button" onClick={handleEditCategory} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -523,6 +515,7 @@ export function CategoriesManagement({
           </DialogHeader>
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 setIsDeleteDialogOpen(false);
@@ -532,7 +525,7 @@ export function CategoriesManagement({
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteCategory} disabled={isSubmitting}>
+            <Button type="button" variant="destructive" onClick={handleDeleteCategory} disabled={isSubmitting}>
               {isSubmitting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>

@@ -129,11 +129,14 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
       finalBasePrice = Math.min(...prices);
 
       // Prepare variants with price_adjustment
-      for (const variant of validated.data.variants) {
+      for (let i = 0; i < validated.data.variants.length; i++) {
+        const variant = validated.data.variants[i];
         variantsToCreate.push({
+          id: `var-${Date.now()}-${i}`,
+          product_id: "", // Will be set in repository
           name: variant.name,
           price_adjustment: variant.price - finalBasePrice,
-          sort_order: 0, // Default sort order
+          sort_order: i,
           is_active: true,
         });
       }
@@ -143,6 +146,7 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
 
     // 4. Handle image upload
     const imageFile = formData.get("image") as File | null;
+    const imageUrlFromGallery = formData.get("image_url") as string | null;
     let imageUrl: string | undefined;
 
     if (imageFile && imageFile.size > 0) {
@@ -151,12 +155,16 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
         return { success: false, error: "Failed to upload image" };
       }
       imageUrl = uploadedUrl;
+    } else if (imageUrlFromGallery) {
+      // User selected an existing image from gallery
+      imageUrl = imageUrlFromGallery;
     }
 
     // 5. Create product in database
+    const productId = `prod-${Date.now()}`;
     const product = await productRepository.createWithVariants(
-      // @ts-expect-error - Type mismatch in repository
       {
+        id: productId,
         name: validated.data.name,
         slug: validated.data.slug,
         description: validated.data.description,
@@ -260,6 +268,7 @@ export async function updateProduct(
 
     // 5. Handle image upload (if new image provided)
     const imageFile = formData.get("image") as File | null;
+    const imageUrlFromGallery = formData.get("image_url") as string | null;
     let imageUrl = existingProduct.image_url;
 
     if (imageFile && imageFile.size > 0) {
@@ -274,6 +283,9 @@ export async function updateProduct(
         return { success: false, error: "Failed to upload image" };
       }
       imageUrl = uploadedUrl;
+    } else if (imageUrlFromGallery) {
+      // User selected an existing image from gallery
+      imageUrl = imageUrlFromGallery;
     }
 
     // 6. Update product and variants in database
@@ -353,6 +365,22 @@ export async function deleteProduct(id: string): Promise<ActionResult<void>> {
 export async function getProducts() {
   try {
     const products = await productRepository.findAll();
+
+    // Debug: Check for products with null/empty image_url
+    const productsWithoutImages = products.filter((p: any) => !p.image_url || p.image_url === "");
+    if (productsWithoutImages.length > 0) {
+      console.log("[SERVER DEBUG] Products without images from DB:",
+        productsWithoutImages.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          image_url: p.image_url,
+          image_url_type: typeof p.image_url,
+          is_null: p.image_url === null,
+          is_undefined: p.image_url === undefined,
+          is_empty: p.image_url === ""
+        }))
+      );
+    }
 
     // Fetch variants for each product
     const productsWithVariants = await Promise.all(
