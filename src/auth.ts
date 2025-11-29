@@ -129,15 +129,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               message: data?.error?.message,
             });
           }
-          if (data?.error?.message === "EMAIL_NOT_VERIFIED") {
-            throw new AuthError("EMAIL_NOT_VERIFIED");
-          }
           return null;
         }
 
-        // Enforce email verification
+        // Enforce email verification (Google is source of truth)
         const verified = await verifyIdToken(data.idToken);
         if (!verified.emailVerified) {
+          if (process.env.NODE_ENV === "development") {
+            console.warn("Login blocked: email not verified");
+          }
           throw new Error("EMAIL_NOT_VERIFIED");
         }
 

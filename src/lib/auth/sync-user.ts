@@ -13,6 +13,11 @@ interface AuthData {
   phone?: string;
 }
 
+const KNOWN_ADMIN_EMAILS = new Set([
+  "admin@bandofbakers.co.uk",
+  "circularpi@hotmail.co.uk",
+]);
+
 export async function syncUser(authData: AuthData) {
   const db = await getDb();
   const email = authData.email;
@@ -25,6 +30,18 @@ export async function syncUser(authData: AuthData) {
 
   if (existingUser) {
     // Optional: Update avatar or other fields if they changed
+    const desiredRole = KNOWN_ADMIN_EMAILS.has(email.toLowerCase()) ? "owner" : existingUser.role;
+    if (desiredRole !== existingUser.role || authData.picture || authData.photoURL || authData.image) {
+      await db
+        .update(users)
+        .set({
+          role: desiredRole,
+          avatar_url: authData.picture || authData.photoURL || authData.image || existingUser.avatar_url,
+          updated_at: new Date().toISOString(),
+        })
+        .where(eq(users.email, email));
+      return await db.query.users.findFirst({ where: eq(users.email, email) });
+    }
     return existingUser;
   }
 

@@ -13,6 +13,7 @@ import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff } from "lucide-react";
+import { resendVerification } from "@/actions/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [pendingResend, setPendingResend] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +97,33 @@ export default function LoginPage() {
             {error && (
               <div className="text-sm text-red-500 bg-red-50 p-2 rounded" role="alert">
                 {error}
+              </div>
+            )}
+            {emailError && (
+              <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded flex justify-between items-center">
+                <span>{emailError}</span>
+                <button
+                  type="button"
+                  className="text-primary underline text-xs disabled:opacity-50"
+                  disabled={pendingResend || !email}
+                  onClick={async () => {
+                    if (!email) return;
+                    setPendingResend(true);
+                    setError("");
+                    try {
+                      const formData = new FormData();
+                      formData.append("email", email);
+                      const result = await resendVerification(formData);
+                      if (result.error) throw new Error(result.error);
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Failed to resend email");
+                    } finally {
+                      setPendingResend(false);
+                    }
+                  }}
+                >
+                  {pendingResend ? "Resending..." : "Resend email"}
+                </button>
               </div>
             )}
             <div>
