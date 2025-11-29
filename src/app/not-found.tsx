@@ -10,10 +10,10 @@ export default function NotFound() {
         {/* Background Image */}
         <div className="absolute inset-0 w-full h-full">
           <Image
-            src="/artisan-bread.jpg"
-            alt="Freshly baked artisan bread"
+            src="/images/categories/foccacia-detail.webp"
+            alt="Freshly baked focaccia"
             fill
-            className="object-cover opacity-10"
+            className="object-contain opacity-10 scale-125"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-br from-warm-flour/90 to-warm-flour/70" />

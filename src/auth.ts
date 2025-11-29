@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { syncUser } from "./lib/auth/sync-user";
 import { JWT } from "next-auth/jwt";
+import { verifyIdToken } from "./lib/google-identity";
 
 declare module "next-auth" {
   interface Session {
@@ -128,7 +129,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               message: data?.error?.message,
             });
           }
+          if (data?.error?.message === "EMAIL_NOT_VERIFIED") {
+            throw new AuthError("EMAIL_NOT_VERIFIED");
+          }
           return null;
+        }
+
+        // Enforce email verification
+        const verified = await verifyIdToken(data.idToken);
+        if (!verified.emailVerified) {
+          throw new Error("EMAIL_NOT_VERIFIED");
         }
 
         // Return an object that looks like a user, but contains the tokens
@@ -230,44 +240,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
-      // Pass properties to the client
+      // Always hydrate user from DB to reflect latest avatar/profile
       if (token.idToken && token.userId) {
         session.user.id = token.userId as string;
         session.user.role = token.role as string;
         session.user.is_banned = token.is_banned as boolean;
 
-        // Optimization: Use cached data from token if available
-        if (token.name) {
-          session.user.name = token.name as string;
-          session.user.image = token.picture as string;
-          // @ts-expect-error: Custom session property
-          session.user.phone = token.phone as string;
-          // @ts-expect-error: Custom session property
-          session.user.emailVerified = token.emailVerified as boolean;
-        } else {
-          // Fallback: Fetch from DB for existing sessions without cached data
-          try {
-            console.time("SessionDBFallback");
-            const { getDb } = await import("@/lib/db");
-            const { users } = await import("@/db/schema");
-            const { eq } = await import("drizzle-orm");
+        try {
+          const { getDb } = await import("@/lib/db");
+          const { users } = await import("@/db/schema");
+          const { eq } = await import("drizzle-orm");
 
-            const db = await getDb();
-            const dbUser = await db.query.users.findFirst({
-              where: eq(users.id, token.userId as string),
-            });
+          const db = await getDb();
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.id, token.userId as string),
+          });
 
-            if (dbUser) {
-              session.user.name = dbUser.name;
-              session.user.image = dbUser.avatar_url;
+          if (dbUser) {
+            session.user.name = dbUser.name;
+            session.user.image = dbUser.avatar_url;
+            // @ts-expect-error: Custom session property
+            session.user.phone = dbUser.phone;
+            // @ts-expect-error: Custom session property
+            session.user.emailVerified = dbUser.email_verified;
+            session.user.is_banned = dbUser.is_banned;
+          } else {
+            // Fallback to token cache if DB user not found
+            if (token.name) {
+              session.user.name = token.name as string;
+              session.user.image = token.picture as string;
               // @ts-expect-error: Custom session property
-              session.user.phone = dbUser.phone;
-              session.user.emailVerified = dbUser.email_verified;
-              session.user.is_banned = dbUser.is_banned;
+              session.user.phone = token.phone as string;
+              // @ts-expect-error: Custom session property
+              session.user.emailVerified = token.emailVerified as boolean;
             }
-            console.timeEnd("SessionDBFallback");
-          } catch (error) {
-            console.error("Error fetching user in session callback fallback:", error);
+          }
+        } catch (error) {
+          console.error("Error fetching user in session callback:", error);
+          // Fallback to token cache
+          if (token.name) {
+            session.user.name = token.name as string;
+            session.user.image = token.picture as string;
+            // @ts-expect-error: Custom session property
+            session.user.phone = token.phone as string;
+            // @ts-expect-error: Custom session property
+            session.user.emailVerified = token.emailVerified as boolean;
           }
         }
       }

@@ -17,6 +17,8 @@ import { ArrowRight, ShoppingBag, Truck } from "lucide-react";
 import { SHIPPING_COST } from "@/lib/constants/app";
 import { createOrder } from "@/actions/orders";
 import { TurnstileWidget } from "@/components/turnstile/turnstile-widget";
+import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +43,7 @@ const checkoutDeliverySchema = z.object({
 type CheckoutDeliveryForm = z.infer<typeof checkoutDeliverySchema>;
 
 export default function CheckoutPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -67,6 +70,11 @@ export default function CheckoutPage() {
   const totalToPay = cartTotal + SHIPPING_COST;
 
   const onSubmit = async (data: CheckoutDeliveryForm) => {
+    if (status !== "authenticated") {
+      await signIn(undefined, { callbackUrl: "/checkout" });
+      return;
+    }
+
     try {
       if (turnstileEnabled && !turnstileToken) {
         toast.error("Please complete the verification");

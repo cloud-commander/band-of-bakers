@@ -44,6 +44,9 @@ export default async function AdminDashboard() {
     trends,
     upcomingBakeSalesCount,
     nextBakeSale,
+    revenueSeries,
+    statusCounts,
+    topProducts,
   } = await getDashboardStats();
   const topVouchers = await getTopVouchers(5);
 
@@ -122,7 +125,7 @@ export default async function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Order Status Chart */}
             <div className="lg:col-span-1">
-              <OrderStatusChart nextBakeSale={nextBakeSale} />
+              <OrderStatusChart data={statusCounts} nextBakeSale={nextBakeSale} />
             </div>
 
             {/* Recent Orders List */}
@@ -185,11 +188,22 @@ export default async function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Trend - Full Width */}
             <div className="lg:col-span-2">
-              <RevenueTrendChart />
+              <RevenueTrendChart
+                data={revenueSeries.map((r) => ({
+                  date: new Date(r.date).toLocaleDateString("en-GB", { month: "short", day: "numeric" }),
+                  revenue: r.revenue,
+                }))}
+              />
             </div>
 
             {/* Top Products */}
-            <TopProductsChart />
+            <TopProductsChart
+              data={topProducts.map((p) => ({
+                name: p.name,
+                units: Number(p.units || 0),
+                revenue: Number(p.revenue || 0),
+              }))}
+            />
 
             {/* Top Vouchers */}
             <TopVouchersList vouchers={topVouchers} />

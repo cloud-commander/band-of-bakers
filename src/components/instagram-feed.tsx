@@ -75,14 +75,46 @@ export function InstagramFeed({ embedHtml }: { embedHtml?: string | null }) {
       {/* Embedded post or placeholder */}
       <div className="max-w-3xl mx-auto">
         {embedHtml ? (
-          <div
-            className="bg-background border rounded-xl overflow-hidden shadow-sm"
-            // Instagram embed HTML provided by admin (trusted input)
-            dangerouslySetInnerHTML={{ __html: embedHtml }}
-          />
+          <>
+            <div className="flex justify-center">
+              <div
+                className="instagram-embed-wrapper bg-background border rounded-xl overflow-hidden shadow-sm"
+                // Instagram embed HTML provided by admin (trusted input)
+                dangerouslySetInnerHTML={{ __html: embedHtml }}
+              />
+            </div>
+            <style jsx global>{`
+              .instagram-embed-wrapper .instagram-media {
+                margin: 0 auto !important;
+                max-width: 420px !important;
+                width: 100% !important;
+              }
+
+              @media (min-width: 1024px) {
+                .instagram-embed-wrapper .instagram-media {
+                  transform: scale(0.9);
+                  transform-origin: top center;
+                  overflow: hidden !important;
+                }
+              }
+            `}</style>
+            <div className="text-center mt-4">
+              <a
+                href="https://www.instagram.com/band_of_bakers/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                View on Instagram
+              </a>
+            </div>
+          </>
         ) : (
-          <div className="text-center py-8 text-muted-foreground border rounded-xl bg-muted/30">
-            Instagram embed not configured yet.
+          <div className="max-w-xl mx-auto">
+            <div className="animate-pulse bg-muted/50 h-72 rounded-xl border" />
+            <p className="text-center mt-4 text-sm text-muted-foreground">
+              Instagram embed not configured yet.
+            </p>
           </div>
         )}
       </div>

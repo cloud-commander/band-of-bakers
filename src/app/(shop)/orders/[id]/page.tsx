@@ -1,7 +1,8 @@
 import { PageHeader } from "@/components/state/page-header";
 import { Badge } from "@/components/ui/badge";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getOrderById } from "@/actions/orders";
+import { auth } from "@/auth";
 
 interface OrderPageProps {
   params: Promise<{
@@ -20,9 +21,16 @@ const statusColors = {
 
 export default async function OrderPage({ params }: OrderPageProps) {
   const { id } = await params;
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect(`/auth/login?callbackUrl=/orders/${id}`);
+  }
   const order = await getOrderById(id);
 
   if (!order) {
+    notFound();
+  }
+  if (order.user_id !== session.user.id) {
     notFound();
   }
 
@@ -149,7 +157,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
             </div>
             <div className="pt-2">
               <p className="text-sm text-muted-foreground">
-                Payment Method: {order.payment_method.replace(/_/g, " ")}
+                Payment Method: Pay on Collection
               </p>
               <p className="text-sm text-muted-foreground capitalize">
                 Payment Status: {order.payment_status || "pending"}

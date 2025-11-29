@@ -13,23 +13,29 @@ import { initiateGoogleSignIn } from "@/lib/google-identity";
 import { signupSchema, type SignupFormData } from "@/lib/validators/auth";
 import { z } from "zod";
 import { registerUser } from "@/actions/auth";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [completed, setCompleted] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (completed) return;
     setIsLoading(true);
     setError("");
+    setSuccess(false);
 
     try {
       // Validate form data with Zod
@@ -55,8 +61,8 @@ export default function SignupPage() {
         throw new Error(result.error);
       }
 
-      router.push("/");
-      router.refresh();
+      setSuccess(true);
+      setCompleted(true);
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Handle Zod validation errors
@@ -89,6 +95,16 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</div>}
+            {success && (
+              <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertTitle>Check your email</AlertTitle>
+                <AlertDescription>
+                  We&apos;ve sent a verification link to {email || "your inbox"}. Please verify to
+                  activate your account.
+                </AlertDescription>
+              </Alert>
+            )}
             <div>
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -147,8 +163,8 @@ export default function SignupPage() {
                 placeholder="Re-enter your password"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Sign Up"}
+            <Button type="submit" className="w-full" disabled={isLoading || completed}>
+              {isLoading ? "Creating account..." : completed ? "Check your email" : "Sign Up"}
             </Button>
 
             {/* Divider */}

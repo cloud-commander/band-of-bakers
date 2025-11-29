@@ -10,12 +10,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UserMenuProps {
   isLoggedIn: boolean;
+  userImage?: string | null;
+  userName?: string | null;
 }
 
-export const UserMenu = memo(function UserMenu({ isLoggedIn }: UserMenuProps) {
+export const UserMenu = memo(function UserMenu({ isLoggedIn, userImage, userName }: UserMenuProps) {
   if (!isLoggedIn) {
     return (
       <Button
@@ -33,15 +36,20 @@ export const UserMenu = memo(function UserMenu({ isLoggedIn }: UserMenuProps) {
     );
   }
 
+  const initial = userName?.charAt(0)?.toUpperCase() || "U";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full hover:bg-red-50 hover:text-red-700 transition-colors"
+          className="rounded-full hover:bg-red-50 hover:text-red-700 transition-colors p-0"
         >
-          <User className="h-6 w-6" />
+          <Avatar className="h-10 w-10 border">
+            <AvatarImage src={userImage || undefined} alt={userName || "User avatar"} />
+            <AvatarFallback>{initial}</AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -60,7 +68,7 @@ export const UserMenu = memo(function UserMenu({ isLoggedIn }: UserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="flex items-center cursor-pointer"
-          onClick={() => signOut()}
+          onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Logout

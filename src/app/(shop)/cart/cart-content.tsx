@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Minus, Plus, ArrowRight, ShoppingCart, CreditCard, Banknote } from "lucide-react";
+import { Minus, Plus, ArrowRight, ShoppingCart, Banknote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/state/page-header";
 import { useCart } from "@/context/cart-context";
@@ -16,6 +16,7 @@ import { Ticket, X } from "lucide-react";
 import { BakeSaleWithLocation } from "@/lib/repositories";
 import { validateVoucherCode } from "@/actions/vouchers";
 import type { Voucher } from "@/lib/repositories";
+import { useSession, signIn } from "next-auth/react";
 
 interface CartContentProps {
   upcomingBakeSales: BakeSaleWithLocation[];
@@ -23,10 +24,10 @@ interface CartContentProps {
 
 export function CartContent({ upcomingBakeSales }: CartContentProps) {
   const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<"online" | "collection">("online");
   const [voucherCode, setVoucherCode] = useState("");
   const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const { status } = useSession();
 
   const handleApplyVoucher = async () => {
     if (!voucherCode.trim()) {
@@ -246,50 +247,20 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
             <div className={`${DESIGN_TOKENS.cards.base} p-6 sticky top-24`}>
               <h3 className={`${DESIGN_TOKENS.typography.h4.size} mb-4`}>Order Summary</h3>
 
-              {/* Payment Method Selection */}
+              {/* Payment Method */}
               <div className="mb-6 pb-6 border-b">
                 <label
                   className={`block ${DESIGN_TOKENS.typography.label.size} ${DESIGN_TOKENS.typography.label.weight} mb-3`}
                 >
                   Payment Method
                 </label>
-                <RadioGroup
-                  value={paymentMethod}
-                  onValueChange={(value) => setPaymentMethod(value as "online" | "collection")}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer">
-                      <RadioGroupItem value="online" id="online" />
-                      <Label
-                        htmlFor="online"
-                        className="flex items-center gap-2 cursor-pointer flex-1"
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        <div>
-                          <div className="font-medium">Pay Online</div>
-                          <div className="text-xs text-muted-foreground">
-                            Secure payment via Stripe
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer">
-                      <RadioGroupItem value="collection" id="collection" />
-                      <Label
-                        htmlFor="collection"
-                        className="flex items-center gap-2 cursor-pointer flex-1"
-                      >
-                        <Banknote className="h-4 w-4" />
-                        <div>
-                          <div className="font-medium">Pay on Collection</div>
-                          <div className="text-xs text-muted-foreground">
-                            Cash or card at pickup
-                          </div>
-                        </div>
-                      </Label>
-                    </div>
+                <div className="flex items-center gap-3 border rounded-lg p-3 bg-muted/40">
+                  <Banknote className="h-4 w-4" />
+                  <div>
+                    <div className="font-medium">Pay on Collection</div>
+                    <div className="text-xs text-muted-foreground">Cash or card at pickup</div>
                   </div>
-                </RadioGroup>
+                </div>
               </div>
 
               {/* Voucher Code Section */}
@@ -346,27 +317,29 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
                     <span>-£{voucherDiscount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Shipping</span>
-                  <span>Calculated at checkout</span>
-                </div>
                 <div className="border-t pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>£{finalTotal.toFixed(2)}</span>
                 </div>
               </div>
 
-              <Button asChild className="w-full" size="lg">
-                <Link href={paymentMethod === "online" ? "/checkout" : "/checkout/collection"}>
-                  Proceed to Checkout
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => {
+                  if (status !== "authenticated") {
+                    void signIn(undefined, { callbackUrl: "/checkout/collection" });
+                    return;
+                  }
+                  window.location.href = "/checkout/collection";
+                }}
+              >
+                Proceed to Checkout
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
 
               <p className="text-xs text-muted-foreground text-center mt-4">
-                {paymentMethod === "online"
-                  ? "Secure checkout powered by Stripe"
-                  : "You'll pay when you collect your order"}
+                You&apos;ll pay when you collect your order
               </p>
             </div>
           </div>

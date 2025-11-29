@@ -1,6 +1,6 @@
 "use server";
 
-import { signUpWithEmailAndPassword } from "@/lib/google-identity";
+import { signUpWithEmailAndPassword, sendVerificationEmail, verifyIdToken } from "@/lib/google-identity";
 import { syncUser } from "@/lib/auth/sync-user";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
@@ -17,7 +17,7 @@ export async function registerUser(formData: FormData) {
 
   try {
     // 1. Create user in GCP Identity Platform
-    const { user } = await signUpWithEmailAndPassword(email, password, name);
+    const { user, idToken } = await signUpWithEmailAndPassword(email, password, name);
 
     // 2. Sync user to D1 database
     // We pass the user object from GCP, but we might want to add phone if supported by syncUser
@@ -27,21 +27,14 @@ export async function registerUser(formData: FormData) {
       ...user,
       displayName: name,
       photoURL: user.photoURL,
-      // Phone is not currently handled by syncUser based on my previous read,
-      // but we can update syncUser later if needed. For now, let's just pass it.
       phone: phone,
     });
 
-    // 3. Sign the user in immediately
-    // We can't easily sign them in on the server side with credentials without re-verifying
-    // But we can try to call signIn with the credentials we just used.
-    await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    // 3. Send verification email
+    await sendVerificationEmail(idToken);
 
-    return { success: true };
+    // 4. Do not auto-sign-in; require email verification flow on client
+    return { success: true, needsVerification: true };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {

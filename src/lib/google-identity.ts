@@ -220,6 +220,28 @@ export const signUpWithEmailAndPassword = async (
   };
 };
 
+// Send email verification
+export const sendVerificationEmail = async (idToken: string): Promise<void> => {
+  let url = `${GOOGLE_IDENTITY_API_BASE}/accounts:sendOobCode?key=${API_KEY}`;
+  if (TENANT_ID) {
+    url += `&tenantId=${TENANT_ID}`;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      requestType: "VERIFY_EMAIL",
+      idToken,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData?.error?.message || "Failed to send verification email");
+  }
+};
+
 // Sign out (revoke refresh token)
 export const signOut = async (idToken: string): Promise<void> => {
   const url = `${GOOGLE_IDENTITY_API_BASE}/accounts:revokeToken?key=${API_KEY}`;

@@ -35,7 +35,11 @@ export function Navbar() {
             <CartPreview />
 
             {/* User Menu / Login */}
-            <UserMenu isLoggedIn={!!session?.user} />
+            <UserMenu
+              isLoggedIn={!!session?.user}
+              userImage={session?.user?.image}
+              userName={session?.user?.name}
+            />
           </div>
 
           {/* Mobile Menu */}

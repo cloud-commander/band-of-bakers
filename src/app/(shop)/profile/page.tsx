@@ -10,7 +10,7 @@ export default async function ProfilePage() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect("/auth/login?callbackUrl=/profile");
   }
 
   const [reviews, testimonials] = await Promise.all([

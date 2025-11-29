@@ -19,7 +19,8 @@ interface OrderResolutionPageProps {
 export default async function OrderResolutionPage({ params }: OrderResolutionPageProps) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/login"); // Or a specific login redirect
+    const { id } = await params;
+    redirect(`/auth/login?callbackUrl=/orders/${id}/resolution`);
   }
 
   const orderId = (await params).id;

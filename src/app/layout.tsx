@@ -109,6 +109,8 @@ import { LazyMotionProvider } from "@/components/providers/lazy-motion-provider"
 
 import { StructuredData } from "@/components/seo/structured-data";
 
+const enablePartytown = process.env.NEXT_PUBLIC_PARTYTOWN === "true";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -121,7 +123,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
-        <Partytown debug={process.env.NODE_ENV === "development"} forward={["dataLayer.push"]} />
+        {enablePartytown && (
+          <Partytown debug={false} forward={["dataLayer.push"]} />
+        )}
         <StructuredData />
       </head>
       <body

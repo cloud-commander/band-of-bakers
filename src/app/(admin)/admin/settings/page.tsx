@@ -24,7 +24,8 @@ export default function AdminSettingsPage() {
       />
 
       <div className="grid gap-6">
-        {/* General Settings */}
+        {/* General Settings (delivery fee deferred for post-day-one) */}
+        {/*
         <Card>
           <CardHeader>
             <CardTitle>General Settings</CardTitle>
@@ -45,6 +46,7 @@ export default function AdminSettingsPage() {
             </form>
           </CardContent>
         </Card>
+        */}
 
         {/* Payment Methods */}
         <Card>
@@ -54,11 +56,11 @@ export default function AdminSettingsPage() {
           <CardContent>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                • Payment on Collection (Always enabled)
+                • Payment on Collection (enabled)
               </p>
-              <p className="text-sm text-muted-foreground">• Stripe</p>
-              <p className="text-sm text-muted-foreground">• PayPal</p>
-              <p className="text-sm text-muted-foreground">• Bank Transfer</p>
+              <p className="text-sm text-muted-foreground">• Stripe (N/A)</p>
+              <p className="text-sm text-muted-foreground">• PayPal (N/A)</p>
+              <p className="text-sm text-muted-foreground">• Bank Transfer (N/A)</p>
             </div>
           </CardContent>
         </Card>

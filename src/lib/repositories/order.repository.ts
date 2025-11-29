@@ -1,6 +1,6 @@
 import { BaseRepository } from "./base.repository";
-import { orders, orderItems, type InsertOrder, type InsertOrderItem } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { orders, orderItems, products, type InsertOrder, type InsertOrderItem } from "@/db/schema";
+import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
 
 export class OrderRepository extends BaseRepository<typeof orders> {
   constructor() {
@@ -175,6 +175,91 @@ export class OrderRepository extends BaseRepository<typeof orders> {
         user: true,
       },
     });
+  }
+
+  /**
+   * Revenue grouped by day for the last N days (ISO date strings, ascending).
+   */
+  async revenueLastNDays(days: number) {
+    const db = await this.getDatabase();
+    const result = await db.execute(
+      sql`SELECT strftime('%Y-%m-%d', ${orders.created_at}) as day, SUM(${orders.total}) as revenue
+          FROM ${orders}
+          WHERE ${orders.created_at} >= datetime('now', '-' || ${days} || ' days')
+          GROUP BY day
+          ORDER BY day ASC`
+    );
+
+    // @ts-expect-error drizzle execute returns unknown row shape
+    return (result as { rows: Array<{ day: string; revenue: number }> }).rows || [];
+  }
+
+  /**
+   * Order counts per status.
+   */
+  async statusCounts() {
+    const db = await this.getDatabase();
+    const result = await db.execute(
+      sql`SELECT ${orders.status} as status, COUNT(*) as count FROM ${orders} GROUP BY ${orders.status}`
+    );
+    // @ts-expect-error drizzle execute returns unknown row shape
+    return (result as { rows: Array<{ status: string; count: number }> }).rows || [];
+  }
+
+  /**
+   * Top products by units sold.
+   */
+  async topProducts(limit = 5) {
+    const db = await this.getDatabase();
+    const result = await db.execute(
+      sql`SELECT ${products.id} as product_id,
+                  ${products.name} as name,
+                  SUM(${orderItems.quantity}) as units,
+                  SUM(${orderItems.total_price}) as revenue
+          FROM ${orderItems}
+          JOIN ${products} ON ${orderItems.product_id} = ${products.id}
+          GROUP BY ${products.id}, ${products.name}
+          ORDER BY units DESC
+          LIMIT ${limit}`
+    );
+    // @ts-expect-error drizzle execute returns unknown row shape
+    return (result as { rows: Array<{ product_id: string; name: string; units: number; revenue: number }> }).rows || [];
+  }
+
+  async countSince(dateISO: string) {
+    const db = await this.getDatabase();
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(orders)
+      .where(gte(orders.created_at, dateISO));
+    return Number(result[0]?.count || 0);
+  }
+
+  async countBetween(startISO: string, endISO: string) {
+    const db = await this.getDatabase();
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(orders)
+      .where(and(gte(orders.created_at, startISO), lte(orders.created_at, endISO)));
+    return Number(result[0]?.count || 0);
+  }
+
+  async sumTotalSince(dateISO: string) {
+    const db = await this.getDatabase();
+    const result = await db
+      .select({ total: sql<number>`sum(${orders.total})` })
+      .from(orders)
+      .where(gte(orders.created_at, dateISO));
+    return Number(result[0]?.total || 0);
+  }
+
+  async sumTotalBetween(startISO: string, endISO: string) {
+    const db = await this.getDatabase();
+    const result = await db
+      .select({ total: sql<number>`sum(${orders.total})` })
+      .from(orders)
+      .where(and(gte(orders.created_at, startISO), lte(orders.created_at, endISO)));
+    return Number(result[0]?.total || 0);
   }
 }
 

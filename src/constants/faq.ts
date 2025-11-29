@@ -56,7 +56,7 @@ export const FAQS: FAQ[] = [
     id: "faq-2",
     question: "What is the order cutoff time?",
     answer:
-      "Orders must be placed at least 48 hours before the bake sale date, typically by 6:00 PM. Check each bake sale listing for specific cutoff times.",
+      "Orders must be placed at least 24 hours before the bake sale date, typically by 11:00 AM. Check each bake sale listing for specific cutoff times.",
     category: "ordering",
     sort_order: 2,
   },
