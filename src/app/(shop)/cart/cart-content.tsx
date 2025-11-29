@@ -8,8 +8,6 @@ import { PageHeader } from "@/components/state/page-header";
 import { useCart } from "@/context/cart-context";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { useState } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Ticket, X } from "lucide-react";

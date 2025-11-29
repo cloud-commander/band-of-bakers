@@ -176,6 +176,28 @@ export const signInWithEmailAndPassword = async (
   };
 };
 
+// Send a new verification email by looking up the user and issuing a code
+export const sendVerificationByEmail = async (email: string): Promise<void> => {
+  let url = `${GOOGLE_IDENTITY_API_BASE}/accounts:sendOobCode?key=${API_KEY}`;
+  if (TENANT_ID) {
+    url += `&tenantId=${TENANT_ID}`;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      requestType: "VERIFY_EMAIL",
+      email,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData?.error?.message || "Failed to send verification email");
+  }
+};
+
 // Sign up with email and password using Google Identity Platform
 export const signUpWithEmailAndPassword = async (
   email: string,

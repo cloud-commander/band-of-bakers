@@ -3,11 +3,10 @@
 import {
   signUpWithEmailAndPassword,
   sendVerificationEmail,
-  verifyIdToken,
   sendPasswordResetEmail,
+  sendVerificationByEmail,
 } from "@/lib/google-identity";
 import { syncUser } from "@/lib/auth/sync-user";
-import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 
 export async function registerUser(formData: FormData) {
@@ -66,5 +65,18 @@ export async function requestPasswordReset(formData: FormData) {
   } catch (error) {
     console.error("Password reset request failed:", error);
     return { error: error instanceof Error ? error.message : "Failed to send reset email" };
+  }
+}
+
+export async function resendVerification(formData: FormData) {
+  const email = formData.get("email") as string;
+  if (!email) return { error: "Email is required" };
+
+  try {
+    await sendVerificationByEmail(email);
+    return { success: true };
+  } catch (error) {
+    console.error("Resend verification failed:", error);
+    return { error: "Unable to resend verification email" };
   }
 }

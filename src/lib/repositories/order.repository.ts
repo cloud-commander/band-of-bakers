@@ -190,7 +190,6 @@ export class OrderRepository extends BaseRepository<typeof orders> {
           ORDER BY day ASC`
     );
 
-    // @ts-expect-error drizzle execute returns unknown row shape
     return (result as { rows: Array<{ day: string; revenue: number }> }).rows || [];
   }
 
@@ -202,7 +201,6 @@ export class OrderRepository extends BaseRepository<typeof orders> {
     const result = await db.execute(
       sql`SELECT ${orders.status} as status, COUNT(*) as count FROM ${orders} GROUP BY ${orders.status}`
     );
-    // @ts-expect-error drizzle execute returns unknown row shape
     return (result as { rows: Array<{ status: string; count: number }> }).rows || [];
   }
 
@@ -222,8 +220,13 @@ export class OrderRepository extends BaseRepository<typeof orders> {
           ORDER BY units DESC
           LIMIT ${limit}`
     );
-    // @ts-expect-error drizzle execute returns unknown row shape
-    return (result as { rows: Array<{ product_id: string; name: string; units: number; revenue: number }> }).rows || [];
+    return (
+      (
+        result as {
+          rows: Array<{ product_id: string; name: string; units: number; revenue: number }>;
+        }
+      ).rows || []
+    );
   }
 
   async countSince(dateISO: string) {

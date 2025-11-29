@@ -9,10 +9,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { QuotesDisplay } from "@/components/quotes-display";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
-import { initiateGoogleSignIn } from "@/lib/google-identity";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +22,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setEmailError("");
+    setPasswordError("");
 
     try {
       // Validate form data with Zod
@@ -46,9 +51,12 @@ export default function LoginPage() {
       if (result?.error) {
         const code = result.error.toUpperCase();
         if (code.includes("EMAIL_NOT_VERIFIED")) {
+          setEmailError("Please verify your email before logging in.");
           throw new Error("Please verify your email before logging in.");
         }
         if (code.includes("INVALID LOGIN CREDENTIALS") || code.includes("CREDENTIALSSIGNIN")) {
+          setEmailError("Check your email address.");
+          setPasswordError("Invalid email or password.");
           throw new Error("Invalid email or password.");
         }
         throw new Error("Unable to sign in. Please try again.");
@@ -78,10 +86,7 @@ export default function LoginPage() {
           >
             Login
           </CardTitle>
-          <p
-            className={`${DESIGN_TOKENS.typography.body.sm.size}`}
-            style={{ color: DESIGN_TOKENS.colors.text.muted }}
-          >
+          <p className="text-sm text-muted-foreground">
             Enter your credentials to access your account
           </p>
         </CardHeader>
@@ -102,25 +107,44 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
+                className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                aria-invalid={!!emailError}
               />
+              {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 pr-10"
+                  aria-invalid={!!passwordError}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordError && <p className="text-xs text-red-600 mt-1">{passwordError}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Login"}
             </Button>
 
             <div className="flex justify-between text-sm text-muted-foreground">
-              <Link href="/auth/forgot" className="hover:underline text-primary">
+              <Link
+                href="/auth/forgot"
+                className="hover:underline text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+              >
                 Forgot password?
               </Link>
             </div>

@@ -42,9 +42,9 @@ export function InstagramEmbedForm({
   );
 
   const embedHtml = state.embed;
-  const enabled = state.enabled;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalEnabled(state.enabled);
   }, [state.enabled]);
 
@@ -59,7 +59,9 @@ export function InstagramEmbedForm({
     }
 
     const scriptSrc = "https://www.instagram.com/embed.js";
-    const existing = document.querySelector(`script[src="${scriptSrc}"]`) as HTMLScriptElement | null;
+    const existing = document.querySelector(
+      `script[src="${scriptSrc}"]`
+    ) as HTMLScriptElement | null;
     if (existing) {
       existing.addEventListener("load", process, { once: true });
       return;
@@ -111,7 +113,9 @@ export function InstagramEmbedForm({
           <div
             className={cn(
               "text-sm rounded-md px-3 py-2 border",
-              state.success ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"
+              state.success
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-red-50 text-red-700 border-red-200"
             )}
           >
             {state.message}

@@ -10,7 +10,7 @@ import { QuotesDisplay } from "@/components/quotes-display";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { signupSchema, type SignupFormData } from "@/lib/validators/auth";
 import { z } from "zod";
-import { registerUser } from "@/actions/auth";
+import { registerUser, resendVerification } from "@/actions/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 export const dynamic = "force-dynamic";
@@ -87,12 +87,7 @@ export default function SignupPage() {
           >
             Create an Account
           </CardTitle>
-          <p
-            className={`${DESIGN_TOKENS.typography.body.sm.size}`}
-            style={{ color: DESIGN_TOKENS.colors.text.muted }}
-          >
-            Sign up to start ordering from Band of Bakers
-          </p>
+          <p className="text-sm text-muted-foreground">Sign up to start ordering from Band of Bakers</p>
         </CardHeader>
         <CardContent>
           {success ? (
@@ -108,15 +103,47 @@ export default function SignupPage() {
               <p className="text-sm text-muted-foreground text-center">
                 Didn&apos;t get it? Check spam or try again in a few minutes.
               </p>
+              {lastEmail && (
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isLoading}
+                    onClick={async () => {
+                      setIsLoading(true);
+                      setError("");
+                      try {
+                        const formData = new FormData();
+                        formData.append("email", lastEmail);
+                        const result = await resendVerification(formData);
+                        if (result.error) throw new Error(result.error);
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : "Failed to resend email");
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                  >
+                    Resend verification email
+                  </Button>
+                </div>
+              )}
               <div className="text-center text-sm">
-                <Link href="/auth/login" className="text-primary hover:underline">
+                <Link
+                  href="/auth/login"
+                  className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+                >
                   Back to login
                 </Link>
               </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4" aria-live="polite">
-              {error && <div className="text-sm text-red-500 bg-red-50 p-2 rounded" role="alert">{error}</div>}
+              {error && (
+                <div className="text-sm text-red-500 bg-red-50 p-2 rounded" role="alert">
+                  {error}
+                </div>
+              )}
               <div>
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -126,6 +153,7 @@ export default function SignupPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={isLoading}
+                  className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                 />
               </div>
               <div>
@@ -138,6 +166,7 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
+                  className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   We&apos;ll send a verification link to this address.
@@ -153,6 +182,7 @@ export default function SignupPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={isLoading}
+                  className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                 />
               </div>
               <div>
@@ -184,7 +214,7 @@ export default function SignupPage() {
                   </button>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-                  <span>Minimum 8 characters.</span>
+                  <span className="text-xs text-muted-foreground">Minimum 8 characters.</span>
                   <span
                     className={`font-semibold ${
                       strength === "strong"
@@ -218,15 +248,11 @@ export default function SignupPage() {
                 {isLoading ? "Creating account..." : completed ? "Check your email" : "Sign Up"}
               </Button>
 
-              <div
-                className={`text-center ${DESIGN_TOKENS.typography.body.sm.size}`}
-                style={{ color: DESIGN_TOKENS.colors.text.muted }}
-              >
+              <div className="text-center text-sm text-muted-foreground">
                 <span>Already have an account? </span>
                 <Link
                   href="/auth/login"
-                  className="hover:underline"
-                  style={{ color: DESIGN_TOKENS.colors.accent }}
+                  className="hover:underline text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
                 >
                   Login
                 </Link>

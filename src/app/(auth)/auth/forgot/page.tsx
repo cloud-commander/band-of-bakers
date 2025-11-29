@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { requestPasswordReset } from "@/actions/auth";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
       <CardHeader>
         <CardTitle className="text-xl font-semibold">Reset your password</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a reset link.
+          Enter your email and we'll send you a reset link.
         </p>
       </CardHeader>
       <CardContent>
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
           )}
           {success && (
             <div className="text-sm text-emerald-700 bg-emerald-50 p-2 rounded" role="status">
-              Check your inbox for the reset link.
+              Check your inbox for the reset link. If you don't see it, check spam or try again.
             </div>
           )}
           <div className="space-y-2">
@@ -68,13 +68,17 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
+              className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Sending..." : "Send reset link"}
           </Button>
           <div className="text-center text-sm">
-            <Link href="/auth/login" className="text-primary hover:underline">
+            <Link
+              href="/auth/login"
+              className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+            >
               Back to login
             </Link>
           </div>

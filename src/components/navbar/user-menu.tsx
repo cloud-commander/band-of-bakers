@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Link from "next/link";
-import { User, LogOut, Package, UserCircle, LogIn, ChevronDown } from "lucide-react";
+import { LogOut, Package, UserCircle, LogIn, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

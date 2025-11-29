@@ -43,7 +43,7 @@ const checkoutDeliverySchema = z.object({
 type CheckoutDeliveryForm = z.infer<typeof checkoutDeliverySchema>;
 
 export default function CheckoutPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);

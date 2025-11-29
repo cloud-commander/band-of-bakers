@@ -2,26 +2,11 @@
 
 import { PageHeader } from "@/components/state/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export default function AdminSettingsPage() {
-  const [deliveryFee, setDeliveryFee] = useState("5.00");
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Mock save
-    alert("Settings saved!");
-  };
-
   return (
     <div>
-      <PageHeader
-        title="Settings"
-        description="Configure your store settings"
-      />
+      <PageHeader title="Settings" description="Configure your store settings" />
 
       <div className="grid gap-6">
         {/* General Settings (delivery fee deferred for post-day-one) */}
@@ -55,9 +40,7 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                • Payment on Collection (enabled)
-              </p>
+              <p className="text-sm text-muted-foreground">• Payment on Collection (enabled)</p>
               <p className="text-sm text-muted-foreground">• Stripe (N/A)</p>
               <p className="text-sm text-muted-foreground">• PayPal (N/A)</p>
               <p className="text-sm text-muted-foreground">• Bank Transfer (N/A)</p>

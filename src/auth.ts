@@ -1,4 +1,4 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth, { type DefaultSession, AuthError } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
@@ -261,7 +261,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             session.user.image = dbUser.avatar_url;
             // @ts-expect-error: Custom session property
             session.user.phone = dbUser.phone;
-            // @ts-expect-error: Custom session property
             session.user.emailVerified = dbUser.email_verified;
             session.user.is_banned = dbUser.is_banned;
           } else {
