@@ -40,29 +40,35 @@ export async function getAllReviews() {
 }
 
 export async function getPaginatedReviews(page = 1, pageSize = 20) {
-  if (!(await checkAdminRole())) {
-    throw new Error("Unauthorized");
-  }
-
   const limit = Math.max(1, Math.min(pageSize, 100));
   const currentPage = Math.max(1, page);
   const offset = (currentPage - 1) * limit;
 
-  const db = await getDb();
-  const data = await db.query.reviews.findMany({
-    with: {
-      user: true,
-      product: true,
-    },
-    limit,
-    offset,
-    orderBy: (reviews: typeof db.query.reviews.$inferSelect, { desc }: OrderHelpers) => [
-      desc(reviews.created_at),
-    ],
-  });
+  try {
+    const isAdmin = await checkAdminRole();
+    if (!isAdmin) {
+      return { data: [], total: 0, page: currentPage, pageSize: limit };
+    }
 
-  const totalResult = await db.select({ count: sql<number>`count(*)` }).from(reviews);
-  return { data, total: Number(totalResult[0]?.count || 0), page: currentPage, pageSize: limit };
+    const db = await getDb();
+    const data = await db.query.reviews.findMany({
+      with: {
+        user: true,
+        product: true,
+      },
+      limit,
+      offset,
+      orderBy: (reviews: typeof db.query.reviews.$inferSelect, { desc }: OrderHelpers) => [
+        desc(reviews.created_at),
+      ],
+    });
+
+    const totalResult = await db.select({ count: sql<number>`count(*)` }).from(reviews);
+    return { data, total: Number(totalResult[0]?.count || 0), page: currentPage, pageSize: limit };
+  } catch (error) {
+    console.error("Get paginated reviews error:", error);
+    return { data: [], total: 0, page: currentPage, pageSize: limit };
+  }
 }
 
 /**

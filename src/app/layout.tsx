@@ -99,8 +99,6 @@ export const metadata: Metadata = {
 import { CartProvider } from "@/context/cart-context";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
-import { StructuredData } from "@/components/seo/structured-data";
-import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import {
   LazyRollbarProvider,
   LazyLogflareProvider,
@@ -108,6 +106,8 @@ import {
 } from "@/components/analytics/lazy-providers";
 import { Partytown } from "@builder.io/partytown/react";
 import { LazyMotionProvider } from "@/components/providers/lazy-motion-provider";
+
+import { StructuredData } from "@/components/seo/structured-data";
 
 export default function RootLayout({
   children,
@@ -123,7 +123,6 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <Partytown debug={process.env.NODE_ENV === "development"} forward={["dataLayer.push"]} />
         <StructuredData />
-        <GoogleAnalytics />
       </head>
       <body
         className={cn(

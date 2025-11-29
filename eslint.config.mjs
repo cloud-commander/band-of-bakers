@@ -27,7 +27,7 @@ const eslintConfig = defineConfig([
     "Thumbs.db",
   ]),
   {
-    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]
+    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "public/sw.js"]
   }
 ]);
 

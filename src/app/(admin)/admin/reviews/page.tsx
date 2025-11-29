@@ -3,13 +3,12 @@ import { getPaginatedReviews } from "@/actions/reviews";
 import { ReviewsTable } from "./reviews-table";
 
 type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export default async function AdminReviewsPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const page = Number(params?.page) || 1;
-  const pageSize = Number(params?.pageSize) || 20;
+  const page = Number(searchParams?.page) || 1;
+  const pageSize = Number(searchParams?.pageSize) || 20;
   const {
     data,
     total,

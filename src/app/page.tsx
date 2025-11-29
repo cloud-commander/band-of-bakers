@@ -3,11 +3,9 @@ import Link from "next/link";
 import { FadeIn } from "@/components/fade-in";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RecentNews } from "@/components/recent-news";
-import { TestimonialsCarousel } from "@/components/testimonials-carousel";
-import { InstagramFeed } from "@/components/instagram-feed";
 import { SectionDivider } from "@/components/section-divider";
 import { Heading } from "@/components/ui/heading";
+import { RecentNews } from "@/components/recent-news";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { MESSAGES } from "@/lib/constants/frontend";
 import {
@@ -20,14 +18,26 @@ import { getActiveTestimonials } from "@/actions/testimonials";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { getRecentNewsPosts } from "@/actions/news";
 import { getRandomProducts } from "@/actions/products";
+import dynamic from "next/dynamic";
+
+const LazyTestimonialsCarousel = dynamic(
+  () => import("@/components/testimonials-carousel").then((mod) => mod.TestimonialsCarousel),
+  { loading: () => <div className="h-48" /> }
+);
+const LazyInstagramFeed = dynamic(
+  () => import("@/components/instagram-feed").then((mod) => mod.InstagramFeed),
+  { loading: () => <div className="h-32" /> }
+);
 
 export const revalidate = 3600;
 
 export default async function Home() {
-  const featuredProducts = await getRandomProducts(3);
-  const testimonials = await getActiveTestimonials();
-  const upcomingBakeSales = await getUpcomingBakeSales();
-  const recentNews = await getRecentNewsPosts(3);
+  const [featuredProducts, testimonials, upcomingBakeSales, recentNews] = await Promise.all([
+    getRandomProducts(3),
+    getActiveTestimonials(),
+    getUpcomingBakeSales(),
+    getRecentNewsPosts(3),
+  ]);
 
   return (
     <>
@@ -41,6 +51,7 @@ export default async function Home() {
             fill
             className="object-cover"
             priority
+            sizes="100vw"
           />
           {/* Dark overlay for text readability */}
           <div
@@ -250,7 +261,7 @@ export default async function Home() {
                 Don&apos;t just take our word for it - hear from our happy customers
               </p>
             </div>
-            <TestimonialsCarousel testimonials={testimonials} />
+            <LazyTestimonialsCarousel testimonials={testimonials} />
           </FadeIn>
         </div>
       </section>
@@ -276,7 +287,7 @@ export default async function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <FadeIn>
-            <InstagramFeed />
+            <LazyInstagramFeed />
           </FadeIn>
         </div>
       </section>
