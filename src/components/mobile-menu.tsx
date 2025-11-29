@@ -75,10 +75,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
     { href: "/profile", label: "Profile", icon: UserCircle },
     { href: "/orders", label: "My Orders", icon: Package },
     ...(isAdmin
-      ? [
-          { href: "/admin", label: "Admin Panel", icon: Shield },
-          { href: "/admin/settings/email-templates", label: "Email Templates", icon: Shield },
-        ]
+      ? [{ href: "/admin", label: "Admin Panel", icon: Shield }]
       : []),
   ];
 

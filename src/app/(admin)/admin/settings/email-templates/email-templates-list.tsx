@@ -118,7 +118,9 @@ export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps
                 <Label>Content (HTML)</Label>
                 <div className="border rounded-md overflow-hidden">
                   <Editor
-                    apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                    apiKey="no-api-key"
+                    tinymceScriptSrc="/tinymce/tinymce.min.js"
+                    licenseKey="gpl"
                     value={content}
                     onEditorChange={(newContent) => setContent(newContent)}
                     init={{
