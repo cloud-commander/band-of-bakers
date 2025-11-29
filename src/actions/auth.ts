@@ -1,6 +1,11 @@
 "use server";
 
-import { signUpWithEmailAndPassword, sendVerificationEmail, verifyIdToken } from "@/lib/google-identity";
+import {
+  signUpWithEmailAndPassword,
+  sendVerificationEmail,
+  verifyIdToken,
+  sendPasswordResetEmail,
+} from "@/lib/google-identity";
 import { syncUser } from "@/lib/auth/sync-user";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
@@ -34,7 +39,7 @@ export async function registerUser(formData: FormData) {
     await sendVerificationEmail(idToken);
 
     // 4. Do not auto-sign-in; require email verification flow on client
-    return { success: true, needsVerification: true };
+    return { success: true, needsVerification: true, email };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -46,5 +51,20 @@ export async function registerUser(formData: FormData) {
     }
     console.error("Registration error:", error);
     return { error: error instanceof Error ? error.message : "Registration failed" };
+  }
+}
+
+export async function requestPasswordReset(formData: FormData) {
+  const email = formData.get("email") as string;
+  if (!email) {
+    return { error: "Email is required" };
+  }
+
+  try {
+    await sendPasswordResetEmail(email);
+    return { success: true };
+  } catch (error) {
+    console.error("Password reset request failed:", error);
+    return { error: error instanceof Error ? error.message : "Failed to send reset email" };
   }
 }

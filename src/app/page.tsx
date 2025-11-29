@@ -19,18 +19,18 @@ import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { getRecentNewsPosts } from "@/actions/news";
 import { getRandomProducts } from "@/actions/products";
 import { getInstagramSettings } from "@/actions/instagram";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 
-const LazyTestimonialsCarousel = dynamic(
+export const dynamic = "force-dynamic";
+
+const LazyTestimonialsCarousel = nextDynamic(
   () => import("@/components/testimonials-carousel").then((mod) => mod.TestimonialsCarousel),
   { loading: () => <div className="h-48" /> }
 );
-const LazyInstagramFeed = dynamic(
+const LazyInstagramFeed = nextDynamic(
   () => import("@/components/instagram-feed").then((mod) => mod.InstagramFeed),
   { loading: () => <div className="h-32" /> }
 );
-
-export const revalidate = 3600;
 
 export default async function Home() {
   const [featuredProducts, testimonials, upcomingBakeSales, recentNews, instagramSettings] =

@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { BUSINESS_INFO } from "@/lib/constants/frontend";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
@@ -107,7 +108,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+                  className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100]"
                   onClick={() => setIsOpen(false)}
                 />
 
@@ -122,12 +123,25 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between p-4 border-b">
-                    <span
-                      className="text-lg font-bold"
-                      style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
-                    >
-                      Menu
-                    </span>
+                    <div className="flex items-center gap-3">
+                      {isLoggedIn && (
+                        <Avatar className="h-10 w-10 border">
+                          <AvatarImage
+                            src={session?.user?.image || undefined}
+                            alt={session?.user?.name || "User avatar"}
+                          />
+                          <AvatarFallback>
+                            {(session?.user?.name || "U").charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <span
+                        className="text-lg font-bold"
+                        style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
+                      >
+                        Menu
+                      </span>
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -148,13 +162,13 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
                           key={item.href}
                           href={item.href}
                           className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                            pathname === item.href ? "bg-muted font-medium" : "hover:bg-muted/50"
+                            pathname === item.href ? "bg-muted font-semibold" : "hover:bg-muted/50"
                           }`}
                           onClick={() => setIsOpen(false)}
                         >
                           <div className="flex items-center gap-3">
                             <item.icon className="h-5 w-5 text-muted-foreground" />
-                            <span className="text-lg">{item.label}</span>
+                            <span className="text-base">{item.label}</span>
                           </div>
                           <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </Link>

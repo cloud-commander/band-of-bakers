@@ -41,9 +41,14 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
     return () => clearInterval(timer);
   }, [nextTestimonial, testimonials]);
 
-  // If no testimonials, don't render anything or render a placeholder
+  // If no testimonials, show a gentle placeholder
   if (!testimonials || testimonials.length === 0) {
-    return null;
+    return (
+      <div className={`${DESIGN_TOKENS.cards.base} p-8 md:p-12 text-center`}>
+        <p className="text-muted-foreground mb-4">No testimonials yet.</p>
+        <SubmitTestimonialDialog />
+      </div>
+    );
   }
 
   const currentTestimonial = testimonials[currentIndex];

@@ -136,12 +136,18 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
             {items.map((item) => (
               <div
                 key={`${item.productId}-${item.variantId}`}
-                className={`${DESIGN_TOKENS.cards.base} p-4 flex gap-4 items-center`}
+                className={`${DESIGN_TOKENS.cards.base} p-4 flex gap-4 items-center flex-col sm:flex-row relative`}
               >
                 {/* Image */}
-                <div className="relative h-24 w-24 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                <div className="relative h-24 w-24 rounded-md overflow-hidden bg-muted flex-shrink-0 w-full sm:w-24">
                   {item.image ? (
-                    <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 96px"
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
                       No img
@@ -150,7 +156,7 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
                 </div>
 
                 {/* Details */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 w-full">
                   <h3 className="font-semibold text-lg truncate">{item.name}</h3>
                   {item.bakeSaleId ? (
                     (() => {
@@ -192,10 +198,10 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
                 </div>
 
                 {/* Quantity Controls */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-start sm:self-center">
                   <Button
                     variant="outline"
-                    size="icon"
+                    size="sm"
                     className="h-8 w-8"
                     onClick={() =>
                       updateQuantity(
@@ -211,7 +217,7 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
                   <span className="w-8 text-center font-medium">{item.quantity}</span>
                   <Button
                     variant="outline"
-                    size="icon"
+                    size="sm"
                     className="h-8 w-8"
                     onClick={() =>
                       updateQuantity(
@@ -227,16 +233,21 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
                 </div>
 
                 {/* Total & Remove */}
-                <div className="text-right min-w-[80px]">
+                <div className="text-right min-w-[80px] w-full sm:w-auto space-y-1">
                   <p className="font-bold text-lg">£{(item.price * item.quantity).toFixed(2)}</p>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-destructive hover:text-destructive/90 h-auto p-0 mt-1"
+                    className="text-destructive hover:text-destructive/90 h-auto p-0"
                     onClick={() => removeItem(item.productId, item.variantId, item.bakeSaleId)}
                   >
                     Remove
                   </Button>
+                </div>
+
+                {/* Mobile swipe hint */}
+                <div className="absolute right-3 top-3 sm:hidden text-[10px] uppercase tracking-wide text-muted-foreground opacity-70">
+                  Swipe to remove
                 </div>
               </div>
             ))}
@@ -244,7 +255,7 @@ export function CartContent({ upcomingBakeSales }: CartContentProps) {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className={`${DESIGN_TOKENS.cards.base} p-6 sticky top-24`}>
+            <div className={`${DESIGN_TOKENS.cards.base} p-6 lg:sticky lg:top-24`}>
               <h3 className={`${DESIGN_TOKENS.typography.h4.size} mb-4`}>Order Summary</h3>
 
               {/* Payment Method */}

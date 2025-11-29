@@ -44,13 +44,14 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        if (result.error === "EMAIL_NOT_VERIFIED") {
+        const code = result.error.toUpperCase();
+        if (code.includes("EMAIL_NOT_VERIFIED")) {
           throw new Error("Please verify your email before logging in.");
         }
-        if (result.error.toLowerCase().includes("invalid login credentials")) {
-          throw new Error("Invalid email or password");
+        if (code.includes("INVALID LOGIN CREDENTIALS") || code.includes("CREDENTIALSSIGNIN")) {
+          throw new Error("Invalid email or password.");
         }
-        throw new Error(result.error);
+        throw new Error("Unable to sign in. Please try again.");
       }
 
       router.push("/");
@@ -86,7 +87,11 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</div>}
+            {error && (
+              <div className="text-sm text-red-500 bg-red-50 p-2 rounded" role="alert">
+                {error}
+              </div>
+            )}
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -113,6 +118,12 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Login"}
             </Button>
+
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <Link href="/auth/forgot" className="hover:underline text-primary">
+                Forgot password?
+              </Link>
+            </div>
 
             {/* Divider */}
             {/* Social login temporarily disabled */}

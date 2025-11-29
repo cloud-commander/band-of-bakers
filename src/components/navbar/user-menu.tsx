@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Link from "next/link";
-import { User, LogOut, Package, UserCircle, LogIn } from "lucide-react";
+import { User, LogOut, Package, UserCircle, LogIn, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,13 +43,14 @@ export const UserMenu = memo(function UserMenu({ isLoggedIn, userImage, userName
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="rounded-full hover:bg-red-50 hover:text-red-700 transition-colors p-0"
+          size="sm"
+          className="rounded-full hover:bg-red-50 hover:text-red-700 transition-colors px-2 py-1 gap-2 flex items-center"
         >
           <Avatar className="h-10 w-10 border">
             <AvatarImage src={userImage || undefined} alt={userName || "User avatar"} />
             <AvatarFallback>{initial}</AvatarFallback>
           </Avatar>
+          <ChevronDown className="h-3 w-3 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

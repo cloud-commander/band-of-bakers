@@ -14,7 +14,7 @@ export function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full transition-all duration-300 border-b shadow-md bg-white"
+      className="sticky top-0 z-50 w-full transition-all duration-300 border-b shadow-sm lg:shadow bg-white"
       style={{
         backgroundColor: "rgb(255, 255, 255)",
         backdropFilter: "blur(12px)",
@@ -22,7 +22,7 @@ export function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 relative">
+        <div className="flex items-center justify-between h-14 lg:h-16 relative">
           {/* Logo */}
           <NavbarLogo />
 
@@ -30,7 +30,7 @@ export function Navbar() {
           <DesktopNav session={session} />
 
           {/* Right: Cart + User Menu (Desktop) */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-5">
             {/* Cart Preview Dropdown */}
             <CartPreview />
 
