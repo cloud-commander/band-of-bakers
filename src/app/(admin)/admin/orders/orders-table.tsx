@@ -79,7 +79,6 @@ export function OrdersTable({
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [orders]);
 
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortField, setSortField] = useState<SortField>("created_at");
@@ -176,13 +175,19 @@ export function OrdersTable({
   // Sync page state with incoming props when navigation happens
   useEffect(() => {
     setCurrentPage(currentPageProp);
-  }, [currentPageProp]);
+  }, [currentPageProp, setCurrentPage]);
 
   // Calculate pagination using server-provided totals when no client-side filters/search are applied.
   const hasClientFilters = Boolean(debouncedSearchTerm || statusFilter !== "all" || bakeSaleFilter);
   const totalPages = hasClientFilters
     ? Math.max(1, Math.ceil(filteredAndSortedOrders.length / pageSize))
     : Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // Paginate orders for mobile view
+  const paginatedOrders = filteredAndSortedOrders.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
@@ -380,7 +385,7 @@ export function OrdersTable({
       <div className="mb-6">
         <PaginationInfo
           currentPage={currentPage}
-          pageSize={ITEMS_PER_PAGE}
+          pageSize={pageSize}
           totalItems={filteredAndSortedOrders.length}
         />
       </div>

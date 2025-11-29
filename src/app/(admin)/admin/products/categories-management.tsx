@@ -30,7 +30,7 @@ import { ImageGallery } from "@/components/admin/image-gallery";
 
 interface CategoriesManagementProps {
   categories: ProductCategory[];
-  onCategoriesChange: (categories: ProductCategory[]) => void;
+  onCategoriesChange?: (categories: ProductCategory[]) => void;
 }
 
 export function CategoriesManagement({
@@ -101,7 +101,7 @@ export function CategoriesManagement({
         // Refresh categories
         const { getCategories } = await import("@/actions/categories");
         const updatedCategories = await getCategories();
-        onCategoriesChange(updatedCategories);
+        onCategoriesChange?.(updatedCategories);
       } else {
         toast.error(result.error);
       }
@@ -137,7 +137,7 @@ export function CategoriesManagement({
         // Refresh categories
         const { getCategories } = await import("@/actions/categories");
         const updatedCategories = await getCategories();
-        onCategoriesChange(updatedCategories);
+        onCategoriesChange?.(updatedCategories);
       } else {
         toast.error(result.error);
       }
@@ -163,7 +163,7 @@ export function CategoriesManagement({
         // Refresh categories
         const { getCategories } = await import("@/actions/categories");
         const updatedCategories = await getCategories();
-        onCategoriesChange(updatedCategories);
+        onCategoriesChange?.(updatedCategories);
       } else {
         toast.error(result.error);
       }
@@ -265,10 +265,20 @@ export function CategoriesManagement({
                     )}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button type="button" variant="ghost" size="sm" onClick={() => openEditDialog(category)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(category)}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => openDeleteDialog(category)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openDeleteDialog(category)}
+                    >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>
@@ -525,7 +535,12 @@ export function CategoriesManagement({
             >
               Cancel
             </Button>
-            <Button type="button" variant="destructive" onClick={handleDeleteCategory} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteCategory}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>

@@ -76,7 +76,7 @@ export default function CheckoutPage() {
       const orderData = {
         ...data,
         fulfillment_method: "delivery" as const,
-        payment_method: "payment_on_collection",
+        payment_method: "payment_on_collection" as const,
         turnstileToken: turnstileToken || undefined,
         items: items.map((item) => ({
           productId: item.productId,
@@ -208,7 +208,9 @@ export default function CheckoutPage() {
               {/* Verification */}
               {turnstileEnabled && (
                 <div className={`${DESIGN_TOKENS.cards.base} p-6`}>
-                  <h2 className={`${DESIGN_TOKENS.typography.h4.size} mb-2`}>Verify you’re human</h2>
+                  <h2 className={`${DESIGN_TOKENS.typography.h4.size} mb-2`}>
+                    Verify you’re human
+                  </h2>
                   <TurnstileWidget
                     onSuccess={(token) => setTurnstileToken(token)}
                     onError={() => {

@@ -28,3 +28,17 @@ export async function getUserById(id: string) {
     return null;
   }
 }
+
+export async function getPaginatedUsers(page = 1, pageSize = 20) {
+  const limit = Math.max(1, Math.min(pageSize, 100));
+  const currentPage = Math.max(1, page);
+  const offset = (currentPage - 1) * limit;
+
+  const result = await userRepository.findPaginated(limit, offset);
+  return {
+    users: result.data,
+    total: result.total,
+    page: currentPage,
+    pageSize: limit,
+  };
+}

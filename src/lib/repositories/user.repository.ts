@@ -1,6 +1,6 @@
 import { users } from "@/db/schema";
 import { BaseRepository } from "./base.repository";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -110,6 +110,22 @@ export class UserRepository extends BaseRepository<typeof users> {
       .from(users)
       .where(eq(users.role, "customer"));
     return Number(result[0]?.count || 0);
+  }
+
+  /**
+   * Paginated users list with totals.
+   */
+  async findPaginated(limit: number, offset: number) {
+    const db = await this.getDatabase();
+    const data = await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.created_at))
+      .limit(limit)
+      .offset(offset);
+
+    const totalResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return { data, total: Number(totalResult[0]?.count || 0) };
   }
 }
 

@@ -8,6 +8,16 @@ import { z } from "zod";
 import type { Product } from "@/db/schema";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
+type PaginatedResult<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+type ProductWithVariants = Product & {
+  variants: Awaited<ReturnType<typeof productRepository.getVariants>>;
+};
 
 // Validation schema for product creation/update
 const productSchema = z.object({
@@ -402,6 +412,38 @@ export async function getProducts() {
   } catch (error) {
     console.error("Get products error:", error);
     return [];
+  }
+}
+
+export async function getPaginatedProducts(
+  page = 1,
+  pageSize = 20
+): Promise<PaginatedResult<ProductWithVariants>> {
+  const limit = Math.max(1, Math.min(pageSize, 100));
+  const currentPage = Math.max(1, page);
+  const offset = (currentPage - 1) * limit;
+
+  try {
+    const result = await productRepository.findPaginated(limit, offset, false);
+    const productsWithVariants = await Promise.all(
+      result.data.map(async (product: Product) => {
+        const variants = await productRepository.getVariants(product.id);
+        return {
+          ...product,
+          variants,
+        };
+      })
+    );
+
+    return {
+      data: productsWithVariants,
+      total: result.total,
+      page: currentPage,
+      pageSize: limit,
+    };
+  } catch (error) {
+    console.error("Get paginated products error:", error);
+    return { data: [], total: 0, page: currentPage, pageSize: limit };
   }
 }
 

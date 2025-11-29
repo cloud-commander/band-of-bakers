@@ -3,6 +3,7 @@
 import { ImageLoaderProps } from "next/image";
 
 export default function cloudflareLoader({ src, width, quality }: ImageLoaderProps) {
+  const cloudflareDomain = process.env.NEXT_PUBLIC_CLOUDFLARE_IMAGES_DOMAIN;
   // If in development, return the src directly (or use Next.js default optimization if not using loaderFile)
   // But since we are setting loaderFile, we are responsible for the URL.
   // If we just return src, it points to the public folder or API route.
@@ -28,5 +29,7 @@ export default function cloudflareLoader({ src, width, quality }: ImageLoaderPro
     return `${src}${separator}w=${width}`;
   }
 
-  return `/cdn-cgi/image/${paramsString}${src}`;
+  // If Cloudflare Images custom domain is provided, construct absolute URL; otherwise use relative path
+  const base = cloudflareDomain ? `https://${cloudflareDomain}` : "";
+  return `${base}/cdn-cgi/image/${paramsString}${src}`;
 }

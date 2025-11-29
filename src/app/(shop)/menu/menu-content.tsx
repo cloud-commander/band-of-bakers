@@ -318,12 +318,11 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
           className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${DESIGN_TOKENS.sections.gap}`}
         >
           {paginatedProducts.map((product) => {
-            const hasStockValue = typeof product.stock_quantity === "number";
-            const isOutOfStock = hasStockValue ? product.stock_quantity <= 0 : false;
+            const isOutOfStock = product.stock_quantity !== null && product.stock_quantity <= 0;
             const isLowStock =
-              hasStockValue && product.stock_quantity > 0
-                ? product.stock_quantity <= LOW_STOCK_THRESHOLD
-                : false;
+              product.stock_quantity !== null &&
+              product.stock_quantity > 0 &&
+              product.stock_quantity <= LOW_STOCK_THRESHOLD;
 
             return (
               <div key={product.id}>

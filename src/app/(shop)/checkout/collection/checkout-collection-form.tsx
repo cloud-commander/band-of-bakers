@@ -116,7 +116,7 @@ export function CheckoutCollectionForm({
           quantity: item.quantity,
         })),
         turnstileToken,
-      };
+      } as const;
 
       const result = await createOrder(orderData);
 

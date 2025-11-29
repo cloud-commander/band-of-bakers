@@ -5,11 +5,13 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 
 const isProd = process.env.NODE_ENV === "production";
+const cloudflareImagesDomain = process.env.NEXT_PUBLIC_CLOUDFLARE_IMAGES_DOMAIN;
 
 const nextConfig: NextConfig = {
   images: {
     loader: isProd ? "custom" : undefined,
     loaderFile: isProd ? "./src/lib/image-loader.ts" : undefined,
+    unoptimized: isProd && Boolean(cloudflareImagesDomain),
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -57,6 +59,15 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      ...(cloudflareImagesDomain
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: cloudflareImagesDomain,
+              pathname: "/**",
+            },
+          ]
+        : []),
     ],
   },
   compress: true,
@@ -114,6 +125,20 @@ const nextConfig: NextConfig = {
     },
   },
   serverExternalPackages: ["better-sqlite3"],
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /https:\/\/fonts\.gstatic\.com\/.*\.ttf$/,
+      use: {
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+          outputPath: "static/fonts/",
+          publicPath: "/_next/static/fonts/",
+        },
+      },
+    });
+    return config;
+  },
 };
 
 import withBundleAnalyzer from "@next/bundle-analyzer";

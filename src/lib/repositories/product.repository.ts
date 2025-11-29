@@ -1,6 +1,6 @@
 import { products, productVariants } from "@/db/schema";
 import { BaseRepository } from "./base.repository";
-import { eq, and, sql, like, gte, isNotNull } from "drizzle-orm";
+import { eq, and, sql, like, gte, isNotNull, desc } from "drizzle-orm";
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
@@ -52,7 +52,7 @@ export class ProductRepository extends BaseRepository<typeof products> {
       limit,
       offset,
       where: whereClause,
-      orderBy: eq(products.is_active, true) ? undefined : undefined,
+      orderBy: desc(products.created_at),
     });
 
     const totalResult = whereClause

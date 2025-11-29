@@ -39,7 +39,7 @@ export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps
       setSubject(selectedTemplate.subject);
       setContent(selectedTemplate.content);
     }
-  }, [selectedTemplate?.id]);
+  }, [selectedTemplate?.id, selectedTemplate]);
 
   const handleSave = async () => {
     if (!selectedTemplate) return;

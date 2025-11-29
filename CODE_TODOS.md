@@ -15,8 +15,8 @@ Older backlog entries were removed because they no longer match live TODO commen
 
 ## Open TODOs
 - Server-side pagination for listings
-  - **Progress**: Orders listing now fetches paged data from the server with total counts (`src/actions/orders.ts`, `src/app/(admin)/admin/orders/page.tsx`, `orders-table.tsx`). Current filters/sorting run client-side on the current page only.
-  - **Remaining scope**: Migrate other listings (products, users, etc.) to limit/offset queries and adjust UIs to request paged data with totals; consider server-side filtering/sorting for consistency.
+  - **Progress**: Orders listing uses server pagination. Products listing now server-paginated with URL-driven paging; users listing now server-paginated with URL-driven paging. Repositories and actions support limit/offset.
+  - **Remaining scope**: Extend the same pattern to any other admin lists if needed and consider moving filters/sorting server-side for large datasets.
   - **Priority**: Medium
 
 Last scan: 2025-11-28 via `rg "TODO" src`

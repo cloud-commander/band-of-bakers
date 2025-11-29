@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import Image from "next/image";
 import { deleteReview, updateReviewStatus } from "@/actions/reviews";
 import { Review, Product, User } from "@/db/schema";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 // Define a type that includes relations
 type ReviewWithRelations = Review & {
@@ -37,15 +38,34 @@ type ReviewWithRelations = Review & {
 
 interface ReviewsTableProps {
   initialReviews: ReviewWithRelations[];
+  totalCount: number;
+  currentPage: number;
+  pageSize?: number;
 }
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_ORDERS_ITEMS_PER_PAGE;
 
-export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
+export function ReviewsTable({
+  initialReviews,
+  totalCount,
+  currentPage,
+  pageSize = ITEMS_PER_PAGE,
+}: ReviewsTableProps) {
   const [reviews, setReviews] = useState<ReviewWithRelations[]>(initialReviews);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [pageState, setPageState] = useState(currentPage);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    setReviews(initialReviews);
+  }, [initialReviews]);
+
+  useEffect(() => {
+    setPageState(currentPage);
+  }, [currentPage]);
 
   const filteredReviews = reviews.filter((review) => {
     const productName = review.product?.name.toLowerCase() || "";
@@ -58,14 +78,22 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
     return matchesSearch && matchesStatus;
   });
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedReviews = filteredReviews.slice(startIndex, endIndex);
+  const hasClientFilters = Boolean(searchQuery || statusFilter !== "all");
+  const totalPages = hasClientFilters
+    ? Math.max(1, Math.ceil(filteredReviews.length / pageSize))
+    : Math.max(1, Math.ceil(totalCount / pageSize));
+  const startIndex = hasClientFilters ? (pageState - 1) * pageSize : 0;
+  const endIndex = hasClientFilters ? startIndex + pageSize : filteredReviews.length;
+  const paginatedReviews = hasClientFilters
+    ? filteredReviews.slice(startIndex, endIndex)
+    : filteredReviews;
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    router.push(`${pathname}?${params.toString()}`);
+    setPageState(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -106,7 +134,7 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
-                  setCurrentPage(1);
+                  setPageState(1);
                 }}
                 className="pl-9 w-full sm:w-[250px]"
               />
@@ -115,7 +143,7 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
               value={statusFilter}
               onValueChange={(value) => {
                 setStatusFilter(value);
-                setCurrentPage(1);
+                setPageState(1);
               }}
             >
               <SelectTrigger className="w-full sm:w-[150px]">
@@ -135,9 +163,9 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
         {/* Pagination Info */}
         <div className="mb-6">
           <PaginationInfo
-            currentPage={currentPage}
-            pageSize={ITEMS_PER_PAGE}
-            totalItems={filteredReviews.length}
+            currentPage={pageState}
+            pageSize={pageSize}
+            totalItems={hasClientFilters ? filteredReviews.length : totalCount}
           />
         </div>
 
@@ -214,8 +242,8 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
                             review.status === "approved"
                               ? "bg-green-50 text-green-700 border-green-200"
                               : review.status === "rejected"
-                              ? "bg-red-50 text-red-700 border-red-200"
-                              : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                ? "bg-red-50 text-red-700 border-red-200"
+                                : "bg-yellow-50 text-yellow-700 border-yellow-200"
                           }
                         >
                           {review.status}
@@ -304,8 +332,8 @@ export function ReviewsTable({ initialReviews }: ReviewsTableProps) {
                       review.status === "approved"
                         ? "bg-green-50 text-green-700 border-green-200"
                         : review.status === "rejected"
-                        ? "bg-red-50 text-red-700 border-red-200"
-                        : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                          ? "bg-red-50 text-red-700 border-red-200"
+                          : "bg-yellow-50 text-yellow-700 border-yellow-200"
                     }
                   >
                     {review.status}
