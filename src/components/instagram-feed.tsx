@@ -1,64 +1,51 @@
 "use client";
 
+import { useEffect } from "react";
 import { Instagram } from "lucide-react";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
-import Image from "next/image";
 
-interface InstagramPost {
-  id: string;
-  imageUrl: string;
-  caption: string;
-  likes: number;
-  link: string;
+declare global {
+  interface Window {
+    instgrm?: {
+      Embeds?: {
+        process?: () => void;
+      };
+    };
+  }
 }
 
-// Mock Instagram posts - using local images as permanent fixtures
-const mockInstagramPosts: InstagramPost[] = [
-  {
-    id: "1",
-    imageUrl: "/images/gallery/instagram-01.jpg",
-    caption: "Fresh sourdough ready for collection",
-    likes: 245,
-    link: "#",
-  },
-  {
-    id: "2",
-    imageUrl: "/images/gallery/instagram-02.jpg",
-    caption: "Almond croissants - weekend special",
-    likes: 189,
-    link: "#",
-  },
-  {
-    id: "3",
-    imageUrl: "/images/gallery/instagram-03.jpg",
-    caption: "Behind the scenes at the bakery",
-    likes: 312,
-    link: "#",
-  },
-  {
-    id: "4",
-    imageUrl: "/images/gallery/instagram-04.jpg",
-    caption: "Chocolate brownies - customer favorite",
-    likes: 276,
-    link: "#",
-  },
-  {
-    id: "5",
-    imageUrl: "/images/gallery/instagram-05.jpg",
-    caption: "Artisan bread selection",
-    likes: 198,
-    link: "#",
-  },
-  {
-    id: "6",
-    imageUrl: "/images/gallery/instagram-06.jpg",
-    caption: "Fresh from the oven",
-    likes: 234,
-    link: "#",
-  },
-];
+export function InstagramFeed({ embedHtml }: { embedHtml?: string | null }) {
+  useEffect(() => {
+    if (!embedHtml) return;
 
-export function InstagramFeed() {
+    // Ensure Instagram embed script is loaded and processed
+    const processEmbed = () => window.instgrm?.Embeds?.process?.();
+
+    if (window.instgrm?.Embeds) {
+      processEmbed();
+      return;
+    }
+
+    const existingScript = document.querySelector(
+      'script[src="https://www.instagram.com/embed.js"]'
+    ) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      existingScript.addEventListener("load", processEmbed, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://www.instagram.com/embed.js";
+    script.async = true;
+    script.onload = processEmbed;
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+    };
+  }, [embedHtml]);
+
   return (
     <div className="w-full">
       {/* Header */}
@@ -85,31 +72,19 @@ export function InstagramFeed() {
         </p>
       </div>
 
-      {/* Instagram Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-        {mockInstagramPosts.map((post) => (
-          <a
-            key={post.id}
-            href={post.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative aspect-square overflow-hidden rounded-lg"
-          >
-            <Image
-              src={post.imageUrl}
-              alt={post.caption}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-110"
-            />
-            {/* Overlay on hover */}
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <div className="text-white text-center p-4">
-                <Instagram className="h-6 w-6 mx-auto mb-2" />
-                <p className="text-xs line-clamp-2">{post.caption}</p>
-              </div>
-            </div>
-          </a>
-        ))}
+      {/* Embedded post or placeholder */}
+      <div className="max-w-3xl mx-auto">
+        {embedHtml ? (
+          <div
+            className="bg-background border rounded-xl overflow-hidden shadow-sm"
+            // Instagram embed HTML provided by admin (trusted input)
+            dangerouslySetInnerHTML={{ __html: embedHtml }}
+          />
+        ) : (
+          <div className="text-center py-8 text-muted-foreground border rounded-xl bg-muted/30">
+            Instagram embed not configured yet.
+          </div>
+        )}
       </div>
 
       {/* Follow Button */}

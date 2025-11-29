@@ -19,6 +19,7 @@ import {
   Star,
   MessageSquareQuote,
   Image,
+  Instagram,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +34,7 @@ const navigation = [
   { name: "News", href: "/admin/news", icon: Newspaper },
   { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote },
+  { name: "Instagram", href: "/admin/settings/instagram", icon: Instagram },
   { name: "Email Templates", href: "/admin/settings/email-templates", icon: Settings },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];

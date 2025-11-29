@@ -17,11 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Save, Upload } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { createTestimonial } from "@/actions/testimonials";
 
 // Form validation schema (simplified for admin form - we'll add user_id server-side)
@@ -41,13 +40,12 @@ type TestimonialForm = z.infer<typeof testimonialFormSchema>;
 
 export default function NewTestimonialPage() {
   const router = useRouter();
-  const [avatarUrl, setAvatarUrl] = useState("");
 
   const {
     register,
     control,
     handleSubmit,
-    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<TestimonialForm>({
     resolver: zodResolver(testimonialFormSchema),
@@ -87,19 +85,7 @@ export default function NewTestimonialPage() {
     }
   };
 
-  // Mock image upload
-  const handleImageUpload = () => {
-    // In a real app, this would open a file picker and upload to R2
-    const mockAvatars = [
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-    ];
-    const randomAvatar = mockAvatars[Math.floor(Math.random() * mockAvatars.length)];
-    setAvatarUrl(randomAvatar);
-    setValue("avatar", randomAvatar);
-    toast.success("Image uploaded successfully");
-  };
+  const avatarUrl = watch("avatar");
 
   return (
     <div className="space-y-6">
@@ -189,25 +175,24 @@ export default function NewTestimonialPage() {
           <div className="space-y-6">
             <Card className="border border-stone-200">
               <CardContent className="p-6 space-y-4">
-                <Label>Customer Avatar</Label>
-                <div
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-stone-200 rounded-lg p-6 hover:bg-stone-50 transition-colors cursor-pointer"
-                  onClick={handleImageUpload}
-                >
-                  {avatarUrl ? (
-                    <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
-                      <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-stone-100 flex items-center justify-center mb-4">
-                      <Upload className="w-8 h-8 text-stone-400" />
-                    </div>
-                  )}
-                  <p className="text-sm font-medium text-stone-600">
-                    {avatarUrl ? "Click to change" : "Click to upload avatar"}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG up to 2MB</p>
-                </div>
+                <Label htmlFor="avatar">Customer Avatar URL (optional)</Label>
+                <Input
+                  id="avatar"
+                  {...register("avatar")}
+                  placeholder="https://cdn.example.com/path/to/avatar.jpg"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Paste an image URL already hosted on your CDN/Cloudflare Images.
+                </p>
+                {avatarUrl ? (
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden border border-stone-200">
+                    <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-stone-100 flex items-center justify-center text-xs text-muted-foreground">
+                    No avatar set
+                  </div>
+                )}
               </CardContent>
             </Card>
 

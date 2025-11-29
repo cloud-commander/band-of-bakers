@@ -14,7 +14,7 @@ const dmSerifDisplay = DM_Serif_Display({
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400", "700", "900"],
+  weight: ["400", "700"],
   variable: "--font-playfair",
   display: "swap",
 });

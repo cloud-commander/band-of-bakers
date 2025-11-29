@@ -41,7 +41,8 @@ export const FAQ_CTA_SECTION = {
   ctaEmail: "hello@bandofbakers.co.uk",
 } as const;
 
-export const mockFAQs: FAQ[] = [
+// Canonical FAQ content for the site
+export const FAQS: FAQ[] = [
   // ORDERING
   {
     id: "faq-1",
@@ -172,11 +173,11 @@ export const mockFAQs: FAQ[] = [
 ];
 
 // By category
-export const mockFAQsByCategory = {
-  ordering: mockFAQs.filter((faq) => faq.category === "ordering"),
-  delivery: mockFAQs.filter((faq) => faq.category === "delivery"),
-  products: mockFAQs.filter((faq) => faq.category === "products"),
-  general: mockFAQs.filter((faq) => faq.category === "general"),
+export const FAQS_BY_CATEGORY = {
+  ordering: FAQS.filter((faq) => faq.category === "ordering"),
+  delivery: FAQS.filter((faq) => faq.category === "delivery"),
+  products: FAQS.filter((faq) => faq.category === "products"),
+  general: FAQS.filter((faq) => faq.category === "general"),
 };
 
 export const FAQ_CATEGORIES: FAQCategory[] = [

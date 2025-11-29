@@ -2,8 +2,8 @@
 
 import { PageHeader } from "@/components/state/page-header";
 import {
-  mockFAQs,
-  mockFAQsByCategory,
+  FAQS,
+  FAQS_BY_CATEGORY,
   FAQ_CATEGORIES,
   FAQ_PAGE_HEADER,
   FAQ_CTA_SECTION,
@@ -25,8 +25,8 @@ export default function FAQPage() {
 
   const displayFAQs =
     activeCategory === "all"
-      ? mockFAQs
-      : mockFAQsByCategory[activeCategory as keyof typeof mockFAQsByCategory];
+      ? FAQS
+      : FAQS_BY_CATEGORY[activeCategory as keyof typeof FAQS_BY_CATEGORY];
 
   return (
     <div className="min-h-screen">

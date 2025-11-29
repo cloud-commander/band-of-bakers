@@ -18,6 +18,7 @@ import { getActiveTestimonials } from "@/actions/testimonials";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { getRecentNewsPosts } from "@/actions/news";
 import { getRandomProducts } from "@/actions/products";
+import { getInstagramSettings } from "@/actions/instagram";
 import dynamic from "next/dynamic";
 
 const LazyTestimonialsCarousel = dynamic(
@@ -32,12 +33,14 @@ const LazyInstagramFeed = dynamic(
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [featuredProducts, testimonials, upcomingBakeSales, recentNews] = await Promise.all([
-    getRandomProducts(3),
-    getActiveTestimonials(),
-    getUpcomingBakeSales(),
-    getRecentNewsPosts(3),
-  ]);
+  const [featuredProducts, testimonials, upcomingBakeSales, recentNews, instagramSettings] =
+    await Promise.all([
+      getRandomProducts(3),
+      getActiveTestimonials(),
+      getUpcomingBakeSales(),
+      getRecentNewsPosts(3),
+      getInstagramSettings(),
+    ]);
 
   return (
     <>
@@ -278,19 +281,23 @@ export default async function Home() {
       </section>
 
       {/* Instagram Feed */}
-      <SectionDivider variant="subtle" />
-      <section
-        className={DESIGN_TOKENS.sections.padding}
-        style={{
-          backgroundColor: DESIGN_TOKENS.colors.background,
-        }}
-      >
-        <div className="max-w-7xl mx-auto">
-          <FadeIn>
-            <LazyInstagramFeed />
-          </FadeIn>
-        </div>
-      </section>
+      {instagramSettings.enabled && instagramSettings.embed && (
+        <>
+          <SectionDivider variant="subtle" />
+          <section
+            className={DESIGN_TOKENS.sections.padding}
+            style={{
+              backgroundColor: DESIGN_TOKENS.colors.background,
+            }}
+          >
+            <div className="max-w-7xl mx-auto">
+              <FadeIn>
+                <LazyInstagramFeed embedHtml={instagramSettings.embed} />
+              </FadeIn>
+            </div>
+          </section>
+        </>
+      )}
     </>
   );
 }
