@@ -7,14 +7,42 @@ import { CheckCircle } from "lucide-react";
 import { formatOrderReference } from "@/lib/utils/order";
 import { getPaginatedUserOrders } from "@/actions/orders";
 import { auth } from "@/auth";
+import { useEffect, useState } from "react";
 
 export const dynamic = "force-dynamic";
 
-export default async function CheckoutSuccessPage() {
-  const session = await auth();
-  const latestOrder = session?.user?.id
-    ? ((await getPaginatedUserOrders(1, 1)).orders[0] ?? null)
-    : null;
+interface OrderData {
+  id: string;
+  order_number: number;
+  bakeSale?: {
+    date: string;
+    location?: {
+      collection_hours?: string;
+      address_line1?: string;
+      postcode?: string;
+    };
+  };
+}
+
+export default function CheckoutSuccessPage() {
+  const [latestOrder, setLatestOrder] = useState<OrderData | null>(null);
+
+  useEffect(() => {
+    async function fetchOrderData() {
+      try {
+        const session = await auth();
+        const order = session?.user?.id
+          ? ((await getPaginatedUserOrders(1, 1)).orders[0] ?? null)
+          : null;
+        setLatestOrder(order);
+      } catch (error) {
+        console.error("Failed to fetch order data:", error);
+      }
+    }
+
+    fetchOrderData();
+  }, []);
+
   const formattedRef = latestOrder
     ? formatOrderReference(latestOrder.id, latestOrder.order_number)
     : null;

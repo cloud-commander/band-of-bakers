@@ -43,6 +43,7 @@ export async function createFaq(data: Omit<InsertFaq, "id" | "created_at" | "upd
       })
       .returning();
     revalidatePath("/admin/faqs");
+    revalidatePath("/faq");
     return { success: true, data: newFaq[0] };
   } catch (error) {
     console.error("Error creating FAQ:", error);
@@ -65,6 +66,7 @@ export async function updateFaq(
       .where(eq(faqs.id, id))
       .returning();
     revalidatePath("/admin/faqs");
+    revalidatePath("/faq");
     return { success: true, data: updatedFaq[0] };
   } catch (error) {
     console.error("Error updating FAQ:", error);
@@ -77,6 +79,7 @@ export async function deleteFaq(id: string) {
     const db = await getDb();
     await db.delete(faqs).where(eq(faqs.id, id));
     revalidatePath("/admin/faqs");
+    revalidatePath("/faq");
     return { success: true };
   } catch (error) {
     console.error("Error deleting FAQ:", error);
@@ -96,6 +99,7 @@ export async function toggleFaqStatus(id: string, isActive: boolean) {
       .where(eq(faqs.id, id))
       .returning();
     revalidatePath("/admin/faqs");
+    revalidatePath("/faq");
     return { success: true, data: updatedFaq[0] };
   } catch (error) {
     console.error("Error toggling FAQ status:", error);

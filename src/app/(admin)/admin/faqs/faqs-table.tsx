@@ -38,6 +38,7 @@ export function FaqsTable({ initialFaqs }: FaqsTableProps) {
   const [selectedFaq, setSelectedFaq] = useState<Faq | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState<Faq | null>(null);
+  const hasFaqs = faqs.length > 0;
 
   const handleEdit = (faq: Faq) => {
     setSelectedFaq(faq);
@@ -99,7 +100,54 @@ export function FaqsTable({ initialFaqs }: FaqsTableProps) {
         </Button>
       </div>
 
-      <div className="border rounded-lg shadow-sm bg-white overflow-hidden">
+      {/* Mobile cards */}
+      <div className="grid gap-3 md:hidden">
+        {!hasFaqs && (
+          <div className="border rounded-lg bg-white p-4 text-center text-muted-foreground">
+            No FAQs found. Create one to get started.
+          </div>
+        )}
+        {faqs.map((faq) => (
+          <div key={faq.id} className="border rounded-lg bg-white p-4 space-y-2 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground">Sort #{faq.sort_order ?? 0}</p>
+                <p className="font-semibold">{faq.question}</p>
+                {faq.category && <Badge variant="outline">{faq.category}</Badge>}
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <Switch
+                  checked={faq.is_active}
+                  onCheckedChange={() => handleToggleStatus(faq.id, faq.is_active)}
+                  aria-label={faq.is_active ? "Set inactive" : "Set active"}
+                />
+                <span className="text-xs text-muted-foreground">
+                  {faq.is_active ? "Active" : "Inactive"}
+                </span>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground line-clamp-3">{faq.answer}</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => handleEdit(faq)}>
+                <Edit className="w-4 h-4 mr-1" />
+                Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                onClick={() => handleDeleteClick(faq)}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="border rounded-lg shadow-sm bg-white overflow-hidden hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
