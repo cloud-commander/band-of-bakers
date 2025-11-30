@@ -1,5 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseRepository } from "./base.repository";
-import { orders, orderItems, products, type InsertOrder, type InsertOrderItem } from "@/db/schema";
+import {
+  orders,
+  orderItems,
+  products,
+  bakeSales,
+  locations,
+  type InsertOrder,
+  type InsertOrderItem,
+} from "@/db/schema";
 import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
 
 export class OrderRepository extends BaseRepository<typeof orders> {
@@ -9,7 +18,9 @@ export class OrderRepository extends BaseRepository<typeof orders> {
 
   async nextOrderNumber() {
     const db = await this.getDatabase();
-    const result = await db.select({ max: sql<number>`coalesce(max(${orders.order_number}), 0)` }).from(orders);
+    const result = await db
+      .select({ max: sql<number>`coalesce(max(${orders.order_number}), 0)` })
+      .from(orders);
     const currentMax = Number(result[0]?.max ?? 0);
     return currentMax + 1;
   }
@@ -17,11 +28,12 @@ export class OrderRepository extends BaseRepository<typeof orders> {
   /**
    * Create order with items inside a transaction, assigning an atomic order_number.
    */
-  async createWithItems(order: InsertOrder, items: InsertOrderItem[]) {
+  async createWithItems(order: Omit<InsertOrder, "order_number">, items: InsertOrderItem[]) {
     const db = await this.getDatabase();
 
     try {
-      const result = await db.transaction(async (tx) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await db.transaction(async (tx: any) => {
         // Assign next order number atomically within this transaction
         const next = await tx
           .select({ max: sql<number>`coalesce(max(${orders.order_number}), 0)` })
@@ -121,9 +133,10 @@ export class OrderRepository extends BaseRepository<typeof orders> {
         voucher_discount: orders.voucher_discount,
         total: orders.total,
         created_at: orders.created_at,
-        item_count: sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
-          "item_count"
-        ),
+        item_count:
+          sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
+            "item_count"
+          ),
       })
       .from(orders)
       .limit(limit)
@@ -150,13 +163,16 @@ export class OrderRepository extends BaseRepository<typeof orders> {
         status: orders.status,
         fulfillment_method: orders.fulfillment_method,
         bake_sale_id: orders.bake_sale_id,
-        bakeSaleDate: sql<string | null>`(${orders.bake_sale_id})`.as("bake_sale_date"),
-        bakeSaleLocation: sql<string | null>`(${orders.bake_sale_id})`.as("bake_sale_location"),
-        item_count: sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
-          "item_count"
-        ),
+        bakeSaleDate: bakeSales.date,
+        bakeSaleLocation: locations.name,
+        item_count:
+          sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
+            "item_count"
+          ),
       })
       .from(orders)
+      .leftJoin(bakeSales, eq(bakeSales.id, orders.bake_sale_id))
+      .leftJoin(locations, eq(locations.id, bakeSales.location_id))
       .where(eq(orders.user_id, userId))
       .orderBy(orderBy)
       .limit(limit)
@@ -254,7 +270,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .groupBy(day)
       .orderBy(day);
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       day: row.day,
       revenue: Number(row.revenue ?? 0),
     }));
@@ -273,7 +289,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .from(orders)
       .groupBy(orders.status);
 
-    return counts.map((row) => ({
+    return counts.map((row: any) => ({
       status: row.status,
       count: Number(row.count ?? 0),
     }));
@@ -300,7 +316,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .orderBy(desc(units))
       .limit(limit);
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       product_id: row.product_id,
       name: row.name,
       units: Number(row.units ?? 0),

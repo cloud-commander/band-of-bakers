@@ -37,7 +37,12 @@ export async function getDashboardStats() {
 
     // Fill missing days with zero so charts are consistent
     const today = new Date();
-    const revenueMap = new Map(revenueSeries.map((r) => [r.day, Number(r.revenue || 0)]));
+    const revenueMap = new Map<string, number>(
+      revenueSeries.map((r: { day: string; revenue: number | null }) => [
+        r.day,
+        Number(r.revenue || 0),
+      ])
+    );
     const filledRevenueSeries: Array<{ date: string; revenue: number }> = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date(today);

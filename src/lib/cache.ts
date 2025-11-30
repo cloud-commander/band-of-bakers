@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getDb } from "@/lib/db";
 import { images } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and, sql } from "drizzle-orm";
 
 /**
  * Cache tags for invalidation

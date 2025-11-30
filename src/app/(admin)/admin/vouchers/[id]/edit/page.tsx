@@ -3,13 +3,14 @@ import { getVoucherById } from "@/actions/vouchers";
 import { VoucherForm } from "@/app/(admin)/admin/vouchers/voucher-form";
 
 interface EditVoucherPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = "force-dynamic";
 
 export default async function EditVoucherPage({ params }: EditVoucherPageProps) {
-  const voucher = await getVoucherById(params.id);
+  const { id } = await params;
+  const voucher = await getVoucherById(id);
   if (!voucher) {
     notFound();
   }

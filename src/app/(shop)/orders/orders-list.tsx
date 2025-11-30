@@ -27,7 +27,7 @@ const fulfillmentColors = {
 interface OrdersListProps {
   orders: Array<{
     id: string;
-    order_number?: number | null;
+    order_number: number;
     created_at: number | string | Date;
     total: number;
     status: string;
@@ -86,11 +86,7 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
 
         {/* Pagination Info */}
         <div className="mb-6">
-          <PaginationInfo
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalItems={totalItems}
-          />
+          <PaginationInfo currentPage={currentPage} pageSize={pageSize} totalItems={totalItems} />
           <div className="mt-3 flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Sort by:</span>
             <select
@@ -128,11 +124,10 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
                     </Badge>
                     <Badge
                       variant="outline"
-                      className={fulfillmentColors[order.fulfillment_method as "collection" | "delivery"]}
+                      className={
+                        fulfillmentColors[order.fulfillment_method as "collection" | "delivery"]
+                      }
                     >
-                      {order.fulfillment_method}
-                    </Badge>
-                    <Badge variant="outline" className="capitalize">
                       {order.fulfillment_method}
                     </Badge>
                   </div>
@@ -168,23 +163,25 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
               </div>
             </Link>
           ))}
-      </div>
+        </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-12 flex flex-col items-center gap-6 pb-24">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex flex-col items-center gap-6 pb-24">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
-        </div>
-      )}
+      </div>
 
       {totalPages > 1 && (
-        <div className="fixed bottom-4 inset-x-0 px-4 sm:px-6 lg:px-8 pointer-events-none">
+        <div
+          className="fixed bottom-4 inset-x-0 px-4 sm:px-6 lg:px-8 pointer-events-none"
+          aria-hidden="true"
+        >
           <div className="max-w-4xl mx-auto">
             <div className="bg-white/95 backdrop-blur border rounded-full shadow-lg px-4 py-2 flex items-center justify-center pointer-events-auto">
               <Pagination

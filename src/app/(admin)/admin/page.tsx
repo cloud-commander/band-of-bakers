@@ -27,6 +27,7 @@ import { AlertTriangle } from "lucide-react";
 
 interface DashboardOrder {
   id: string;
+  order_number: number;
   created_at: string | number | Date;
   status: string;
   total: number;
@@ -191,7 +192,10 @@ export default async function AdminDashboard() {
             <div className="lg:col-span-2">
               <RevenueTrendChart
                 data={revenueSeries.map((r) => ({
-                  date: new Date(r.date).toLocaleDateString("en-GB", { month: "short", day: "numeric" }),
+                  date: new Date(r.date).toLocaleDateString("en-GB", {
+                    month: "short",
+                    day: "numeric",
+                  }),
                   revenue: r.revenue,
                 }))}
               />
@@ -199,7 +203,8 @@ export default async function AdminDashboard() {
 
             {/* Top Products */}
             <TopProductsChart
-              data={topProducts.map((p) => ({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data={topProducts.map((p: any) => ({
                 name: p.name,
                 units: Number(p.units || 0),
                 revenue: Number(p.revenue || 0),

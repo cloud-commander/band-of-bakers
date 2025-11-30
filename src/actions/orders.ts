@@ -51,7 +51,7 @@ const orderSchema = z.object({
 
 export async function createOrder(
   data: z.infer<typeof orderSchema>
-): Promise<ActionResult<{ id: string; order_number?: number }>> {
+): Promise<ActionResult<{ id: string; order_number: number }>> {
   // Track stock reservations to allow rollback on failure
   const stockReservations: Array<{ productId: string; quantity: number }> = [];
   let voucherReservation: string | null = null;
@@ -417,7 +417,7 @@ export async function updateOrderStatus(
       if (nextStatus === "ready" && order.bakeSale?.location) {
         void sendEmail(order.user.email, "order_ready_for_collection", {
           customer_name: order.user.name || "Customer",
-          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
+          order_id: formatOrderReference(order.id, order.order_number),
           location_name: order.bakeSale.location.name,
           location_address: `${order.bakeSale.location.address_line1}, ${order.bakeSale.location.postcode}`,
           collection_time: order.bakeSale.location.collection_hours || "10am - 2pm",
@@ -425,22 +425,22 @@ export async function updateOrderStatus(
       } else if (nextStatus === "fulfilled") {
         void sendEmail(order.user.email, "order_completed", {
           customer_name: order.user.name || "Customer",
-          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
+          order_id: formatOrderReference(order.id, order.order_number),
         });
       } else if (nextStatus === "cancelled") {
         void sendEmail(order.user.email, "order_cancelled", {
           customer_name: order.user.name || "Customer",
-          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
+          order_id: formatOrderReference(order.id, order.order_number),
         });
       } else if (nextStatus === "refunded") {
         void sendEmail(order.user.email, "order_refunded", {
           customer_name: order.user.name || "Customer",
-          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
+          order_id: formatOrderReference(order.id, order.order_number),
         });
       } else if (nextStatus === "action_required") {
         void sendEmail(order.user.email, "order_action_required", {
           customer_name: order.user.name || "Customer",
-          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
+          order_id: formatOrderReference(order.id, order.order_number),
         });
       }
     }

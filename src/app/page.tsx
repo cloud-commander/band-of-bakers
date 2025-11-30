@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { FadeIn } from "@/components/fade-in";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionDivider } from "@/components/section-divider";
 import { Heading } from "@/components/ui/heading";
 import { RecentNews } from "@/components/recent-news";

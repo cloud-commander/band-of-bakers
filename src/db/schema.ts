@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sql, relations } from "drizzle-orm";
 
 // Helper for timestamps
@@ -144,7 +144,7 @@ export const orders = sqliteTable(
   "orders",
   {
     id: text("id").primaryKey(),
-    order_number: integer("order_number"),
+    order_number: integer("order_number").notNull(),
     user_id: text("user_id")
       .notNull()
       .references(() => users.id),
@@ -175,6 +175,7 @@ export const orders = sqliteTable(
     ...timestamps,
   },
   (table) => ({
+    orderNumberIdx: uniqueIndex("idx_orders_order_number").on(table.order_number),
     userIdIdx: index("idx_orders_user_id").on(table.user_id),
     statusIdx: index("idx_orders_status").on(table.status),
     createdAtIdx: index("idx_orders_created_at").on(table.created_at),

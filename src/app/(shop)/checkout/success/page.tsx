@@ -1,24 +1,20 @@
 "use client";
 
-import Link from "next/link";
+import NextLink from "next/link";
 import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { CheckCircle } from "lucide-react";
 import { formatOrderReference } from "@/lib/utils/order";
-import { Suspense } from "react";
 import { getPaginatedUserOrders } from "@/actions/orders";
 import { auth } from "@/auth";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutSuccessPage() {
   const session = await auth();
-  const latestOrder =
-    session?.user?.id
-      ? (await getPaginatedUserOrders(1, 1)).orders[0] ?? null
-      : null;
+  const latestOrder = session?.user?.id
+    ? ((await getPaginatedUserOrders(1, 1)).orders[0] ?? null)
+    : null;
   const formattedRef = latestOrder
     ? formatOrderReference(latestOrder.id, latestOrder.order_number)
     : null;
@@ -69,7 +65,12 @@ export default async function CheckoutSuccessPage() {
           )}
           {mapLink && (
             <p className="text-sm mt-2">
-              <a className="underline text-bakery-amber-700" href={mapLink} target="_blank" rel="noreferrer">
+              <a
+                className="underline text-bakery-amber-700"
+                href={mapLink}
+                target="_blank"
+                rel="noreferrer"
+              >
                 View location on map
               </a>
             </p>
@@ -88,13 +89,13 @@ export default async function CheckoutSuccessPage() {
 
         <div className="space-y-4">
           <Button asChild className="w-full" size="lg">
-            <Link href="/orders">View My Orders</Link>
+            <NextLink href="/orders">View My Orders</NextLink>
           </Button>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/menu">Continue Shopping</Link>
+            <NextLink href="/menu">Continue Shopping</NextLink>
           </Button>
           {icsLink && (
-            <Button asChild variant="ghost" className="w-full">
+            <Button asChild variant="ghost" className="w-full" title="Download calendar event">
               <a href={icsLink}>Save to Calendar</a>
             </Button>
           )}

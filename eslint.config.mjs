@@ -27,8 +27,14 @@ const eslintConfig = defineConfig([
     "Thumbs.db",
   ]),
   {
-    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "public/sw.js"]
-  }
+    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "public/sw.js"],
+  },
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**/*.ts", "**/__tests__/**/*.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

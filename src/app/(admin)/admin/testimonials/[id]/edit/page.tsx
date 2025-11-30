@@ -3,13 +3,14 @@ import { getTestimonialById } from "@/actions/testimonials";
 import { EditTestimonialForm } from "./edit-testimonial-form";
 
 interface EditTestimonialPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = "force-dynamic";
 
 export default async function EditTestimonialPage({ params }: EditTestimonialPageProps) {
-  const testimonial = await getTestimonialById(params.id);
+  const { id } = await params;
+  const testimonial = await getTestimonialById(id);
 
   if (!testimonial) {
     notFound();

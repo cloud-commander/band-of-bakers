@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { updateOrderStatus } from "@/actions/orders";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { formatOrderReference } from "@/lib/utils/order";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type SortField = "created_at" | "bake_sale_date" | "total" | "status";
 type SortDirection = "asc" | "desc";
@@ -31,10 +30,12 @@ type StatusFilter =
 // Define the shape of the order with relations
 interface OrderWithRelations {
   id: string;
-  order_number?: number | null;
+  order_number: number;
   created_at: number | string | Date; // Adjust based on DB schema
   total: number;
   status: string;
+  fulfillment_method: string;
+  payment_method: string;
   user_id: string;
   bake_sale_id?: string | null;
   item_count?: number;
@@ -286,11 +287,11 @@ export function OrdersTable({
     const status = order.status.toLowerCase();
     const isUpdating = updatingOrderId === order.id;
 
-  if (status === "pending" || status === "processing") {
-    return (
-      <Button
-        size="sm"
-        variant="outline"
+    if (status === "pending" || status === "processing") {
+      return (
+        <Button
+          size="sm"
+          variant="outline"
           className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
           onClick={(e) => handleMarkReady(order.id, e)}
           disabled={isUpdating}

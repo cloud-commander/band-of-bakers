@@ -490,7 +490,8 @@ async function main() {
 
       let orderNumberCounter = 1;
       for (const order of ordersToSeed) {
-        const orderNumber = order.order_number ?? orderNumberCounter++;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const orderNumber = (order as any).order_number ?? orderNumberCounter++;
         sqlStatements.push(
           `INSERT OR REPLACE INTO orders (id, order_number, user_id, bake_sale_id, status, fulfillment_method, payment_method, payment_status, payment_intent_id, subtotal, delivery_fee, voucher_discount, total, shipping_address_line1, shipping_address_line2, shipping_city, shipping_postcode, billing_address_line1, billing_address_line2, billing_city, billing_postcode, voucher_id, notes, created_at, updated_at) VALUES ('${
             order.id

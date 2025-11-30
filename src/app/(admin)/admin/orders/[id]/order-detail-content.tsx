@@ -11,16 +11,17 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatOrderReference } from "@/lib/utils/order";
-import { Button as CalendarButton } from "@/components/ui/button";
 
 // Define shapes matching what we get from getOrderById
 interface OrderDetailContentProps {
   order: {
     id: string;
-    order_number?: number | null;
+    order_number: number;
     created_at: number | string | Date;
     total: number;
     status: string;
+    fulfillment_method: string;
+    payment_method: string;
     user_id: string;
     bake_sale_id?: string | null;
     user?: {
@@ -32,6 +33,9 @@ interface OrderDetailContentProps {
       date: string;
       location: {
         name: string;
+        address_line1?: string | null;
+        city?: string | null;
+        postcode?: string | null;
       };
     } | null;
     items: Array<{
@@ -260,15 +264,22 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
             day: "numeric",
           })}`}
         />
-        {bakeSaleMapLink && (
-          <div className="mt-2">
+        <div className="mt-2 flex items-center gap-2">
+          <Badge className="uppercase">{order.status}</Badge>
+          <Badge variant="outline" className="capitalize">
+            {order.fulfillment_method}
+          </Badge>
+          <Badge variant="outline" className="capitalize">
+            {order.payment_method.replace(/_/g, " ")}
+          </Badge>
+          {bakeSaleMapLink && (
             <Button variant="outline" size="sm" asChild>
               <a href={bakeSaleMapLink} target="_blank" rel="noreferrer">
                 View location on map
               </a>
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Status Timeline */}
@@ -288,7 +299,12 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                   )}
                   aria-label={stage}
                 />
-                <span className={cn("text-xs capitalize", active ? "text-green-700" : "text-muted-foreground")}>
+                <span
+                  className={cn(
+                    "text-xs capitalize",
+                    active ? "text-green-700" : "text-muted-foreground"
+                  )}
+                >
                   {stage}
                 </span>
                 {idx < stagesOrder.length - 1 && (
