@@ -9,7 +9,7 @@ import {
   type InsertOrder,
   type InsertOrderItem,
 } from "@/db/schema";
-import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lte, lt, inArray } from "drizzle-orm";
 
 export class OrderRepository extends BaseRepository<typeof orders> {
   constructor() {
@@ -358,6 +358,24 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .from(orders)
       .where(and(gte(orders.created_at, startISO), lte(orders.created_at, endISO)));
     return Number(result[0]?.total || 0);
+  }
+
+  async overdueCountsByStatus(targetStatuses: Array<string>, todayIsoDate: string) {
+    const db = await this.getDatabase();
+    const rows = await db
+      .select({
+        status: orders.status,
+        count: sql<number>`count(*)`.as("count"),
+      })
+      .from(orders)
+      .leftJoin(bakeSales, eq(bakeSales.id, orders.bake_sale_id))
+      .where(and(inArray(orders.status, targetStatuses), lt(bakeSales.date, todayIsoDate)))
+      .groupBy(orders.status);
+
+    return rows.map((row: any) => ({
+      status: row.status,
+      count: Number(row.count ?? 0),
+    }));
   }
 }
 

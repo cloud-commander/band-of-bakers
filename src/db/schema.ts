@@ -180,6 +180,8 @@ export const orders = sqliteTable(
     statusIdx: index("idx_orders_status").on(table.status),
     createdAtIdx: index("idx_orders_created_at").on(table.created_at),
     userCreatedIdx: index("idx_orders_user_created").on(table.user_id, table.created_at),
+    bakeSaleIdIdx: index("idx_orders_bake_sale_id").on(table.bake_sale_id),
+    voucherIdIdx: index("idx_orders_voucher_id").on(table.voucher_id),
   })
 );
 
@@ -208,6 +210,7 @@ export const orderItems = sqliteTable(
   (table) => ({
     orderIdIdx: index("idx_order_items_order_id").on(table.order_id),
     productIdIdx: index("idx_order_items_product_id").on(table.product_id),
+    variantIdIdx: index("idx_order_items_variant_id").on(table.product_variant_id),
   })
 );
 
@@ -326,6 +329,7 @@ export const testimonials = sqliteTable(
   },
   (table) => ({
     statusIdx: index("idx_testimonials_status").on(table.status),
+    userIdIdx: index("idx_testimonials_user_id").on(table.user_id),
   })
 );
 

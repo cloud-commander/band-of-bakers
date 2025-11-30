@@ -81,7 +81,7 @@ export function FaqContent({ faqs, categories = FAQ_CATEGORIES }: FaqContentProp
                 value={cat.id}
                 className="w-full text-center data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border"
               >
-                <span className="hidden sm:inline">{cat.icon} </span>
+                <span className="mr-2">{cat.icon}</span>
                 {cat.label}
               </TabsTrigger>
             ))}

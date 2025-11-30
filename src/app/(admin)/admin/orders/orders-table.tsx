@@ -66,6 +66,8 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const [orders, setOrders] = useState(initialOrders);
   const [currentPage, setCurrentPage] = useState(currentPageProp);
+  const [swipedOrderId, setSwipedOrderId] = useState<string | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   // Get all unique bake sales from orders
   const allBakeSales = useMemo(() => {
     const uniqueBakeSales = new Map();
@@ -322,6 +324,27 @@ export function OrdersTable({
     return null;
   };
 
+  const handleTouchStart = (orderId: string, e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+    if (swipedOrderId && swipedOrderId !== orderId) {
+      setSwipedOrderId(null);
+    }
+  };
+
+  const handleTouchMove = (orderId: string, e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const deltaX = e.touches[0].clientX - touchStartX;
+    if (deltaX < -30) {
+      setSwipedOrderId(orderId);
+    } else if (deltaX > 30) {
+      setSwipedOrderId(null);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchStartX(null);
+  };
+
   return (
     <div>
       {/* Search and Filters */}
@@ -512,68 +535,89 @@ export function OrdersTable({
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {paginatedOrders.map((order) => (
-          <Link
+          <div
             key={order.id}
-            href={`/admin/orders/${order.id}`}
-            className="block border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+            className="relative overflow-hidden rounded-lg border bg-white shadow-sm"
+            onTouchStart={(e) => handleTouchStart(order.id, e)}
+            onTouchMove={(e) => handleTouchMove(order.id, e)}
+            onTouchEnd={handleTouchEnd}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">
-                  Order {formatOrderReference(order.id, order.order_number)}
-                </p>
-                <p className="font-medium text-sm">{getCustomerName(order)}</p>
-              </div>
-              <Badge
-                variant="outline"
-                className={cn(
-                  "capitalize",
-                  order.status.toLowerCase() === "pending" &&
-                    "bg-amber-50 text-amber-700 border-amber-200",
-                  order.status.toLowerCase() === "processing" &&
-                    "bg-blue-50 text-blue-700 border-blue-200",
-                  order.status.toLowerCase() === "ready" &&
-                    "bg-indigo-50 text-indigo-700 border-indigo-200",
-                  order.status.toLowerCase() === "completed" &&
-                    "bg-emerald-50 text-emerald-700 border-emerald-200",
-                  order.status.toLowerCase() === "cancelled" &&
-                    "bg-red-50 text-red-700 border-red-200"
-                )}
-              >
-                {order.status}
-              </Badge>
+            <div
+              className={cn(
+                "absolute inset-y-0 right-0 flex items-center gap-2 pr-4 bg-gradient-to-l from-white to-white/0 transition-transform",
+                swipedOrderId === order.id ? "translate-x-0" : "translate-x-full"
+              )}
+            >
+              {getQuickAction(order)}
+              <Button variant="ghost" size="sm" className="bg-white/80" asChild>
+                <Link href={`/admin/orders/${order.id}`}>Open</Link>
+              </Button>
             </div>
+            <Link
+              href={`/admin/orders/${order.id}`}
+              className={cn(
+                "block p-4 transition-transform",
+                swipedOrderId === order.id ? "-translate-x-20" : "translate-x-0"
+              )}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Order {formatOrderReference(order.id, order.order_number)}
+                  </p>
+                  <p className="font-medium text-sm">{getCustomerName(order)}</p>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "capitalize",
+                    order.status.toLowerCase() === "pending" &&
+                      "bg-amber-50 text-amber-700 border-amber-200",
+                    order.status.toLowerCase() === "processing" &&
+                      "bg-blue-50 text-blue-700 border-blue-200",
+                    order.status.toLowerCase() === "ready" &&
+                      "bg-indigo-50 text-indigo-700 border-indigo-200",
+                    order.status.toLowerCase() === "completed" &&
+                      "bg-emerald-50 text-emerald-700 border-emerald-200",
+                    order.status.toLowerCase() === "cancelled" &&
+                      "bg-red-50 text-red-700 border-red-200"
+                  )}
+                >
+                  {order.status}
+                </Badge>
+              </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-              <div>
-                <p className="text-xs text-muted-foreground">Order Date</p>
-                <p className="font-medium">
-                  {new Date(order.created_at).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </p>
+              <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Order Date</p>
+                  <p className="font-medium">
+                    {new Date(order.created_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Bake Sale</p>
+                  <p className="font-medium">
+                    {order.bakeSale
+                      ? new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "N/A"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Bake Sale</p>
-                <p className="font-medium">
-                  {order.bakeSale
-                    ? new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                      })
-                    : "N/A"}
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-center justify-between pt-3 border-t">
-              <span className="font-serif font-bold text-lg">£{order.total.toFixed(2)}</span>
-              <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
-                {getQuickAction(order)}
+              <div className="flex items-center justify-between pt-3 border-t">
+                <span className="font-serif font-bold text-lg">£{order.total.toFixed(2)}</span>
+                <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                  {getQuickAction(order)}
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         ))}
       </div>
 

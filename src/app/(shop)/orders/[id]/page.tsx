@@ -25,11 +25,11 @@ const stagesOrder = ["pending", "processing", "ready", "fulfilled"] as const;
 
 export default async function OrderPage({ params }: OrderPageProps) {
   const { id } = await params;
-  const session = await auth();
+  const [session, order] = await Promise.all([auth(), getOrderById(id)]);
+
   if (!session?.user?.id) {
     redirect(`/auth/login?callbackUrl=/orders/${id}`);
   }
-  const order = await getOrderById(id);
 
   if (!order) {
     notFound();
@@ -41,16 +41,14 @@ export default async function OrderPage({ params }: OrderPageProps) {
   const bakeSale = order.bakeSale;
   const voucherDiscount = order.voucher_discount ?? 0;
   const hasVoucherDiscount = voucherDiscount > 0;
-  const paymentLabel = order.payment_method
-    ? order.payment_method.replace(/_/g, " ")
-    : "payment";
+  const paymentLabel = order.payment_method ? order.payment_method.replace(/_/g, " ") : "payment";
   const fulfillmentDetails =
     order.fulfillment_method === "collection"
       ? bakeSale && bakeSale.location
         ? `${bakeSale.location.name}, ${bakeSale.location.address_line1 || ""} ${
             bakeSale.location.postcode || ""
           }`
-      : "Collection"
+        : "Collection"
       : order.shipping_address_line1
         ? `${order.shipping_address_line1}${
             order.shipping_address_line2 ? ", " + order.shipping_address_line2 : ""
@@ -106,11 +104,18 @@ export default async function OrderPage({ params }: OrderPageProps) {
                       )}
                       aria-label={stage}
                     />
-                    <span className={cn("text-xs capitalize", active ? "text-green-700" : "text-muted-foreground")}>
+                    <span
+                      className={cn(
+                        "text-xs capitalize",
+                        active ? "text-green-700" : "text-muted-foreground"
+                      )}
+                    >
                       {stage}
                     </span>
                     {idx < stagesOrder.length - 1 && (
-                      <div className={cn("h-[1px] w-10", active ? "bg-green-500" : "bg-stone-300")} />
+                      <div
+                        className={cn("h-[1px] w-10", active ? "bg-green-500" : "bg-stone-300")}
+                      />
                     )}
                   </div>
                 );
@@ -208,9 +213,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
               </div>
             </div>
             <div className="pt-2">
-              <p className="text-sm text-muted-foreground">
-                Payment Method: Pay on Collection
-              </p>
+              <p className="text-sm text-muted-foreground">Payment Method: Pay on Collection</p>
               <p className="text-sm text-muted-foreground capitalize">
                 Payment Status: {order.payment_status || "pending"}
               </p>

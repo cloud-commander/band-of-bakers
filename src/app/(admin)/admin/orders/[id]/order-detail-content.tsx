@@ -64,11 +64,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { markOrderReady, markOrderComplete, updateOrderItems } from "@/actions/admin/orders";
+import {
+  markOrderReady,
+  markOrderComplete,
+  updateOrderItems,
+  updateOrderStatus,
+} from "@/actions/admin/orders";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useRouter } from "next/navigation";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function OrderDetailContent({ order }: OrderDetailContentProps) {
+  const router = useRouter();
   // State for managing item availability (quantity)
   // undefined means full quantity available
   const [availableQuantities, setAvailableQuantities] = useState<Record<string, number>>({});
@@ -79,6 +87,8 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
   } | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [changeType, setChangeType] = useState<"bakery" | "customer">("bakery");
+  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   // Helper function to get product name
   const getProductName = (item: OrderDetailContentProps["order"]["items"][0]) => {
@@ -104,15 +114,6 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     const availableQty = availableQuantities[item.id];
     return availableQty !== undefined && availableQty < item.quantity;
   });
-
-  const bakeSaleMapLink =
-    order.bakeSale?.location?.name && order.bakeSale?.location?.address_line1
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          `${order.bakeSale.location.address_line1} ${order.bakeSale.location.name} ${
-            order.bakeSale.location.city ?? ""
-          } ${order.bakeSale.location.postcode ?? ""}`
-        )}`
-      : null;
 
   // Toggle item availability (Full / None)
   const toggleItemAvailability = (itemId: string, itemName: string, maxQty: number) => {
@@ -192,6 +193,21 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     }
   };
 
+  const handleUndoReady = async () => {
+    try {
+      const result = await updateOrderStatus(order.id, "processing");
+      if (result.success) {
+        toast.success("Status reverted to Processing");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to revert status");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred");
+    }
+  };
+
   const handleMarkComplete = async () => {
     try {
       const result = await markOrderComplete(order.id);
@@ -246,6 +262,21 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     }
   };
 
+  const handleSheetTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+  };
+
+  const handleSheetTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+    const deltaY = e.changedTouches[0].clientY - touchStartY;
+    if (deltaY < -25) {
+      setIsActionSheetOpen(true);
+    } else if (deltaY > 25) {
+      setIsActionSheetOpen(false);
+    }
+    setTouchStartY(null);
+  };
+
   return (
     <div className="pb-24">
       {/* Header */}
@@ -272,13 +303,6 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
           <Badge variant="outline" className="capitalize">
             {order.payment_method.replace(/_/g, " ")}
           </Badge>
-          {bakeSaleMapLink && (
-            <Button variant="outline" size="sm" asChild>
-              <a href={bakeSaleMapLink} target="_blank" rel="noreferrer">
-                View location on map
-              </a>
-            </Button>
-          )}
         </div>
       </div>
 
@@ -599,8 +623,8 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
         </div>
       </div>
 
-      {/* Sticky Footer with Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 shadow-lg lg:left-64">
+      {/* Sticky Footer with Actions (Desktop) */}
+      <div className="hidden md:block fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 shadow-lg lg:left-64">
         <div className="container mx-auto max-w-7xl">
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
             {hasUnavailableItems && (
@@ -625,15 +649,87 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
               </Button>
             )}
             {order.status.toLowerCase() === "ready" && (
-              <Button
-                onClick={handleMarkComplete}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white sm:w-auto"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Mark as Complete
-              </Button>
+              <>
+                <Button
+                  onClick={handleMarkComplete}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white sm:w-auto"
+                >
+                  <Check className="w-4 h-4 mr-2" />
+                  Mark as Complete
+                </Button>
+                <Button variant="outline" onClick={handleUndoReady} className="sm:w-auto">
+                  Undo Ready
+                </Button>
+              </>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Swipe-Up Action Sheet */}
+      <div
+        className="fixed md:hidden bottom-0 inset-x-0 z-40"
+        onTouchStart={handleSheetTouchStart}
+        onTouchEnd={handleSheetTouchEnd}
+      >
+        <div className="mx-auto max-w-3xl px-4 pb-3">
+          <Sheet open={isActionSheetOpen} onOpenChange={setIsActionSheetOpen}>
+            <SheetTrigger asChild>
+              <div className="pointer-events-auto mx-auto mb-2 flex w-full items-center justify-center">
+                <button
+                  className="w-full max-w-xs rounded-full border bg-white/95 px-4 py-2 shadow-sm flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                  type="button"
+                >
+                  <span className="h-1 w-10 rounded-full bg-stone-300" />
+                  <span>{isActionSheetOpen ? "Close actions" : "Swipe up for actions"}</span>
+                </button>
+              </div>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="pb-8">
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Next steps for {formatOrderReference(order.id, order.order_number)}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {(order.status.toLowerCase() === "pending" ||
+                    order.status.toLowerCase() === "processing") && (
+                    <Button
+                      onClick={handleMarkReady}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Mark Ready for Collection
+                    </Button>
+                  )}
+                  {order.status.toLowerCase() === "ready" && (
+                    <>
+                      <Button
+                        onClick={handleMarkComplete}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Mark as Fulfilled
+                      </Button>
+                      <Button variant="outline" onClick={handleUndoReady} className="w-full h-11">
+                        Undo Ready
+                      </Button>
+                    </>
+                  )}
+                  {hasUnavailableItems && (
+                    <Button
+                      variant="outline"
+                      onClick={handleSendEmail}
+                      className="w-full h-11"
+                      disabled={isSendingEmail}
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      {isSendingEmail ? "Sending..." : "Send Update Email"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 

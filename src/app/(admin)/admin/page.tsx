@@ -49,8 +49,15 @@ export default async function AdminDashboard() {
     revenueSeries,
     statusCounts,
     topProducts,
+    overdue,
   } = await getDashboardStats();
   const topVouchers = await getTopVouchers(5);
+
+  const overdueProcessing =
+    overdue.find((item: { status: string }) => item.status === "processing")?.count ?? 0;
+  const overdueReady =
+    overdue.find((item: { status: string }) => item.status === "ready")?.count ?? 0;
+  const hasOverdue = overdueProcessing + overdueReady > 0;
 
   return (
     <div>
@@ -58,6 +65,20 @@ export default async function AdminDashboard() {
         title="Dashboard"
         description="Overview of your store performance and analytics"
       />
+
+      {hasOverdue && (
+        <Alert variant="default" className="mb-6 border-amber-200 bg-amber-50 text-amber-900">
+          <AlertTriangle className="h-4 w-4 text-amber-800" />
+          <AlertTitle>Orders overdue for collection</AlertTitle>
+          <AlertDescription>
+            {overdueProcessing > 0 && <span className="mr-3">{overdueProcessing} processing</span>}
+            {overdueReady > 0 && <span>{overdueReady} ready for collection</span>}
+            <Link href="/admin/orders" className="underline ml-2 font-medium text-amber-900">
+              Review orders →
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {upcomingBakeSalesCount === 0 && (
         <Alert variant="destructive" className="mb-8 bg-red-50 border-red-200 text-red-800">

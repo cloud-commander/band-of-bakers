@@ -18,6 +18,10 @@ vi.mock("@/lib/email/service", () => ({
   sendEmail: vi.fn(),
 }));
 
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 // Mock schema
 vi.mock("@/db/schema", () => ({
   bakeSales: { id: "id", date: "date", is_active: "is_active", cutoff_datetime: "cutoff_datetime" },
@@ -49,7 +53,7 @@ describe("bake-sale-management actions", () => {
     },
     update: vi.fn(() => ({
       set: vi.fn(() => ({
-        where: vi.fn(),
+        where: vi.fn().mockResolvedValue({}),
       })),
     })),
   };

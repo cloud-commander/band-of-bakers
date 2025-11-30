@@ -17,7 +17,7 @@ export function WysiwygEditor({ value, onChange, className, id }: WysiwygEditorP
   return (
     <div id={id} className={cn("min-h-[300px]", className)}>
       <Editor
-        tinymceScriptSrc="/tinymce/tinymce.min.js"
+        tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.6.0/tinymce.min.js"
         licenseKey="gpl"
         onInit={(_evt: unknown, editor: unknown) => (editorRef.current = editor)}
         value={value}

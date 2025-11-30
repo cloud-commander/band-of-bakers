@@ -119,7 +119,7 @@ export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps
                 <div className="border rounded-md overflow-hidden">
                   <Editor
                     apiKey="no-api-key"
-                    tinymceScriptSrc="/tinymce/tinymce.min.js"
+                    tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.6.0/tinymce.min.js"
                     licenseKey="gpl"
                     value={content}
                     onEditorChange={(newContent) => setContent(newContent)}

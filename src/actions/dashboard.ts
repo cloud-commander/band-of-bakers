@@ -34,6 +34,11 @@ export async function getDashboardStats() {
       orderRepository.statusCounts(),
       orderRepository.topProducts(5),
     ]);
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const overdue = await orderRepository.overdueCountsByStatus(
+      ["processing", "ready"],
+      todayIso
+    );
 
     // Fill missing days with zero so charts are consistent
     const today = new Date();
@@ -87,6 +92,7 @@ export async function getDashboardStats() {
       statusCounts,
       topProducts,
       trends,
+      overdue,
     };
   } catch (error) {
     console.error("Failed to fetch dashboard stats:", error);
