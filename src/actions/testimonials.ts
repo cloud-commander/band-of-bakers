@@ -19,6 +19,10 @@ const testimonialSchema = z.object({
   avatar: z.string().optional(),
 });
 
+const testimonialUpdateSchema = testimonialSchema.extend({
+  status: z.enum(["pending", "approved", "rejected"]),
+});
+
 /**
  * Check admin role
  */
@@ -45,6 +49,21 @@ export async function getAllTestimonials() {
     throw new Error("Unauthorized");
   }
   return await testimonialRepository.findAll();
+}
+
+/**
+ * Get a single testimonial by ID (admin only)
+ */
+export async function getTestimonialById(id: string): Promise<Testimonial | null> {
+  try {
+    if (!(await checkAdminRole())) {
+      return null;
+    }
+    return await testimonialRepository.findById(id);
+  } catch (error) {
+    console.error("Get testimonial by id error:", error);
+    return null;
+  }
 }
 
 /**
@@ -151,5 +170,50 @@ export async function updateTestimonialStatus(
   } catch (error) {
     console.error("Update testimonial status error:", error);
     return { success: false, error: "Failed to update testimonial status" };
+  }
+}
+
+/**
+ * Update an existing testimonial (admin)
+ */
+export async function updateTestimonial(
+  id: string,
+  formData: FormData
+): Promise<ActionResult<void>> {
+  try {
+    if (!(await checkAdminRole())) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const rawData = {
+      name: formData.get("name") as string,
+      role: (formData.get("role") as string) || "",
+      content: formData.get("content") as string,
+      rating: Number(formData.get("rating")),
+      status: formData.get("status") as string,
+      avatar: (formData.get("avatar") as string) || "",
+    };
+
+    const validated = testimonialUpdateSchema.safeParse(rawData);
+    if (!validated.success) {
+      return { success: false, error: validated.error.issues[0].message };
+    }
+
+    await testimonialRepository.update(id, {
+      name: validated.data.name,
+      role: validated.data.role || null,
+      content: validated.data.content,
+      rating: validated.data.rating,
+      status: validated.data.status,
+      avatar_url: validated.data.avatar || null,
+    });
+
+    revalidatePath("/admin/testimonials");
+    revalidatePath("/");
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("Update testimonial error:", error);
+    return { success: false, error: "Failed to update testimonial" };
   }
 }

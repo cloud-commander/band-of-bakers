@@ -20,6 +20,7 @@ import {
   MessageSquareQuote,
   Image,
   Instagram,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,7 +36,7 @@ const navigation = [
   { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote },
   { name: "Instagram", href: "/admin/settings/instagram", icon: Instagram },
-  { name: "Email Templates", href: "/admin/settings/email-templates", icon: Settings },
+  { name: "Email Templates", href: "/admin/settings/email-templates", icon: Mail },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

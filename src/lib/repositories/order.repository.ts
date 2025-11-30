@@ -182,15 +182,23 @@ export class OrderRepository extends BaseRepository<typeof orders> {
    */
   async revenueLastNDays(days: number) {
     const db = await this.getDatabase();
-    const result = await db.execute(
-      sql`SELECT strftime('%Y-%m-%d', ${orders.created_at}) as day, SUM(${orders.total}) as revenue
-          FROM ${orders}
-          WHERE ${orders.created_at} >= datetime('now', '-' || ${days} || ' days')
-          GROUP BY day
-          ORDER BY day ASC`
-    );
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffIso = cutoff.toISOString();
+    const day = sql<string>`substr(${orders.created_at}, 1, 10)`.as("day");
+    const revenue = sql<number>`sum(${orders.total})`.as("revenue");
 
-    return (result as { rows: Array<{ day: string; revenue: number }> }).rows || [];
+    const rows = await db
+      .select({ day, revenue })
+      .from(orders)
+      .where(gte(orders.created_at, cutoffIso))
+      .groupBy(day)
+      .orderBy(day);
+
+    return rows.map((row) => ({
+      day: row.day,
+      revenue: Number(row.revenue ?? 0),
+    }));
   }
 
   /**
@@ -198,10 +206,18 @@ export class OrderRepository extends BaseRepository<typeof orders> {
    */
   async statusCounts() {
     const db = await this.getDatabase();
-    const result = await db.execute(
-      sql`SELECT ${orders.status} as status, COUNT(*) as count FROM ${orders} GROUP BY ${orders.status}`
-    );
-    return (result as { rows: Array<{ status: string; count: number }> }).rows || [];
+    const counts = await db
+      .select({
+        status: orders.status,
+        count: sql<number>`count(*)`.as("count"),
+      })
+      .from(orders)
+      .groupBy(orders.status);
+
+    return counts.map((row) => ({
+      status: row.status,
+      count: Number(row.count ?? 0),
+    }));
   }
 
   /**
@@ -209,24 +225,28 @@ export class OrderRepository extends BaseRepository<typeof orders> {
    */
   async topProducts(limit = 5) {
     const db = await this.getDatabase();
-    const result = await db.execute(
-      sql`SELECT ${products.id} as product_id,
-                  ${products.name} as name,
-                  SUM(${orderItems.quantity}) as units,
-                  SUM(${orderItems.total_price}) as revenue
-          FROM ${orderItems}
-          JOIN ${products} ON ${orderItems.product_id} = ${products.id}
-          GROUP BY ${products.id}, ${products.name}
-          ORDER BY units DESC
-          LIMIT ${limit}`
-    );
-    return (
-      (
-        result as {
-          rows: Array<{ product_id: string; name: string; units: number; revenue: number }>;
-        }
-      ).rows || []
-    );
+    const units = sql<number>`sum(${orderItems.quantity})`.as("units");
+    const revenue = sql<number>`sum(${orderItems.total_price})`.as("revenue");
+
+    const rows = await db
+      .select({
+        product_id: products.id,
+        name: products.name,
+        units,
+        revenue,
+      })
+      .from(orderItems)
+      .innerJoin(products, eq(orderItems.product_id, products.id))
+      .groupBy(products.id, products.name)
+      .orderBy(desc(units))
+      .limit(limit);
+
+    return rows.map((row) => ({
+      product_id: row.product_id,
+      name: row.name,
+      units: Number(row.units ?? 0),
+      revenue: Number(row.revenue ?? 0),
+    }));
   }
 
   async countSince(dateISO: string) {
