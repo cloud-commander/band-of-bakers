@@ -52,7 +52,7 @@ export default function LoginPage() {
 
       if (result?.error) {
         const code = result.error.toUpperCase();
-        if (code.includes("EMAIL_NOT_VERIFIED")) {
+        if (code.includes("EMAIL_NOT_VERIFIED") || code.includes("CALLBACKROUTEERROR")) {
           setEmailError("Please verify your email before logging in.");
           throw new Error("Please verify your email before logging in.");
         }
