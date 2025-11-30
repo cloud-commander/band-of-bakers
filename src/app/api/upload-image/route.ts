@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { getDb } from "@/lib/db";
 import { images } from "@/db/schema";
 import { nanoid } from "nanoid";
+import { getDb } from "@/lib/db";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 /**
  * Upload image to Cloudflare R2 and save metadata to DB

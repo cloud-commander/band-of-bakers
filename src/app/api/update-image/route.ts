@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getDb } from "@/lib/db";
 import { images } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache";
+import { getDb } from "@/lib/db";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 /**
  * Update image metadata
@@ -30,9 +30,9 @@ export async function PATCH(request: Request) {
 
     // 3. Update DB
     const db = await getDb();
-
-    // Find image by URL
-    const image = await db.select().from(images).where(eq(images.url, url)).get();
+    const image = await db.query.images.findFirst({
+      where: eq(images.url, url),
+    });
 
     if (!image) {
       return NextResponse.json({ error: "Image not found" }, { status: 404 });

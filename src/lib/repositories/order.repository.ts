@@ -15,25 +15,39 @@ export class OrderRepository extends BaseRepository<typeof orders> {
   }
 
   /**
-   * Create order with items
+   * Create order with items inside a transaction, assigning an atomic order_number.
    */
   async createWithItems(order: InsertOrder, items: InsertOrderItem[]) {
     const db = await this.getDatabase();
 
     try {
-      // Create order
-      const [newOrder] = await db.insert(orders).values(order).returning();
+      const result = await db.transaction(async (tx) => {
+        // Assign next order number atomically within this transaction
+        const next = await tx
+          .select({ max: sql<number>`coalesce(max(${orders.order_number}), 0)` })
+          .from(orders);
+        const orderNumber = Number(next[0]?.max ?? 0) + 1;
 
-      // Create items
-      if (items.length > 0) {
-        const itemsWithOrderId = items.map((item) => ({
-          ...item,
-          order_id: newOrder.id,
-        }));
-        await db.insert(orderItems).values(itemsWithOrderId);
-      }
+        const [newOrder] = await tx
+          .insert(orders)
+          .values({
+            ...order,
+            order_number: orderNumber,
+          })
+          .returning();
 
-      return newOrder;
+        if (items.length > 0) {
+          const itemsWithOrderId = items.map((item) => ({
+            ...item,
+            order_id: newOrder.id,
+          }));
+          await tx.insert(orderItems).values(itemsWithOrderId);
+        }
+
+        return newOrder;
+      });
+
+      return result;
     } catch (error) {
       console.error("Error creating order with items:", error);
       throw error;
@@ -93,25 +107,28 @@ export class OrderRepository extends BaseRepository<typeof orders> {
    */
   async findPaginated(limit: number, offset: number) {
     const db = await this.getDatabase();
-    const data = await db.query.orders.findMany({
-      limit,
-      offset,
-      with: {
-        user: true,
-        items: {
-          with: {
-            product: true,
-            variant: true,
-          },
-        },
-        bakeSale: {
-          with: {
-            location: true,
-          },
-        },
-      },
-      orderBy: desc(orders.created_at),
-    });
+    const data = await db
+      .select({
+        id: orders.id,
+        order_number: orders.order_number,
+        user_id: orders.user_id,
+        bake_sale_id: orders.bake_sale_id,
+        status: orders.status,
+        fulfillment_method: orders.fulfillment_method,
+        payment_method: orders.payment_method,
+        subtotal: orders.subtotal,
+        delivery_fee: orders.delivery_fee,
+        voucher_discount: orders.voucher_discount,
+        total: orders.total,
+        created_at: orders.created_at,
+        item_count: sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
+          "item_count"
+        ),
+      })
+      .from(orders)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(orders.created_at));
     const totalResult = await db.select({ count: sql<number>`count(*)` }).from(orders);
     return { data, total: Number(totalResult[0]?.count || 0) };
   }
@@ -123,20 +140,27 @@ export class OrderRepository extends BaseRepository<typeof orders> {
     sort: "newest" | "oldest" = "newest"
   ) {
     const db = await this.getDatabase();
-    const data = await db.query.orders.findMany({
-      limit,
-      offset,
-      where: eq(orders.user_id, userId),
-      with: {
-        items: true,
-        bakeSale: {
-          with: {
-            location: true,
-          },
-        },
-      },
-      orderBy: sort === "newest" ? desc(orders.created_at) : orders.created_at,
-    });
+    const orderBy = sort === "newest" ? desc(orders.created_at) : orders.created_at;
+    const data = await db
+      .select({
+        id: orders.id,
+        order_number: orders.order_number,
+        created_at: orders.created_at,
+        total: orders.total,
+        status: orders.status,
+        fulfillment_method: orders.fulfillment_method,
+        bake_sale_id: orders.bake_sale_id,
+        bakeSaleDate: sql<string | null>`(${orders.bake_sale_id})`.as("bake_sale_date"),
+        bakeSaleLocation: sql<string | null>`(${orders.bake_sale_id})`.as("bake_sale_location"),
+        item_count: sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
+          "item_count"
+        ),
+      })
+      .from(orders)
+      .where(eq(orders.user_id, userId))
+      .orderBy(orderBy)
+      .limit(limit)
+      .offset(offset);
     const totalResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(orders)

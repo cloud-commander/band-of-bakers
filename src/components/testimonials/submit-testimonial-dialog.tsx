@@ -115,7 +115,7 @@ export function SubmitTestimonialDialog() {
                           <Star
                             className={`w-6 h-6 ${
                               star <= field.value
-                                ? "fill-bakery-amber-400 text-bakery-amber-400"
+                                ? "fill-yellow-400 text-yellow-500"
                                 : "text-stone-300"
                             }`}
                           />

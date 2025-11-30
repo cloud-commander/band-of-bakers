@@ -1,0 +1,577 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2[39m
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindBySlug[2m > [22m[2mreturns product when found
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindBySlug[2m > [22m[2mreturns null when not found
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindActiveProducts[2m > [22m[2mreturns active products
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mdecrementStock[2m > [22m[2mreturns updated product on success
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mdecrementStock[2m > [22m[2mreturns null if update fails (e.g. insufficient stock)
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mtoggleActive[2m > [22m[2mtoggles product status
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mtoggleActive[2m > [22m[2mreturns null if product not found
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2msearchByName[2m > [22m[2msearches products by name
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mcountActive[2m > [22m[2mcounts active products
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mcountActive[2m > [22m[2mreturns 0 if no count returned
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mcreateWithVariants[2m > [22m[2mcreates product and variants
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstderr[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mcreateWithVariants[2m > [22m[2mcreates product and variants
+[22m[39mError creating product with variants: TypeError: db.insert is not a function
+    at ProductRepository.createWithVariants [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/product.repository.ts:87:37[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/__tests__/product.repository.test.ts:178:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mcreateWithVariants[2m > [22m[2mcreates product without variants
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstderr[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mcreateWithVariants[2m > [22m[2mcreates product without variants
+[22m[39mError creating product with variants: TypeError: db.insert is not a function
+    at ProductRepository.createWithVariants [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/product.repository.ts:87:37[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/__tests__/product.repository.test.ts:191:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindByCategoryId[2m > [22m[2mreturns products by category id
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindPaginated[2m > [22m[2mreturns paginated products
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindPaginated[2m > [22m[2mreturns paginated active products
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mfindActiveByCategoryId[2m > [22m[2mreturns active products by category
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mgetVariants[2m > [22m[2mreturns product variants
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mgetActiveVariants[2m > [22m[2mreturns active variants
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mincrementStock[2m > [22m[2mincrements stock
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mupdateWithVariants[2m > [22m[2mupdates product and variants
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstderr[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mupdateWithVariants[2m > [22m[2mupdates product and variants
+[22m[39mError updating product with variants: TypeError: db.update is not a function
+    at ProductRepository.updateWithVariants [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/product.repository.ts:229:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/__tests__/product.repository.test.ts:275:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mupdateWithVariants[2m > [22m[2mreturns null if product not found
+[22m[39mgetDatabase called
+mockDb keys: [
+  [32m'select'[39m, [32m'insert'[39m,
+  [32m'update'[39m, [32m'delete'[39m,
+  [32m'from'[39m,   [32m'where'[39m,
+  [32m'limit'[39m,  [32m'values'[39m,
+  [32m'set'[39m,    [32m'returning'[39m,
+  [32m'then'[39m,   [32m'query'[39m
+]
+mockDb.select type: function
+
+[90mstderr[2m | src/lib/repositories/__tests__/product.repository.test.ts[2m > [22m[2mProductRepository[2m > [22m[2mupdateWithVariants[2m > [22m[2mreturns null if product not found
+[22m[39mError updating product with variants: TypeError: db.update is not a function
+    at ProductRepository.updateWithVariants [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/product.repository.ts:229:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/__tests__/product.repository.test.ts:294:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+ [31m❯[39m src/lib/repositories/__tests__/product.repository.test.ts [2m([22m[2m21 tests[22m[2m | [22m[31m20 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+[31m       [31m×[31m returns product when found[39m[32m 4[2mms[22m[39m
+[31m       [31m×[31m returns null when not found[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns active products[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns updated product on success[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns null if update fails (e.g. insufficient stock)[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m toggles product status[39m[32m 0[2mms[22m[39m
+       [32m✓[39m returns null if product not found[32m 1[2mms[22m[39m
+[31m       [31m×[31m searches products by name[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m counts active products[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns 0 if no count returned[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m creates product and variants[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m creates product without variants[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns products by category id[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns paginated products[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns paginated active products[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns active products by category[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns product variants[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns active variants[39m[32m 2[2mms[22m[39m
+[31m       [31m×[31m increments stock[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m updates product and variants[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m returns null if product not found[39m[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 20 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindBySlug[2m > [22mreturns product when found
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.findBySlug src/lib/repositories/product.repository.ts:[2m24:30[22m[39m
+    [90m 22| [39m  [35masync[39m [34mfindBySlug[39m(slug[33m:[39m string)[33m:[39m [33mPromise[39m[33m<[39m[33mProduct[39m [33m|[39m [35mnull[39m[33m>[39m {
+    [90m 23| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m 24| [39m    const results = await db.select().from(products).where(eq(products…
+    [90m   | [39m                             [31m^[39m
+    [90m 25| [39m    [35mreturn[39m results[[34m0[39m] [33m||[39m [35mnull[39m[33m;[39m
+    [90m 26| [39m  }
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m72:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindBySlug[2m > [22mreturns null when not found
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.findBySlug src/lib/repositories/product.repository.ts:[2m24:30[22m[39m
+    [90m 22| [39m  [35masync[39m [34mfindBySlug[39m(slug[33m:[39m string)[33m:[39m [33mPromise[39m[33m<[39m[33mProduct[39m [33m|[39m [35mnull[39m[33m>[39m {
+    [90m 23| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m 24| [39m    const results = await db.select().from(products).where(eq(products…
+    [90m   | [39m                             [31m^[39m
+    [90m 25| [39m    [35mreturn[39m results[[34m0[39m] [33m||[39m [35mnull[39m[33m;[39m
+    [90m 26| [39m  }
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m80:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindActiveProducts[2m > [22mreturns active products
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.findActiveProducts src/lib/repositories/product.repository.ts:[2m41:21[22m[39m
+    [90m 39| [39m  [35masync[39m [34mfindActiveProducts[39m()[33m:[39m [33mPromise[39m[33m<[39m[33mProduct[39m[][33m>[39m {
+    [90m 40| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m 41| [39m    return await db.select().from(products).where(eq(products.is_activ…
+    [90m   | [39m                    [31m^[39m
+    [90m 42| [39m  }
+    [90m 43| [39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m90:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mdecrementStock[2m > [22mreturns updated product on success
+[31m[1mTypeError[22m: db.update is not a function[39m
+[36m [2m❯[22m ProductRepository.decrementStock src/lib/repositories/product.repository.ts:[2m133:8[22m[39m
+    [90m131| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m132| [39m    [35mconst[39m [updated] [33m=[39m [35mawait[39m db
+    [90m133| [39m      [33m.[39m[34mupdate[39m(products)
+    [90m   | [39m       [31m^[39m
+    [90m134| [39m      [33m.[39m[35mset[39m({
+    [90m135| [39m        stock_quantity[33m:[39m sql[32m`[39m[36m${[39mproducts[33m.[39mstock_quantity[36m}[39m[32m - [39m[36m${[39mquantity[36m}[39m[32m`[39m[33m,[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m100:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mdecrementStock[2m > [22mreturns null if update fails (e.g. insufficient stock)
+[31m[1mTypeError[22m: db.update is not a function[39m
+[36m [2m❯[22m ProductRepository.decrementStock src/lib/repositories/product.repository.ts:[2m133:8[22m[39m
+    [90m131| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m132| [39m    [35mconst[39m [updated] [33m=[39m [35mawait[39m db
+    [90m133| [39m      [33m.[39m[34mupdate[39m(products)
+    [90m   | [39m       [31m^[39m
+    [90m134| [39m      [33m.[39m[35mset[39m({
+    [90m135| [39m        stock_quantity[33m:[39m sql[32m`[39m[36m${[39mproducts[33m.[39mstock_quantity[36m}[39m[32m - [39m[36m${[39mquantity[36m}[39m[32m`[39m[33m,[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m108:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mtoggleActive[2m > [22mtoggles product status
+[31m[1mTypeError[22m: db.update is not a function[39m
+[36m [2m❯[22m ProductRepository.toggleActive src/lib/repositories/product.repository.ts:[2m179:8[22m[39m
+    [90m177| [39m    [90m// Toggle is_active[39m
+    [90m178| [39m    [35mconst[39m results [33m=[39m [35mawait[39m db
+    [90m179| [39m      [33m.[39m[34mupdate[39m(products)
+    [90m   | [39m       [31m^[39m
+    [90m180| [39m      [33m.[39m[35mset[39m({
+    [90m181| [39m        is_active[33m:[39m [33m![39mproduct[33m.[39mis_active[33m,[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m135:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22msearchByName[2m > [22msearches products by name
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.searchByName src/lib/repositories/product.repository.ts:[2m196:8[22m[39m
+    [90m194| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m195| [39m    [35mreturn[39m [35mawait[39m db
+    [90m196| [39m      [33m.[39m[34mselect[39m()
+    [90m   | [39m       [31m^[39m
+    [90m197| [39m      [33m.[39m[35mfrom[39m(products)
+    [90m198| [39m      [33m.[39m[34mwhere[39m([34mlike[39m(products[33m.[39mname[33m,[39m [32m`%[39m[36m${[39msearchTerm[36m}[39m[32m%`[39m))[33m;[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m154:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mcountActive[2m > [22mcounts active products
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.countActive src/lib/repositories/product.repository.ts:[2m207:8[22m[39m
+    [90m205| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m206| [39m    [35mconst[39m result [33m=[39m [35mawait[39m db
+    [90m207| [39m      [33m.[39m[34mselect[39m({ count[33m:[39m sql[33m<[39mnumber[33m>[39m[32m`count(*)`[39m })
+    [90m   | [39m       [31m^[39m
+    [90m208| [39m      [33m.[39m[35mfrom[39m(products)
+    [90m209| [39m      [33m.[39m[34mwhere[39m([34meq[39m(products[33m.[39mis_active[33m,[39m [35mtrue[39m))[33m;[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m162:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mcountActive[2m > [22mreturns 0 if no count returned
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.countActive src/lib/repositories/product.repository.ts:[2m207:8[22m[39m
+    [90m205| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m206| [39m    [35mconst[39m result [33m=[39m [35mawait[39m db
+    [90m207| [39m      [33m.[39m[34mselect[39m({ count[33m:[39m sql[33m<[39mnumber[33m>[39m[32m`count(*)`[39m })
+    [90m   | [39m       [31m^[39m
+    [90m208| [39m      [33m.[39m[35mfrom[39m(products)
+    [90m209| [39m      [33m.[39m[34mwhere[39m([34meq[39m(products[33m.[39mis_active[33m,[39m [35mtrue[39m))[33m;[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m168:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mcreateWithVariants[2m > [22mcreates product and variants
+[31m[1mTypeError[22m: db.insert is not a function[39m
+[36m [2m❯[22m ProductRepository.createWithVariants src/lib/repositories/product.repository.ts:[2m87:37[22m[39m
+    [90m 85| [39m    [35mtry[39m {
+    [90m 86| [39m      [90m// Create product[39m
+    [90m 87| [39m      const [newProduct] = await db.insert(products).values(product).r…
+    [90m   | [39m                                    [31m^[39m
+    [90m 88| [39m
+    [90m 89| [39m      [90m// Create variants if provided[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m178:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mcreateWithVariants[2m > [22mcreates product without variants
+[31m[1mTypeError[22m: db.insert is not a function[39m
+[36m [2m❯[22m ProductRepository.createWithVariants src/lib/repositories/product.repository.ts:[2m87:37[22m[39m
+    [90m 85| [39m    [35mtry[39m {
+    [90m 86| [39m      [90m// Create product[39m
+    [90m 87| [39m      const [newProduct] = await db.insert(products).values(product).r…
+    [90m   | [39m                                    [31m^[39m
+    [90m 88| [39m
+    [90m 89| [39m      [90m// Create variants if provided[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m191:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindByCategoryId[2m > [22mreturns products by category id
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.findByCategoryId src/lib/repositories/product.repository.ts:[2m33:21[22m[39m
+    [90m 31| [39m  [35masync[39m [34mfindByCategoryId[39m(categoryId[33m:[39m string)[33m:[39m [33mPromise[39m[33m<[39m[33mProduct[39m[][33m>[39m {
+    [90m 32| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m 33| [39m    return await db.select().from(products).where(eq(products.category…
+    [90m   | [39m                    [31m^[39m
+    [90m 34| [39m  }
+    [90m 35| [39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m202:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindPaginated[2m > [22mreturns paginated products
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'products')[39m
+[36m [2m❯[22m ProductRepository.findPaginated src/lib/repositories/product.repository.ts:[2m51:33[22m[39m
+    [90m 49| [39m    const whereClause = onlyActive ? eq(products.is_active, true) : un…
+    [90m 50| [39m
+    [90m 51| [39m    [35mconst[39m data [33m=[39m [35mawait[39m db[33m.[39mquery[33m.[39mproducts[33m.[39m[34mfindMany[39m({
+    [90m   | [39m                                [31m^[39m
+    [90m 52| [39m      limit[33m,[39m
+    [90m 53| [39m      offset[33m,[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m213:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindPaginated[2m > [22mreturns paginated active products
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'products')[39m
+[36m [2m❯[22m ProductRepository.findPaginated src/lib/repositories/product.repository.ts:[2m51:33[22m[39m
+    [90m 49| [39m    const whereClause = onlyActive ? eq(products.is_active, true) : un…
+    [90m 50| [39m
+    [90m 51| [39m    [35mconst[39m data [33m=[39m [35mawait[39m db[33m.[39mquery[33m.[39mproducts[33m.[39m[34mfindMany[39m({
+    [90m   | [39m                                [31m^[39m
+    [90m 52| [39m      limit[33m,[39m
+    [90m 53| [39m      offset[33m,[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m223:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mfindActiveByCategoryId[2m > [22mreturns active products by category
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.findActiveByCategoryId src/lib/repositories/product.repository.ts:[2m71:8[22m[39m
+    [90m 69| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m 70| [39m    [35mreturn[39m [35mawait[39m db
+    [90m 71| [39m      [33m.[39m[34mselect[39m()
+    [90m   | [39m       [31m^[39m
+    [90m 72| [39m      [33m.[39m[35mfrom[39m(products)
+    [90m 73| [39m      .where(and(eq(products.category_id, categoryId), eq(products.is_…
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m234:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mgetVariants[2m > [22mreturns product variants
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.getVariants src/lib/repositories/product.repository.ts:[2m112:21[22m[39m
+    [90m110| [39m  [35masync[39m [34mgetVariants[39m(productId[33m:[39m string)[33m:[39m [33mPromise[39m[33m<[39m[33mProductVariant[39m[][33m>[39m {
+    [90m111| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m112| [39m    return await db.select().from(productVariants).where(eq(productVar…
+    [90m   | [39m                    [31m^[39m
+    [90m113| [39m  }
+    [90m114| [39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m244:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mgetActiveVariants[2m > [22mreturns active variants
+[31m[1mTypeError[22m: db.select is not a function[39m
+[36m [2m❯[22m ProductRepository.getActiveVariants src/lib/repositories/product.repository.ts:[2m121:8[22m[39m
+    [90m119| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m120| [39m    [35mreturn[39m [35mawait[39m db
+    [90m121| [39m      [33m.[39m[34mselect[39m()
+    [90m   | [39m       [31m^[39m
+    [90m122| [39m      [33m.[39m[35mfrom[39m(productVariants)
+    [90m123| [39m      .where(and(eq(productVariants.product_id, productId), eq(product…
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m254:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mincrementStock[2m > [22mincrements stock
+[31m[1mTypeError[22m: db.update is not a function[39m
+[36m [2m❯[22m ProductRepository.incrementStock src/lib/repositories/product.repository.ts:[2m156:8[22m[39m
+    [90m154| [39m    [35mconst[39m db [33m=[39m [35mawait[39m [35mthis[39m[33m.[39m[34mgetDatabase[39m()[33m;[39m
+    [90m155| [39m    [35mconst[39m [updated] [33m=[39m [35mawait[39m db
+    [90m156| [39m      [33m.[39m[34mupdate[39m(products)
+    [90m   | [39m       [31m^[39m
+    [90m157| [39m      [33m.[39m[35mset[39m({
+    [90m158| [39m        stock_quantity[33m:[39m sql[32m`[39m[36m${[39mproducts[33m.[39mstock_quantity[36m}[39m[32m + [39m[36m${[39mquantity[36m}[39m[32m`[39m[33m,[39m
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m264:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mupdateWithVariants[2m > [22mupdates product and variants
+[31m[1mTypeError[22m: db.update is not a function[39m
+[36m [2m❯[22m ProductRepository.updateWithVariants src/lib/repositories/product.repository.ts:[2m229:10[22m[39m
+    [90m227| [39m      [90m// 1. Update product[39m
+    [90m228| [39m      [35mconst[39m [updatedProduct] [33m=[39m [35mawait[39m db
+    [90m229| [39m        [33m.[39m[34mupdate[39m(products)
+    [90m   | [39m         [31m^[39m
+    [90m230| [39m        .set({ ...productUpdates, updated_at: new Date().toISOString()…
+    [90m231| [39m        [33m.[39m[34mwhere[39m([34meq[39m(products[33m.[39mid[33m,[39m productId))
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m275:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/20]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/product.repository.test.ts[2m > [22mProductRepository[2m > [22mupdateWithVariants[2m > [22mreturns null if product not found
+[31m[1mTypeError[22m: db.update is not a function[39m
+[36m [2m❯[22m ProductRepository.updateWithVariants src/lib/repositories/product.repository.ts:[2m229:10[22m[39m
+    [90m227| [39m      [90m// 1. Update product[39m
+    [90m228| [39m      [35mconst[39m [updatedProduct] [33m=[39m [35mawait[39m db
+    [90m229| [39m        [33m.[39m[34mupdate[39m(products)
+    [90m   | [39m         [31m^[39m
+    [90m230| [39m        .set({ ...productUpdates, updated_at: new Date().toISOString()…
+    [90m231| [39m        [33m.[39m[34mwhere[39m([34meq[39m(products[33m.[39mid[33m,[39m productId))
+[90m [2m❯[22m src/lib/repositories/__tests__/product.repository.test.ts:[2m294:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/20]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m20 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (21)[39m
+[2m   Start at [22m 13:48:50
+[2m   Duration [22m 750ms[2m (transform 70ms, setup 168ms, import 78ms, tests 17ms, environment 396ms)[22m
+

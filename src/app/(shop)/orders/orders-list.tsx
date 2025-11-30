@@ -27,13 +27,9 @@ interface OrdersListProps {
     total: number;
     status: string;
     fulfillment_method: string;
-    items: Array<unknown>;
-    bakeSale?: {
-      date: string;
-      location?: {
-        name: string;
-      } | null;
-    } | null;
+    item_count?: number;
+    bakeSaleDate?: string | null;
+    bakeSaleLocation?: string | null;
   }>;
   totalItems: number;
   currentPage: number;
@@ -135,17 +131,17 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
                     })}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {order.items.length} item{order.items.length > 1 ? "s" : ""}
+                    {order.item_count ?? 0} item{(order.item_count ?? 0) !== 1 ? "s" : ""}
                   </p>
-                  {order.bakeSale && (
+                  {order.bakeSaleDate && (
                     <p className="text-sm text-muted-foreground">
                       Bake Sale:{" "}
-                      {new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
+                      {new Date(order.bakeSaleDate).toLocaleDateString("en-GB", {
                         weekday: "short",
                         day: "numeric",
                         month: "short",
                       })}{" "}
-                      {order.bakeSale.location?.name ? `• ${order.bakeSale.location.name}` : ""}
+                      {order.bakeSaleLocation ? `• ${order.bakeSaleLocation}` : ""}
                     </p>
                   )}
                 </div>

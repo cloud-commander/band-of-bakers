@@ -11,6 +11,11 @@ export async function sendEmail(
   const db = await getDb();
   // Fetch template
   const template = await db.query.emailTemplates.findFirst({
+    columns: {
+      name: true,
+      subject: true,
+      content: true,
+    },
     where: eq(emailTemplates.name, templateName),
   });
 

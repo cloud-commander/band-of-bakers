@@ -36,6 +36,7 @@ interface OrderWithRelations {
   status: string;
   user_id: string;
   bake_sale_id?: string | null;
+  item_count?: number;
   user?: {
     name: string | null;
     email: string;
@@ -478,7 +479,14 @@ export function OrdersTable({
                     {order.status}
                   </Badge>
                 </td>
-                <td className="p-4 font-medium font-serif">£{order.total.toFixed(2)}</td>
+                <td className="p-4 font-medium font-serif">
+                  <div className="flex flex-col items-start gap-1">
+                    <span>£{order.total.toFixed(2)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {order.item_count ?? 0} item{(order.item_count ?? 0) !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </td>
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     {getQuickAction(order)}

@@ -13,6 +13,7 @@ import { validateVoucher } from "@/lib/utils/voucher";
 import { sendEmail } from "@/lib/email/service";
 import { verifyTurnstileToken } from "@/lib/actions/verify-turnstile";
 import { formatOrderReference } from "@/lib/utils/order";
+import { cache } from "react";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -39,13 +40,12 @@ const orderSchema = z.object({
       quantity: z.number().min(1),
     })
   ),
-  voucherCode: z
-    .preprocess((value) => {
-      if (typeof value === "string" && value.trim() === "") {
-        return undefined;
-      }
-      return value;
-    }, z.string().trim().optional()),
+  voucherCode: z.preprocess((value) => {
+    if (typeof value === "string" && value.trim() === "") {
+      return undefined;
+    }
+    return value;
+  }, z.string().trim().optional()),
   turnstileToken: z.string().optional(),
 });
 
@@ -119,9 +119,21 @@ export async function createOrder(
     const productCache = new Map<string, Awaited<ReturnType<typeof productRepository.findById>>>();
     const stockRequirements = new Map<string, number>();
 
+    // Prefetch variants for all products to avoid N+1
+    const productIds = Array.from(new Set(items.map((item) => item.productId)));
+    const variantsByProduct = await productRepository.getActiveVariantsForProducts(productIds);
+    const productsById = new Map(
+      ((await productRepository.findByIds)
+        ? await productRepository.findByIds(productIds)
+        : await Promise.all(productIds.map((id) => productRepository.findById(id)))
+      )
+        .filter((p) => p !== null)
+        .map((p) => [p!.id, p!])
+    );
+
     for (const item of items) {
       const cachedProduct = productCache.get(item.productId);
-      const product = cachedProduct ?? (await productRepository.findById(item.productId));
+      const product = cachedProduct ?? productsById.get(item.productId);
 
       if (!product) {
         return { success: false, error: `Product not found: ${item.productId}` };
@@ -136,7 +148,7 @@ export async function createOrder(
       let variantId = null;
 
       if (item.variantId) {
-        const variants = await productRepository.getActiveVariants(product.id);
+        const variants = variantsByProduct.get(product.id) || [];
         const variant = variants.find((v) => v.id === item.variantId && v.is_active);
         if (variant) {
           price += variant.price_adjustment;
@@ -177,10 +189,7 @@ export async function createOrder(
     const orderTotalBeforeDiscount = subtotal + deliveryFee;
 
     let voucherDiscount = 0;
-    let appliedVoucher:
-      | Awaited<ReturnType<typeof voucherRepository.findByCode>>
-      | null
-      | undefined;
+    let appliedVoucher: Awaited<ReturnType<typeof voucherRepository.findByCode>> | null | undefined;
 
     if (voucherCode) {
       const voucher = await voucherRepository.findByCode(voucherCode.toUpperCase());
@@ -193,10 +202,7 @@ export async function createOrder(
         };
       }
 
-      if (
-        voucher?.max_uses_per_customer !== null &&
-        voucher?.max_uses_per_customer !== undefined
-      ) {
+      if (voucher?.max_uses_per_customer !== null && voucher?.max_uses_per_customer !== undefined) {
         const perCustomerUses = await orderRepository.countVoucherUses(userId, voucher.id);
         if (perCustomerUses >= voucher.max_uses_per_customer) {
           return {
@@ -239,12 +245,9 @@ export async function createOrder(
       bakeSaleId = upcomingSales[0]?.id;
     }
 
-    const orderNumber = await orderRepository.nextOrderNumber();
-
     const order = await orderRepository.createWithItems(
       {
         id: nanoid(),
-        order_number: orderNumber,
         user_id: userId,
         bake_sale_id: bakeSaleId,
         status: "pending",
@@ -272,7 +275,7 @@ export async function createOrder(
 
     revalidatePath("/admin/orders");
 
-    return { success: true, data: { id: order.id, order_number: orderNumber } };
+    return { success: true, data: { id: order.id, order_number: order.order_number } };
   } catch (error) {
     // Roll back any stock reservations
     if (stockReservations.length > 0) {
@@ -339,7 +342,7 @@ export async function getPaginatedOrders(page = 1, pageSize = 20) {
   };
 }
 
-export async function getPaginatedUserOrders(
+export const getPaginatedUserOrders = cache(async function getPaginatedUserOrders(
   page = 1,
   pageSize = 10,
   sort: "newest" | "oldest" = "newest"
@@ -364,7 +367,7 @@ export async function getPaginatedUserOrders(
     console.error("Failed to fetch paginated user orders:", error);
     return { orders: [], total: 0, page: 1, pageSize };
   }
-}
+});
 
 const ADMIN_ROLES = ["owner", "manager", "staff"] as const;
 const VALID_STATUS_TRANSITIONS: Record<
@@ -384,7 +387,10 @@ export async function updateOrderStatus(
 ): Promise<ActionResult<{ id: string; status: string }>> {
   try {
     const session = await auth();
-    if (!session?.user?.role || !ADMIN_ROLES.includes(session.user.role as (typeof ADMIN_ROLES)[number])) {
+    if (
+      !session?.user?.role ||
+      !ADMIN_ROLES.includes(session.user.role as (typeof ADMIN_ROLES)[number])
+    ) {
       return { success: false, error: "Unauthorized" };
     }
 

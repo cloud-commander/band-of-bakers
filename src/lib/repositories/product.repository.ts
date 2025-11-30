@@ -26,6 +26,16 @@ export class ProductRepository extends BaseRepository<typeof products> {
   }
 
   /**
+   * Find products by IDs in a single query.
+   */
+  async findByIds(ids: string[]) {
+    if (ids.length === 0) return [];
+    const { inArray } = await import("drizzle-orm");
+    const db = await this.getDatabase();
+    return await db.select().from(products).where(inArray(products.id, ids));
+  }
+
+  /**
    * Find products by category ID
    */
   async findByCategoryId(categoryId: string): Promise<Product[]> {
@@ -121,6 +131,27 @@ export class ProductRepository extends BaseRepository<typeof products> {
       .select()
       .from(productVariants)
       .where(and(eq(productVariants.product_id, productId), eq(productVariants.is_active, true)));
+  }
+
+  /**
+   * Get active variants for many products, returned as a map keyed by product_id.
+   */
+  async getActiveVariantsForProducts(productIds: string[]) {
+    if (productIds.length === 0) return new Map<string, ProductVariant[]>();
+    const db = await this.getDatabase();
+    const { inArray } = await import("drizzle-orm");
+    const rows = await db
+      .select()
+      .from(productVariants)
+      .where(and(inArray(productVariants.product_id, productIds), eq(productVariants.is_active, true)));
+
+    const map = new Map<string, ProductVariant[]>();
+    for (const row of rows) {
+      const list = map.get(row.product_id) || [];
+      list.push(row);
+      map.set(row.product_id, list);
+    }
+    return map;
   }
 
   /**

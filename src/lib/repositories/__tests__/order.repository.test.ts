@@ -54,6 +54,19 @@ const mocks = vi.hoisted(() => {
         findMany: vi.fn(),
       },
     },
+    transaction: vi.fn(async (callback) => {
+      // Mock transaction object with same methods as db
+      const tx = {
+        select,
+        insert,
+        update,
+        delete: _delete,
+        query: {
+          orders: { findFirst, findMany },
+        },
+      };
+      return callback(tx);
+    }),
   };
   return {
     mockDb,
@@ -176,7 +189,9 @@ describe("OrderRepository", () => {
       const mockOrders = [{ id: "1" }];
 
       mocks.mocks.findMany.mockResolvedValue(mockOrders);
-      mocks.mocks.then.mockImplementation((resolve: any) => resolve([{ count: 1 }]));
+      mocks.mocks.then
+        .mockImplementationOnce((resolve: any) => resolve(mockOrders))
+        .mockImplementationOnce((resolve: any) => resolve([{ count: 1 }]));
 
       const result = await repository.findPaginated(10, 0);
       expect(result.data).toEqual(mockOrders);
@@ -222,6 +237,66 @@ describe("OrderRepository", () => {
 
       const result = await repository.topProducts(5);
       expect(result).toEqual(expectedData);
+    });
+  });
+
+  describe("findPaginatedByUser", () => {
+    it("returns paginated orders for user", async () => {
+      const mockOrders = [{ id: "1" }];
+      mocks.mocks.findMany.mockResolvedValue(mockOrders);
+      mocks.mocks.then
+        .mockImplementationOnce((resolve: any) => resolve(mockOrders))
+        .mockImplementationOnce((resolve: any) => resolve([{ count: 1 }]));
+
+      const result = await repository.findPaginatedByUser("u1", 10, 0);
+      expect(result.data).toEqual(mockOrders);
+      expect(result.total).toBe(1);
+    });
+  });
+
+  describe("findRecent", () => {
+    it("returns recent orders", async () => {
+      const mockOrders = [{ id: "1" }];
+      mocks.mocks.findMany.mockResolvedValue(mockOrders);
+
+      const result = await repository.findRecent(5);
+      expect(result).toEqual(mockOrders);
+    });
+  });
+
+  describe("findAll", () => {
+    it("returns all orders", async () => {
+      const mockOrders = [{ id: "1" }];
+      mocks.mocks.findMany.mockResolvedValue(mockOrders);
+
+      const result = await repository.findAll();
+      expect(result).toEqual(mockOrders);
+    });
+  });
+
+  describe("analytics methods", () => {
+    it("countSince returns count", async () => {
+      mocks.mocks.then.mockImplementation((resolve: any) => resolve([{ count: 5 }]));
+      const result = await repository.countSince("2023-01-01");
+      expect(result).toBe(5);
+    });
+
+    it("countBetween returns count", async () => {
+      mocks.mocks.then.mockImplementation((resolve: any) => resolve([{ count: 5 }]));
+      const result = await repository.countBetween("2023-01-01", "2023-01-31");
+      expect(result).toBe(5);
+    });
+
+    it("sumTotalSince returns total", async () => {
+      mocks.mocks.then.mockImplementation((resolve: any) => resolve([{ total: 100 }]));
+      const result = await repository.sumTotalSince("2023-01-01");
+      expect(result).toBe(100);
+    });
+
+    it("sumTotalBetween returns total", async () => {
+      mocks.mocks.then.mockImplementation((resolve: any) => resolve([{ total: 100 }]));
+      const result = await repository.sumTotalBetween("2023-01-01", "2023-01-31");
+      expect(result).toBe(100);
     });
   });
 });

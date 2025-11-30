@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getCachedImages } from "@/lib/cache";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 /**
  * List images from DB with filtering
@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
     // Base fetch (cached) then bucket-filter locally
     const filteredImages = await getCachedImages(
       category !== "all" ? category : undefined,
-      tag !== "all" ? tag : undefined
+      tag !== "all" ? tag : undefined,
+      limit
     );
 
     const bucketFiltered = filteredImages.filter((img) => {

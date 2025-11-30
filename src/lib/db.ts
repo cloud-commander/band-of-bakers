@@ -28,6 +28,11 @@ export async function getDb() {
 
   console.warn("[DB] env.DB is undefined or context failed.");
 
+  // On edge, fail fast if no D1 binding is available
+  if (process.env.NEXT_RUNTIME === "edge") {
+    throw new Error("D1 binding (env.DB) is required on edge runtime");
+  }
+
   // Fallback for local development
   if (process.env.NODE_ENV === "development" || !process.env.NODE_ENV) {
     // Check global cache first

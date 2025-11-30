@@ -87,7 +87,6 @@
     "eslint-config-next": "16.0.3",
     "jsdom": "^27.2.0",
     "postcss": "^8.5.6",
-    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
     "vitest": "^4.0.14",
@@ -96,8 +95,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "better-sqlite3",
-      "esbuild",
-      "sharp"
+      "esbuild"
     ]
   }
 }
