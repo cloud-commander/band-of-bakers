@@ -21,6 +21,7 @@ import {
   Image,
   Instagram,
   Mail,
+  HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +36,7 @@ const navigation = [
   { name: "News", href: "/admin/news", icon: Newspaper },
   { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote },
+  { name: "FAQs", href: "/admin/faqs", icon: HelpCircle },
   { name: "Instagram", href: "/admin/settings/instagram", icon: Instagram },
   { name: "Email Templates", href: "/admin/settings/email-templates", icon: Mail },
   { name: "Settings", href: "/admin/settings", icon: Settings },

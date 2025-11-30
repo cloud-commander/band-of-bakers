@@ -1,15 +1,45 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { CheckCircle } from "lucide-react";
+import { formatOrderReference } from "@/lib/utils/order";
+import { Suspense } from "react";
+import { getPaginatedUserOrders } from "@/actions/orders";
+import { auth } from "@/auth";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
-export default function CheckoutSuccessPage() {
-  const [orderNumber] = useState(() => `ORD-${Math.floor(100000 + Math.random() * 900000)}`);
+export default async function CheckoutSuccessPage() {
+  const session = await auth();
+  const latestOrder =
+    session?.user?.id
+      ? (await getPaginatedUserOrders(1, 1)).orders[0] ?? null
+      : null;
+  const formattedRef = latestOrder
+    ? formatOrderReference(latestOrder.id, latestOrder.order_number)
+    : null;
+  const estimated =
+    latestOrder?.bakeSale?.date &&
+    new Date(latestOrder.bakeSale.date).toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  const collectionHours = latestOrder?.bakeSale?.location?.collection_hours || "10:00 - 16:00";
+  const icsLink =
+    latestOrder?.bakeSale?.date && collectionHours
+      ? `/api/calendar?date=${encodeURIComponent(latestOrder.bakeSale.date)}&hours=${encodeURIComponent(collectionHours)}&title=${encodeURIComponent(formattedRef || "Order pickup")}`
+      : null;
+  const mapLink =
+    latestOrder?.bakeSale?.location?.address_line1 && latestOrder?.bakeSale?.location?.postcode
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          `${latestOrder.bakeSale.location.address_line1} ${latestOrder.bakeSale.location.postcode}`
+        )}`
+      : null;
 
   return (
     <div
@@ -29,7 +59,31 @@ export default function CheckoutSuccessPage() {
 
         <div className="bg-muted p-6 rounded-lg mb-8">
           <p className="text-sm text-muted-foreground mb-1">Order Reference</p>
-          <p className="text-xl font-mono font-bold tracking-wider">{orderNumber}</p>
+          <p className="text-xl font-mono font-bold tracking-wider">
+            {formattedRef || "Check My Orders"}
+          </p>
+          {estimated && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Estimated ready/pickup: {estimated} ({collectionHours})
+            </p>
+          )}
+          {mapLink && (
+            <p className="text-sm mt-2">
+              <a className="underline text-bakery-amber-700" href={mapLink} target="_blank" rel="noreferrer">
+                View location on map
+              </a>
+            </p>
+          )}
+        </div>
+
+        <div className="bg-white border rounded-lg p-4 text-left space-y-2 mb-8">
+          <p className="text-sm font-medium">Next steps</p>
+          <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+            <li>We’re preparing your order for the selected bake sale date.</li>
+            <li>You’ll get an email when it’s ready.</li>
+            <li>View details or update your info in My Orders.</li>
+            {collectionHours && <li>Collection hours: {collectionHours}</li>}
+          </ul>
         </div>
 
         <div className="space-y-4">
@@ -39,6 +93,11 @@ export default function CheckoutSuccessPage() {
           <Button asChild variant="outline" className="w-full">
             <Link href="/menu">Continue Shopping</Link>
           </Button>
+          {icsLink && (
+            <Button asChild variant="ghost" className="w-full">
+              <a href={icsLink}>Save to Calendar</a>
+            </Button>
+          )}
         </div>
       </div>
     </div>

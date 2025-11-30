@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { getPaginatedOrders } from "@/actions/orders";
 import { OrdersTable } from "./orders-table";
+import { AdminOrdersSkeleton } from "@/components/skeletons/admin-orders-skeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
   return (
     <div>
       <PageHeader title="Orders" description="Manage customer orders" />
-      <Suspense fallback={<div>Loading orders...</div>}>
+      <Suspense fallback={<AdminOrdersSkeleton />}>
         <OrdersTable
           initialOrders={orders}
           totalCount={total}

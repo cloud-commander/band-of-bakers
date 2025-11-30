@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getOrderById } from "@/actions/orders";
 import { auth } from "@/auth";
 import { formatOrderReference } from "@/lib/utils/order";
+import { cn } from "@/lib/utils";
 
 interface OrderPageProps {
   params: Promise<{
@@ -19,6 +20,8 @@ const statusColors = {
   cancelled: "bg-red-100 text-red-800",
   refunded: "bg-gray-100 text-gray-800",
 } as const;
+
+const stagesOrder = ["pending", "processing", "ready", "fulfilled"] as const;
 
 export default async function OrderPage({ params }: OrderPageProps) {
   const { id } = await params;
@@ -38,6 +41,22 @@ export default async function OrderPage({ params }: OrderPageProps) {
   const bakeSale = order.bakeSale;
   const voucherDiscount = order.voucher_discount ?? 0;
   const hasVoucherDiscount = voucherDiscount > 0;
+  const paymentLabel = order.payment_method
+    ? order.payment_method.replace(/_/g, " ")
+    : "payment";
+  const fulfillmentDetails =
+    order.fulfillment_method === "collection"
+      ? bakeSale && bakeSale.location
+        ? `${bakeSale.location.name}, ${bakeSale.location.address_line1 || ""} ${
+            bakeSale.location.postcode || ""
+          }`
+      : "Collection"
+      : order.shipping_address_line1
+        ? `${order.shipping_address_line1}${
+            order.shipping_address_line2 ? ", " + order.shipping_address_line2 : ""
+          }, ${order.shipping_city || ""} ${order.shipping_postcode || ""}`
+        : "Delivery";
+  const currentStageIdx = stagesOrder.indexOf(order.status as (typeof stagesOrder)[number]);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -59,6 +78,9 @@ export default async function OrderPage({ params }: OrderPageProps) {
               <Badge className={statusColors[order.status as keyof typeof statusColors]}>
                 {order.status}
               </Badge>
+              <Badge variant="outline" className="ml-2 capitalize">
+                {paymentLabel}
+              </Badge>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground mb-1">Placed on</p>
@@ -70,6 +92,35 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 })}
               </p>
             </div>
+          </div>
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              {stagesOrder.map((stage, idx) => {
+                const active = currentStageIdx >= idx;
+                return (
+                  <div key={stage} className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        "h-3 w-3 rounded-full border",
+                        active ? "bg-green-600 border-green-600" : "bg-white border-stone-300"
+                      )}
+                      aria-label={stage}
+                    />
+                    <span className={cn("text-xs capitalize", active ? "text-green-700" : "text-muted-foreground")}>
+                      {stage}
+                    </span>
+                    {idx < stagesOrder.length - 1 && (
+                      <div className={cn("h-[1px] w-10", active ? "bg-green-500" : "bg-stone-300")} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p className="font-medium text-stone-700">Fulfillment</p>
+            <p className="capitalize">{order.fulfillment_method}</p>
+            <p>{fulfillmentDetails}</p>
           </div>
         </div>
 

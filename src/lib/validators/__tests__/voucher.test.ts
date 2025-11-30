@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { insertVoucherSchema, updateVoucherSchema, applyVoucherSchema } from "../voucher";
+import {
+  insertVoucherSchema,
+  updateVoucherSchema,
+  applyVoucherSchema,
+  voucherSchema,
+} from "../voucher";
 
 describe("Voucher Validators", () => {
   describe("insertVoucherSchema", () => {
@@ -235,6 +240,46 @@ describe("Voucher Validators", () => {
       const result = insertVoucherSchema.safeParse({
         ...validPercentageVoucher,
         is_active: false,
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("voucherSchema", () => {
+    const validVoucher = {
+      id: "123e4567-e89b-12d3-a456-426614174000",
+      code: "SAVE20",
+      type: "percentage" as const,
+      value: 20,
+      min_order_value: 10,
+      max_uses: 100,
+      current_uses: 0,
+      max_uses_per_customer: 1,
+      valid_from: "2025-01-01T00:00:00Z",
+      valid_until: "2025-12-31T23:59:59Z",
+      is_active: true,
+      created_at: "2025-01-01T00:00:00Z",
+      updated_at: "2025-01-01T00:00:00Z",
+    };
+
+    it("should validate a correct voucher", () => {
+      const result = voucherSchema.safeParse(validVoucher);
+      expect(result.success).toBe(true);
+    });
+
+    it("should fail if percentage value is greater than 100", () => {
+      const result = voucherSchema.safeParse({
+        ...validVoucher,
+        value: 150,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should validate a fixed amount voucher", () => {
+      const result = voucherSchema.safeParse({
+        ...validVoucher,
+        type: "fixed_amount",
+        value: 150, // Allowed for fixed amount
       });
       expect(result.success).toBe(true);
     });

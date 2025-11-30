@@ -3,6 +3,7 @@ import { getPaginatedUserOrders } from "@/actions/orders";
 import { OrdersList } from "./orders-list";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { OrdersListSkeleton } from "@/components/skeletons/orders-list-skeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   );
 
   return (
-    <Suspense fallback={<div>Loading orders...</div>}>
+    <Suspense fallback={<OrdersListSkeleton />}>
       <OrdersList
         orders={orders}
         totalItems={total}

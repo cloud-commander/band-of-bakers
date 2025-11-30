@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { cancelBakeSale, rescheduleBakeSale, resolveOrderIssue } from "../bake-sale-management";
 import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { sendEmail } from "@/lib/email/service";
-import { revalidatePath } from "next/cache";
 
 // Mock dependencies
 vi.mock("@/auth", () => ({
@@ -16,10 +16,6 @@ vi.mock("@/lib/db", () => ({
 
 vi.mock("@/lib/email/service", () => ({
   sendEmail: vi.fn(),
-}));
-
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
 }));
 
 // Mock schema
@@ -254,7 +250,7 @@ describe("bake-sale-management actions", () => {
       const result = await resolveOrderIssue("o1", "transfer", "bs2");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Not enough stock");
+      expect((result as { success: false; error: string }).error).toContain("Not enough stock");
     });
 
     it("should fail transfer if new bake sale id missing", async () => {
@@ -267,7 +263,7 @@ describe("bake-sale-management actions", () => {
       const result = await resolveOrderIssue("o1", "transfer");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("New bake sale ID required");
+      expect((result as { success: false; error: string }).error).toBe("New bake sale ID required");
     });
   });
 });

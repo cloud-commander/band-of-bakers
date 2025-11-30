@@ -11,6 +11,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatOrderReference } from "@/lib/utils/order";
+import { Button as CalendarButton } from "@/components/ui/button";
 
 // Define shapes matching what we get from getOrderById
 interface OrderDetailContentProps {
@@ -99,6 +100,15 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     const availableQty = availableQuantities[item.id];
     return availableQty !== undefined && availableQty < item.quantity;
   });
+
+  const bakeSaleMapLink =
+    order.bakeSale?.location?.name && order.bakeSale?.location?.address_line1
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          `${order.bakeSale.location.address_line1} ${order.bakeSale.location.name} ${
+            order.bakeSale.location.city ?? ""
+          } ${order.bakeSale.location.postcode ?? ""}`
+        )}`
+      : null;
 
   // Toggle item availability (Full / None)
   const toggleItemAvailability = (itemId: string, itemName: string, maxQty: number) => {
@@ -250,6 +260,44 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
             day: "numeric",
           })}`}
         />
+        {bakeSaleMapLink && (
+          <div className="mt-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href={bakeSaleMapLink} target="_blank" rel="noreferrer">
+                View location on map
+              </a>
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Status Timeline */}
+      <div className="mb-4 bg-muted/50 border rounded-lg p-4">
+        <p className="text-sm font-medium mb-2">Status Timeline</p>
+        <div className="flex items-center gap-4">
+          {["pending", "processing", "ready", "fulfilled"].map((stage, idx) => {
+            const stagesOrder = ["pending", "processing", "ready", "fulfilled"];
+            const currentIdx = stagesOrder.indexOf(order.status);
+            const active = currentIdx >= idx;
+            return (
+              <div key={stage} className="flex items-center gap-2">
+                <div
+                  className={cn(
+                    "h-3 w-3 rounded-full border",
+                    active ? "bg-green-600 border-green-600" : "bg-white border-stone-300"
+                  )}
+                  aria-label={stage}
+                />
+                <span className={cn("text-xs capitalize", active ? "text-green-700" : "text-muted-foreground")}>
+                  {stage}
+                </span>
+                {idx < stagesOrder.length - 1 && (
+                  <div className={cn("h-[1px] w-8", active ? "bg-green-500" : "bg-stone-300")} />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Change Type Selection */}

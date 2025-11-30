@@ -18,6 +18,11 @@ const statusColors = {
   refunded: "bg-gray-100 text-gray-800",
 } as const;
 
+const fulfillmentColors = {
+  collection: "bg-emerald-50 text-emerald-700",
+  delivery: "bg-blue-50 text-blue-700",
+} as const;
+
 // Define shape matching getUserOrders return type
 interface OrdersListProps {
   orders: Array<{
@@ -121,6 +126,15 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
                     <Badge className={statusColors[order.status as keyof typeof statusColors]}>
                       {order.status}
                     </Badge>
+                    <Badge
+                      variant="outline"
+                      className={fulfillmentColors[order.fulfillment_method as "collection" | "delivery"]}
+                    >
+                      {order.fulfillment_method}
+                    </Badge>
+                    <Badge variant="outline" className="capitalize">
+                      {order.fulfillment_method}
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Placed on{" "}
@@ -154,19 +168,35 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
               </div>
             </Link>
           ))}
-        </div>
+      </div>
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="mt-12 flex flex-col items-center gap-6">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-12 flex flex-col items-center gap-6 pb-24">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
           </div>
         )}
-      </div>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="fixed bottom-4 inset-x-0 px-4 sm:px-6 lg:px-8 pointer-events-none">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/95 backdrop-blur border rounded-full shadow-lg px-4 py-2 flex items-center justify-center pointer-events-auto">
+              <Pagination
+                aria-label="Orders pagination"
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

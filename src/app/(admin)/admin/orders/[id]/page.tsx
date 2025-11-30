@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getOrderById } from "@/actions/orders";
 import { OrderDetailContent } from "./order-detail-content";
+import { AdminOrderDetailSkeleton } from "@/components/skeletons/admin-order-detail-skeleton";
 
 interface OrderDetailPageProps {
   params: Promise<{
@@ -17,7 +18,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   }
 
   return (
-    <Suspense fallback={<div>Loading order details...</div>}>
+    <Suspense fallback={<AdminOrderDetailSkeleton />}>
       <OrderDetailContent order={order} />
     </Suspense>
   );

@@ -329,6 +329,27 @@ export const testimonials = sqliteTable(
 );
 
 // ============================================================================
+// FAQs
+// ============================================================================
+
+export const faqs = sqliteTable(
+  "faqs",
+  {
+    id: text("id").primaryKey(),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    category: text("category"),
+    sort_order: integer("sort_order").notNull().default(0),
+    is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    isActiveIdx: index("idx_faqs_is_active").on(table.is_active),
+    sortOrderIdx: index("idx_faqs_sort_order").on(table.sort_order),
+  })
+);
+
+// ============================================================================
 // EMAIL TEMPLATES
 // ============================================================================
 
@@ -405,6 +426,9 @@ export type InsertReview = typeof reviews.$inferInsert;
 
 export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;
+
+export type Faq = typeof faqs.$inferSelect;
+export type InsertFaq = typeof faqs.$inferInsert;
 
 // ============================================================================
 // Relations

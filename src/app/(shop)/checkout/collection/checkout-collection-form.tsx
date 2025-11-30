@@ -158,8 +158,14 @@ export function CheckoutCollectionForm({
       const summary =
         createdOrderRefs.length > 1
           ? `Orders placed: ${createdOrderRefs.join(", ")}`
-          : "Order placed successfully!";
-      toast.success(summary);
+          : `Order placed: ${createdOrderRefs[0]}`;
+      toast.success(summary, {
+        action: {
+          label: "View Orders",
+          onClick: () => router.push("/orders"),
+        },
+        duration: 5000,
+      });
       router.push("/checkout/success");
     } catch (error) {
       toast.error("Failed to place order", {

@@ -96,7 +96,12 @@ export function SubmitTestimonialDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 relative">
+            {form.formState.isSubmitting && (
+              <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-md">
+                <p className="text-sm text-muted-foreground">Submitting...</p>
+              </div>
+            )}
             <FormField
               control={form.control}
               name="rating"
@@ -118,6 +123,15 @@ export function SubmitTestimonialDialog() {
                                 ? "fill-yellow-400 text-yellow-500"
                                 : "text-stone-300"
                             }`}
+                            role="radio"
+                            aria-checked={star === field.value}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                field.onChange(star);
+                              }
+                            }}
                           />
                         </button>
                       ))}
@@ -132,13 +146,19 @@ export function SubmitTestimonialDialog() {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Review</FormLabel>
+                  <FormLabel aria-live="polite">Your Review</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Tell us what you liked..."
-                      className="resize-none"
-                      {...field}
-                    />
+                    <div className="space-y-1">
+                      <Textarea
+                        placeholder="Tell us what you liked..."
+                        className="resize-none"
+                        maxLength={500}
+                        {...field}
+                      />
+                      <div className="text-xs text-muted-foreground text-right" aria-live="polite">
+                        {field.value.length}/500
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

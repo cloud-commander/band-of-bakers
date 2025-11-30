@@ -127,8 +127,8 @@ export async function createOrder(
         ? await productRepository.findByIds(productIds)
         : await Promise.all(productIds.map((id) => productRepository.findById(id)))
       )
-        .filter((p) => p !== null)
-        .map((p) => [p!.id, p!])
+        .filter((p: Awaited<ReturnType<typeof productRepository.findById>>) => p !== null)
+        .map((p: Awaited<ReturnType<typeof productRepository.findById>>) => [p!.id, p!])
     );
 
     for (const item of items) {

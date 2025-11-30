@@ -40,6 +40,8 @@ import {
   realTestimonials,
 } from "@/lib/real-products-mock-data";
 
+import { FAQS } from "@/constants/faq";
+
 // Configuration
 const DB_NAME = "bandofbakers-db";
 const R2_BUCKET = "bandofbakers-assets";
@@ -148,6 +150,7 @@ async function main() {
     sqlStatements.push("DELETE FROM users;");
     sqlStatements.push("DELETE FROM images;");
     sqlStatements.push("DELETE FROM email_templates;");
+    sqlStatements.push("DELETE FROM faqs;");
 
     // Email Templates
     const defaultTemplates = [
@@ -279,6 +282,17 @@ async function main() {
       );
     }
 
+    // FAQs
+    for (const faq of FAQS) {
+      sqlStatements.push(
+        `INSERT OR REPLACE INTO faqs (id, question, answer, category, sort_order, is_active, created_at, updated_at) VALUES ('${
+          faq.id
+        }', '${faq.question.replace(/'/g, "''")}', '${faq.answer.replace(/'/g, "''")}', '${
+          faq.category
+        }', ${faq.sort_order}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
+      );
+    }
+
     // Users
     const usersToSeed = isAdminOnly ? mockUsers.filter((u) => u.role === "owner") : mockUsers;
 
@@ -362,15 +376,11 @@ async function main() {
             const category = productCategories.find((c) => c.id === prod.category_id);
             const categorySlug = category?.slug || "uncategorized";
             // Use R2 URL if not skipping R2
-            imageUrl = publicUrlForR2Path(
-              `images/products/${categorySlug}/${prod.slug}-card.webp`
-            );
+            imageUrl = publicUrlForR2Path(`images/products/${categorySlug}/${prod.slug}-card.webp`);
           } else {
             // For mock products, use old structure
             // Use R2 URL if not skipping R2
-            imageUrl = publicUrlForR2Path(
-              `images/products/${prod.category_id}/${prod.slug}.jpg`
-            );
+            imageUrl = publicUrlForR2Path(`images/products/${prod.category_id}/${prod.slug}.jpg`);
           }
         } else if (skipR2) {
           imageUrl = prod.image_url || "NULL";
@@ -576,6 +586,7 @@ async function main() {
     phase1Statements.push("DELETE FROM users;");
     phase1Statements.push("DELETE FROM images;");
     phase1Statements.push("DELETE FROM email_templates;");
+    phase1Statements.push("DELETE FROM faqs;");
 
     // Add users, locations, vouchers, news, images, email_templates
     phase1Statements.push(
@@ -595,6 +606,9 @@ async function main() {
     );
     phase1Statements.push(
       ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO email_templates"))
+    );
+    phase1Statements.push(
+      ...sqlStatements.filter((s) => s.includes("INSERT OR REPLACE INTO faqs"))
     );
 
     const phase1File = path.join(TEMP_DIR, "seed_phase1.sql");

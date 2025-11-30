@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { updateOrderStatus } from "@/actions/orders";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { formatOrderReference } from "@/lib/utils/order";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type SortField = "created_at" | "bake_sale_date" | "total" | "status";
 type SortDirection = "asc" | "desc";
@@ -285,11 +286,11 @@ export function OrdersTable({
     const status = order.status.toLowerCase();
     const isUpdating = updatingOrderId === order.id;
 
-    if (status === "pending" || status === "processing") {
-      return (
-        <Button
-          size="sm"
-          variant="outline"
+  if (status === "pending" || status === "processing") {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
           className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
           onClick={(e) => handleMarkReady(order.id, e)}
           disabled={isUpdating}
@@ -477,6 +478,12 @@ export function OrdersTable({
                     )}
                   >
                     {order.status}
+                  </Badge>
+                  <Badge variant="secondary" className="ml-2 capitalize">
+                    {order.fulfillment_method}
+                  </Badge>
+                  <Badge variant="outline" className="ml-2 capitalize">
+                    {order.payment_method.replace(/_/g, " ")}
                   </Badge>
                 </td>
                 <td className="p-4 font-medium font-serif">

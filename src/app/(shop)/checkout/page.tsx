@@ -114,7 +114,13 @@ export default function CheckoutPage() {
           }
         }
       }
-      toast.success("Payment successful! Order placed.");
+      toast.success("Order placed!", {
+        action: {
+          label: "View Orders",
+          onClick: () => router.push("/orders"),
+        },
+        duration: 5000,
+      });
       router.push("/checkout/success");
     } catch (error) {
       toast.error("Payment failed", {
