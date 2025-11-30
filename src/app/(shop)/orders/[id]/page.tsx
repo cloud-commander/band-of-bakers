@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { notFound, redirect } from "next/navigation";
 import { getOrderById } from "@/actions/orders";
 import { auth } from "@/auth";
+import { formatOrderReference } from "@/lib/utils/order";
 
 interface OrderPageProps {
   params: Promise<{
@@ -42,11 +43,11 @@ export default async function OrderPage({ params }: OrderPageProps) {
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <PageHeader
-          title={`Order #${order.id.slice(0, 8)}`}
+          title={`Order ${formatOrderReference(order.id, order.order_number)}`}
           breadcrumbs={[
             { label: "Home", href: "/" },
             { label: "Orders", href: "/orders" },
-            { label: `#${order.id.slice(0, 8)}` },
+            { label: formatOrderReference(order.id, order.order_number) },
           ]}
         />
 

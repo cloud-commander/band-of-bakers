@@ -19,6 +19,8 @@ import { createOrder } from "@/actions/orders";
 import type { BakeSaleWithLocation } from "@/lib/repositories/bake-sale.repository";
 import type { User as AuthUser } from "next-auth";
 import { TurnstileWidget } from "@/components/turnstile/turnstile-widget";
+import { savePhoneFromCheckout } from "@/actions/profile";
+import { formatOrderReference } from "@/lib/utils/order";
 
 // Collection checkout validation schema
 const checkoutCollectionSchema = z.object({
@@ -101,31 +103,63 @@ export function CheckoutCollectionForm({
 
   const onSubmit = async (data: CheckoutCollectionFormSchema) => {
     try {
-      // Get bake sale ID from first item (assuming single bake sale for now)
-      const bakeSaleId = items[0]?.bakeSaleId;
+      // Group items by bake sale so each bake sale creates its own order
+      const grouped = items.reduce(
+        (map, item) => {
+          const key = item.bakeSaleId || "UNASSIGNED";
+          if (!map[key]) map[key] = [];
+          map[key].push(item);
+          return map;
+        },
+        {} as Record<string, typeof items>
+      );
 
-      const orderData = {
-        ...data,
-        fulfillment_method: "collection" as const,
-        payment_method: "payment_on_collection" as const,
-        bake_sale_id: bakeSaleId,
-        notes: data.note,
-        items: items.map((item) => ({
-          productId: item.productId,
-          variantId: item.variantId,
-          quantity: item.quantity,
-        })),
-        turnstileToken,
-      } as const;
+      const createdOrderRefs: string[] = [];
 
-      const result = await createOrder(orderData);
+      for (const [bakeSaleId, groupItems] of Object.entries(grouped)) {
+        const orderData = {
+          ...data,
+          fulfillment_method: "collection" as const,
+          payment_method: "payment_on_collection" as const,
+          bake_sale_id: bakeSaleId === "UNASSIGNED" ? undefined : bakeSaleId,
+          notes: data.note,
+          items: groupItems.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            quantity: item.quantity,
+          })),
+          turnstileToken,
+        } as const;
 
-      if (!result.success) {
-        throw new Error(result.error);
+        const result = await createOrder(orderData);
+
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        createdOrderRefs.push(formatOrderReference(result.data.id, result.data.order_number));
       }
 
       clearCart();
-      toast.success("Order placed successfully!");
+      const currentUserPhone = (currentUser as unknown as { phone?: string | null })?.phone;
+      if (!currentUserPhone && data.phone) {
+        const shouldSave = window.confirm(
+          "Save this phone number to your profile for faster checkout next time?"
+        );
+        if (shouldSave) {
+          const saveResult = await savePhoneFromCheckout(data.phone);
+          if (saveResult.success && !saveResult.skipped) {
+            toast.success("Phone saved to your profile");
+          } else if (!saveResult.success) {
+            toast.error(saveResult.error || "Could not save phone to profile");
+          }
+        }
+      }
+      const summary =
+        createdOrderRefs.length > 1
+          ? `Orders placed: ${createdOrderRefs.join(", ")}`
+          : "Order placed successfully!";
+      toast.success(summary);
       router.push("/checkout/success");
     } catch (error) {
       toast.error("Failed to place order", {

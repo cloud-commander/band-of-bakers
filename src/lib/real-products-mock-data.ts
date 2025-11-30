@@ -366,6 +366,7 @@ function createOrder(
   status: "pending" | "processing" | "ready" | "fulfilled" | "cancelled"
 ) {
   const orderId = `rorder-${orderCounter++}`;
+  const orderNumber = orderCounter - 1;
   const orderDate = getOrderDate(bakeSaleDate, daysBeforeOrder);
 
   // Calculate totals (will be calculated from items)
@@ -414,6 +415,7 @@ function createOrder(
 
   realOrders.push({
     id: orderId,
+    order_number: orderNumber,
     user_id: userId,
     bake_sale_id: bakeSaleId,
     status,

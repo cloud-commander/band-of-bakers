@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { updateOrderStatus } from "@/actions/orders";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formatOrderReference } from "@/lib/utils/order";
 
 type SortField = "created_at" | "bake_sale_date" | "total" | "status";
 type SortDirection = "asc" | "desc";
@@ -29,6 +30,7 @@ type StatusFilter =
 // Define the shape of the order with relations
 interface OrderWithRelations {
   id: string;
+  order_number?: number | null;
   created_at: number | string | Date; // Adjust based on DB schema
   total: number;
   status: string;
@@ -259,16 +261,21 @@ export function OrdersTable({
   const handleMarkReady = (orderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    void handleStatusUpdate(orderId, "ready", `Order #${orderId.slice(0, 8)} marked as Ready`);
+    void handleStatusUpdate(
+      orderId,
+      "ready",
+      `${formatOrderReference(orderId, orders.find((o) => o.id === orderId)?.order_number)} marked as Ready`
+    );
   };
 
   const handleMarkComplete = (orderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const orderNumber = orders.find((o) => o.id === orderId)?.order_number;
     void handleStatusUpdate(
       orderId,
       "fulfilled",
-      `Order #${orderId.slice(0, 8)} marked as Fulfilled`
+      `${formatOrderReference(orderId, orderNumber)} marked as Fulfilled`
     );
   };
 
@@ -496,7 +503,9 @@ export function OrdersTable({
           >
             <div className="flex items-start justify-between mb-3">
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Order #{order.id.slice(0, 8)}</p>
+                <p className="text-xs text-muted-foreground mb-1">
+                  Order {formatOrderReference(order.id, order.order_number)}
+                </p>
                 <p className="font-medium text-sm">{getCustomerName(order)}</p>
               </div>
               <Badge

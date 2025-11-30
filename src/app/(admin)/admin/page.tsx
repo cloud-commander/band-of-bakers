@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Metadata } from "next";
 import { getDashboardStats } from "@/actions/dashboard";
 import { getTopVouchers } from "@/actions/vouchers";
+import { formatOrderReference } from "@/lib/utils/order";
 
 export const metadata: Metadata = {
   title: "Dashboard | Band of Bakers Admin",
@@ -151,7 +152,7 @@ export default async function AdminDashboard() {
                             </div>
                             <div>
                               <p className="font-medium text-stone-800 group-hover:text-bakery-amber-700 transition-colors">
-                                Order #{order.id.slice(0, 8)}
+                                Order {formatOrderReference(order.id, order.order_number)}
                               </p>
                               <p className="text-sm font-medium text-stone-600">
                                 {order.user?.name || "Unknown Customer"}

@@ -67,7 +67,7 @@ describe("Navbar", () => {
     expect(screen.queryByRole("link", { name: /login/i })).not.toBeInTheDocument();
     // And check for the user menu trigger (it has a User icon)
     // We can look for the button that opens the menu
-    const userButton = screen.getByRole("button", { name: "" }); // Might need better selector
+    const userButton = screen.getByRole("button", { name: /user menu/i });
     expect(userButton).toBeInTheDocument();
   });
 

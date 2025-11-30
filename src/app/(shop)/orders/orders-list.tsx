@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { PageHeader } from "@/components/state/page-header";
 import { EmptyState } from "@/components/state/empty-state";
-import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
-
-const ITEMS_PER_PAGE = PAGINATION_CONFIG.ORDERS_ITEMS_PER_PAGE;
+import { formatOrderReference } from "@/lib/utils/order";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -24,16 +22,29 @@ const statusColors = {
 interface OrdersListProps {
   orders: Array<{
     id: string;
+    order_number?: number | null;
     created_at: number | string | Date;
     total: number;
     status: string;
     fulfillment_method: string;
-    items: Array<unknown>; // We just need length here
+    items: Array<unknown>;
+    bakeSale?: {
+      date: string;
+      location?: {
+        name: string;
+      } | null;
+    } | null;
   }>;
+  totalItems: number;
+  currentPage: number;
+  pageSize: number;
+  sort: "newest" | "oldest";
 }
 
-export function OrdersList({ orders }: OrdersListProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: OrdersListProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   if (orders.length === 0) {
     return (
@@ -52,14 +63,14 @@ export function OrdersList({ orders }: OrdersListProps) {
     );
   }
 
-  // Calculate pagination
-  const totalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedOrders = orders.slice(startIndex, endIndex);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    params.set("sort", sort);
+    router.push(`${pathname}?${params.toString()}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -76,13 +87,30 @@ export function OrdersList({ orders }: OrdersListProps) {
         <div className="mb-6">
           <PaginationInfo
             currentPage={currentPage}
-            pageSize={ITEMS_PER_PAGE}
-            totalItems={orders.length}
+            pageSize={pageSize}
+            totalItems={totalItems}
           />
+          <div className="mt-3 flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <select
+              value={sort}
+              onChange={(e) => {
+                const params = new URLSearchParams(searchParams?.toString() || "");
+                params.set("page", "1");
+                params.set("pageSize", String(pageSize));
+                params.set("sort", e.target.value);
+                router.push(`${pathname}?${params.toString()}`);
+              }}
+              className="border rounded-md px-3 py-1 text-sm"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </div>
         </div>
 
         <div className="space-y-4">
-          {paginatedOrders.map((order) => (
+          {orders.map((order) => (
             <Link
               key={order.id}
               href={`/orders/${order.id}`}
@@ -91,7 +119,9 @@ export function OrdersList({ orders }: OrdersListProps) {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold">Order #{order.id}</h3>
+                    <h3 className="font-semibold">
+                      Order {formatOrderReference(order.id, order.order_number)}
+                    </h3>
                     <Badge className={statusColors[order.status as keyof typeof statusColors]}>
                       {order.status}
                     </Badge>
@@ -107,6 +137,17 @@ export function OrdersList({ orders }: OrdersListProps) {
                   <p className="text-sm text-muted-foreground">
                     {order.items.length} item{order.items.length > 1 ? "s" : ""}
                   </p>
+                  {order.bakeSale && (
+                    <p className="text-sm text-muted-foreground">
+                      Bake Sale:{" "}
+                      {new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })}{" "}
+                      {order.bakeSale.location?.name ? `• ${order.bakeSale.location.name}` : ""}
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-semibold">£{order.total.toFixed(2)}</p>

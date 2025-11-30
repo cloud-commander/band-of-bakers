@@ -12,6 +12,7 @@ import { SHIPPING_COST } from "@/lib/constants/app";
 import { validateVoucher } from "@/lib/utils/voucher";
 import { sendEmail } from "@/lib/email/service";
 import { verifyTurnstileToken } from "@/lib/actions/verify-turnstile";
+import { formatOrderReference } from "@/lib/utils/order";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -50,7 +51,7 @@ const orderSchema = z.object({
 
 export async function createOrder(
   data: z.infer<typeof orderSchema>
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; order_number?: number }>> {
   // Track stock reservations to allow rollback on failure
   const stockReservations: Array<{ productId: string; quantity: number }> = [];
   let voucherReservation: string | null = null;
@@ -238,9 +239,12 @@ export async function createOrder(
       bakeSaleId = upcomingSales[0]?.id;
     }
 
+    const orderNumber = await orderRepository.nextOrderNumber();
+
     const order = await orderRepository.createWithItems(
       {
         id: nanoid(),
+        order_number: orderNumber,
         user_id: userId,
         bake_sale_id: bakeSaleId,
         status: "pending",
@@ -268,7 +272,7 @@ export async function createOrder(
 
     revalidatePath("/admin/orders");
 
-    return { success: true, data: { id: order.id } };
+    return { success: true, data: { id: order.id, order_number: orderNumber } };
   } catch (error) {
     // Roll back any stock reservations
     if (stockReservations.length > 0) {
@@ -335,6 +339,33 @@ export async function getPaginatedOrders(page = 1, pageSize = 20) {
   };
 }
 
+export async function getPaginatedUserOrders(
+  page = 1,
+  pageSize = 10,
+  sort: "newest" | "oldest" = "newest"
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { orders: [], total: 0, page: 1, pageSize };
+    }
+    const limit = Math.max(1, Math.min(pageSize, 50));
+    const currentPage = Math.max(1, page);
+    const offset = (currentPage - 1) * limit;
+
+    const result = await orderRepository.findPaginatedByUser(session.user.id, limit, offset, sort);
+    return {
+      orders: result.data,
+      total: result.total,
+      page: currentPage,
+      pageSize: limit,
+    };
+  } catch (error) {
+    console.error("Failed to fetch paginated user orders:", error);
+    return { orders: [], total: 0, page: 1, pageSize };
+  }
+}
+
 const ADMIN_ROLES = ["owner", "manager", "staff"] as const;
 const VALID_STATUS_TRANSITIONS: Record<
   "ready" | "fulfilled" | "cancelled" | "refunded" | "action_required",
@@ -380,7 +411,7 @@ export async function updateOrderStatus(
       if (nextStatus === "ready" && order.bakeSale?.location) {
         void sendEmail(order.user.email, "order_ready_for_collection", {
           customer_name: order.user.name || "Customer",
-          order_id: order.id.slice(0, 8),
+          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
           location_name: order.bakeSale.location.name,
           location_address: `${order.bakeSale.location.address_line1}, ${order.bakeSale.location.postcode}`,
           collection_time: order.bakeSale.location.collection_hours || "10am - 2pm",
@@ -388,22 +419,22 @@ export async function updateOrderStatus(
       } else if (nextStatus === "fulfilled") {
         void sendEmail(order.user.email, "order_completed", {
           customer_name: order.user.name || "Customer",
-          order_id: order.id.slice(0, 8),
+          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
         });
       } else if (nextStatus === "cancelled") {
         void sendEmail(order.user.email, "order_cancelled", {
           customer_name: order.user.name || "Customer",
-          order_id: order.id.slice(0, 8),
+          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
         });
       } else if (nextStatus === "refunded") {
         void sendEmail(order.user.email, "order_refunded", {
           customer_name: order.user.name || "Customer",
-          order_id: order.id.slice(0, 8),
+          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
         });
       } else if (nextStatus === "action_required") {
         void sendEmail(order.user.email, "order_action_required", {
           customer_name: order.user.name || "Customer",
-          order_id: order.id.slice(0, 8),
+          order_id: formatOrderReference(order.id, order.order_number ?? undefined),
         });
       }
     }

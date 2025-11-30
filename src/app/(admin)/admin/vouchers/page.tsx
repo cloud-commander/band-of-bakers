@@ -3,6 +3,7 @@ import { getVouchers } from "@/actions/vouchers";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { VouchersTable } from "@/components/admin/vouchers-table";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,11 @@ export default async function AdminVouchersPage() {
         title="Vouchers"
         description="Manage discount vouchers and promotional codes"
         actions={
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Voucher
+          <Button asChild>
+            <Link href="/admin/vouchers/new">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Voucher
+            </Link>
           </Button>
         }
       />

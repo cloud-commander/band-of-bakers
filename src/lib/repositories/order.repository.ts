@@ -7,6 +7,13 @@ export class OrderRepository extends BaseRepository<typeof orders> {
     super(orders);
   }
 
+  async nextOrderNumber() {
+    const db = await this.getDatabase();
+    const result = await db.select({ max: sql<number>`coalesce(max(${orders.order_number}), 0)` }).from(orders);
+    const currentMax = Number(result[0]?.max ?? 0);
+    return currentMax + 1;
+  }
+
   /**
    * Create order with items
    */
@@ -106,6 +113,34 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       orderBy: desc(orders.created_at),
     });
     const totalResult = await db.select({ count: sql<number>`count(*)` }).from(orders);
+    return { data, total: Number(totalResult[0]?.count || 0) };
+  }
+
+  async findPaginatedByUser(
+    userId: string,
+    limit: number,
+    offset: number,
+    sort: "newest" | "oldest" = "newest"
+  ) {
+    const db = await this.getDatabase();
+    const data = await db.query.orders.findMany({
+      limit,
+      offset,
+      where: eq(orders.user_id, userId),
+      with: {
+        items: true,
+        bakeSale: {
+          with: {
+            location: true,
+          },
+        },
+      },
+      orderBy: sort === "newest" ? desc(orders.created_at) : orders.created_at,
+    });
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(orders)
+      .where(eq(orders.user_id, userId));
     return { data, total: Number(totalResult[0]?.count || 0) };
   }
 

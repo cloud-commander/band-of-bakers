@@ -84,3 +84,31 @@ export async function updateProfile(formData: FormData) {
     return { error: "Failed to update profile" };
   }
 }
+
+/**
+ * Save phone from checkout if user is missing one.
+ */
+export async function savePhoneFromCheckout(phone: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const userId = session.user.id;
+  const currentUser = await userRepository.findById(userId);
+
+  if (currentUser?.phone) {
+    return { success: true, skipped: true };
+  }
+
+  try {
+    await userRepository.updateProfile(userId, {
+      phone,
+    });
+    revalidatePath("/profile");
+    return { success: true, skipped: false };
+  } catch (error) {
+    console.error("Failed to save phone from checkout:", error);
+    return { success: false, error: "Failed to save phone" };
+  }
+}

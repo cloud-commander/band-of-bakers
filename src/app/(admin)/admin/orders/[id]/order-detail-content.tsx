@@ -10,11 +10,13 @@ import { ArrowLeft, Check, Package, X, Mail, Minus, Plus } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { formatOrderReference } from "@/lib/utils/order";
 
 // Define shapes matching what we get from getOrderById
 interface OrderDetailContentProps {
   order: {
     id: string;
+    order_number?: number | null;
     created_at: number | string | Date;
     total: number;
     status: string;
@@ -161,9 +163,12 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     try {
       const result = await markOrderReady(order.id);
       if (result.success) {
-        toast.success(`Order #${order.id.slice(0, 8)} marked as Ready for Collection`, {
-          description: "Customer has been notified via email",
-        });
+        toast.success(
+          `${formatOrderReference(order.id, order.order_number)} marked as Ready for Collection`,
+          {
+            description: "Customer has been notified via email",
+          }
+        );
       } else {
         toast.error(result.error || "Failed to update order status");
       }
@@ -177,7 +182,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     try {
       const result = await markOrderComplete(order.id);
       if (result.success) {
-        toast.success(`Order #${order.id.slice(0, 8)} marked as Complete`, {
+        toast.success(`${formatOrderReference(order.id, order.order_number)} marked as Complete`, {
           description: "Order archived successfully",
         });
       } else {
@@ -238,7 +243,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
           </Link>
         </Button>
         <PageHeader
-          title={`Order #${order.id.slice(0, 8)}`}
+          title={`Order ${formatOrderReference(order.id, order.order_number)}`}
           description={`Placed on ${new Date(order.created_at).toLocaleDateString("en-GB", {
             year: "numeric",
             month: "long",

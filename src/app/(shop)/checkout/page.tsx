@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { ArrowRight, ShoppingBag, Truck } from "lucide-react";
 import { SHIPPING_COST } from "@/lib/constants/app";
 import { createOrder } from "@/actions/orders";
+import { savePhoneFromCheckout } from "@/actions/profile";
 import { TurnstileWidget } from "@/components/turnstile/turnstile-widget";
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
@@ -43,7 +44,7 @@ const checkoutDeliverySchema = z.object({
 type CheckoutDeliveryForm = z.infer<typeof checkoutDeliverySchema>;
 
 export default function CheckoutPage() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -100,6 +101,19 @@ export default function CheckoutPage() {
       }
 
       clearCart();
+      if (session?.user && !session.user.phone && data.phone) {
+        const shouldSave = window.confirm(
+          "Save this phone number to your profile for faster checkout next time?"
+        );
+        if (shouldSave) {
+          const saveResult = await savePhoneFromCheckout(data.phone);
+          if (saveResult.success && !saveResult.skipped) {
+            toast.success("Phone saved to your profile");
+          } else if (!saveResult.success) {
+            toast.error(saveResult.error || "Could not save phone to profile");
+          }
+        }
+      }
       toast.success("Payment successful! Order placed.");
       router.push("/checkout/success");
     } catch (error) {

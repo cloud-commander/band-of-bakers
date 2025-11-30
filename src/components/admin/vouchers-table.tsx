@@ -17,6 +17,7 @@ import {
   getVoucherStatus,
   formatUsage,
 } from "@/lib/utils/voucher";
+import Link from "next/link";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_USERS_ITEMS_PER_PAGE;
 
@@ -291,13 +292,14 @@ export function VouchersTable({ vouchers }: VouchersTableProps) {
                     <td className="p-4">{getStatusBadge(voucher)}</td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link
+                            href={`/admin/vouchers/${voucher.id}/edit`}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Link>
                         </Button>
                         <Button
                           variant="ghost"
@@ -359,13 +361,14 @@ export function VouchersTable({ vouchers }: VouchersTableProps) {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-3 border-t">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      href={`/admin/vouchers/${voucher.id}/edit`}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Link>
                   </Button>
                   <Button
                     variant="outline"

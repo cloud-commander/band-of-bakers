@@ -144,6 +144,7 @@ export const orders = sqliteTable(
   "orders",
   {
     id: text("id").primaryKey(),
+    order_number: integer("order_number"),
     user_id: text("user_id")
       .notNull()
       .references(() => users.id),
@@ -225,6 +226,7 @@ export const vouchers = sqliteTable("vouchers", {
   valid_from: text("valid_from").notNull(), // ISO datetime
   valid_until: text("valid_until").notNull(), // ISO datetime
   is_active: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  notes: text("notes"),
   ...timestamps,
 });
 

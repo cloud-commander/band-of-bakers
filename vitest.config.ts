@@ -16,13 +16,7 @@ export default defineConfig({
     include: ["**/__tests__/**/*.{test,spec}.{ts,tsx}"],
 
     // Exclude patterns
-    exclude: [
-      "node_modules",
-      "dist",
-      ".next",
-      "coverage",
-      "**/*.config.{ts,js}",
-    ],
+    exclude: ["node_modules", "dist", ".next", "coverage", "**/*.config.{ts,js}"],
 
     // Coverage configuration
     coverage: {
@@ -41,10 +35,10 @@ export default defineConfig({
       ],
       // Coverage thresholds - Phase 9 targets
       thresholds: {
-        lines: 60, // Start at 60%, increase to 80% by Phase 10
-        functions: 60,
-        branches: 50,
-        statements: 60,
+        lines: 65,
+        functions: 65,
+        branches: 55,
+        statements: 65,
       },
     },
 

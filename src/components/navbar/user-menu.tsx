@@ -45,6 +45,7 @@ export const UserMenu = memo(function UserMenu({ isLoggedIn, userImage, userName
           variant="ghost"
           size="sm"
           className="rounded-full hover:bg-red-50 hover:text-red-700 transition-colors px-2 py-1 gap-2 flex items-center"
+          aria-label="User menu"
         >
           <Avatar className="h-10 w-10 border">
             <AvatarImage src={userImage || undefined} alt={userName || "User avatar"} />

@@ -9,6 +9,7 @@ import { Heading } from "@/components/ui/heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { ResolutionOptions } from "./order-resolution-options";
+import { formatOrderReference } from "@/lib/utils/order";
 
 interface OrderResolutionPageProps {
   params: Promise<{
@@ -70,8 +71,9 @@ export default async function OrderResolutionPage({ params }: OrderResolutionPag
         </div>
         <Heading level={1}>Action Required</Heading>
         <p className="text-muted-foreground mt-2">
-          There has been a change to the bake sale for your order #{order.id.slice(0, 8)}. Please
-          choose how you would like to proceed.
+          There has been a change to the bake sale for your order{" "}
+          {formatOrderReference(order.id, order.order_number)}. Please choose how you would like to
+          proceed.
         </p>
       </div>
 

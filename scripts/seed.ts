@@ -478,11 +478,13 @@ async function main() {
       const ordersToSeed = useRealProducts ? realOrders : mockOrders;
       const orderItemsToSeed = useRealProducts ? realOrderItems : mockOrderItems;
 
+      let orderNumberCounter = 1;
       for (const order of ordersToSeed) {
+        const orderNumber = order.order_number ?? orderNumberCounter++;
         sqlStatements.push(
-          `INSERT OR REPLACE INTO orders (id, user_id, bake_sale_id, status, fulfillment_method, payment_method, payment_status, payment_intent_id, subtotal, delivery_fee, voucher_discount, total, shipping_address_line1, shipping_address_line2, shipping_city, shipping_postcode, billing_address_line1, billing_address_line2, billing_city, billing_postcode, voucher_id, notes, created_at, updated_at) VALUES ('${
+          `INSERT OR REPLACE INTO orders (id, order_number, user_id, bake_sale_id, status, fulfillment_method, payment_method, payment_status, payment_intent_id, subtotal, delivery_fee, voucher_discount, total, shipping_address_line1, shipping_address_line2, shipping_city, shipping_postcode, billing_address_line1, billing_address_line2, billing_city, billing_postcode, voucher_id, notes, created_at, updated_at) VALUES ('${
             order.id
-          }', '${order.user_id}', '${order.bake_sale_id}', '${order.status}', '${
+          }', ${orderNumber}, '${order.user_id}', '${order.bake_sale_id}', '${order.status}', '${
             order.fulfillment_method
           }', '${order.payment_method}', '${order.payment_status}', ${
             order.payment_intent_id ? `'${order.payment_intent_id}'` : "NULL"
