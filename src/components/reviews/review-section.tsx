@@ -22,7 +22,7 @@ export async function ReviewSection({ productId }: ReviewSectionProps) {
         >
           Customer Reviews
         </h2>
-        <WriteReviewDialog />
+        <WriteReviewDialog productId={productId} />
       </div>
 
       <div className="flex items-center gap-4 bg-muted/30 p-6 rounded-lg">

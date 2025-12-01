@@ -40,7 +40,7 @@ export async function getAllReviews() {
   });
 }
 
-export async function getPaginatedReviews(page = 1, pageSize = 20) {
+export async function getPaginatedReviews(page = 1, pageSize = 10) {
   const limit = Math.max(1, Math.min(pageSize, 100));
   const currentPage = Math.max(1, page);
   const offset = (currentPage - 1) * limit;
@@ -76,7 +76,8 @@ export async function getPaginatedReviews(page = 1, pageSize = 20) {
  * Get reviews for a product
  */
 export async function getProductReviews(productId: string) {
-  return await reviewRepository.findByProductId(productId);
+  const session = await auth();
+  return await reviewRepository.findByProductId(productId, session?.user?.id);
 }
 
 /**
@@ -175,4 +176,52 @@ export async function getProductRatings(): Promise<
   });
 
   return result;
+}
+
+/**
+ * Create a new review
+ */
+export async function createReview(
+  productId: string,
+  data: { rating: number; title: string; comment: string }
+) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "You must be logged in to leave a review" };
+  }
+
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
+  }
+
+  const userId = session.user.id;
+
+  // Check if user has already reviewed this product (any status)
+  const existingReview = await reviewRepository.findByUserAndProduct(userId, productId);
+  if (existingReview) return { error: "You have already reviewed this product" };
+
+  try {
+    await reviewRepository.create({
+      id: crypto.randomUUID(),
+      product_id: productId,
+      user_id: userId,
+      rating: data.rating,
+      title: data.title,
+      comment: data.comment,
+      verified_purchase: false, // TODO: Check if user purchased product
+      helpful_count: 0,
+      status: "pending",
+    });
+
+    revalidatePath(`/menu/[slug]`); // Revalidate product pages
+    return { success: true };
+  } catch (error) {
+    console.error("Create review error:", error);
+    return { error: "Failed to submit review" };
+  }
 }

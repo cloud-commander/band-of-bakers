@@ -63,15 +63,15 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
     <div className="space-y-6">
       <div>
         <h1
-          className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} mb-2`}
-          style={{ fontFamily: DESIGN_TOKENS.typography.h1.family }}
+          className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} mb-2 text-stone-900`}
+          style={{ fontFamily: DESIGN_TOKENS.typography.h1.family, letterSpacing: "-0.01em" }}
         >
           {product.name}
         </h1>
         <div className="flex items-center gap-4">
           <p
-            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
-            style={{ color: DESIGN_TOKENS.colors.accent }}
+            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} text-bakery-amber-800`}
+            style={{ fontFamily: DESIGN_TOKENS.typography.h1.family, letterSpacing: "-0.01em" }}
           >
             £{currentPrice.toFixed(2)}
           </p>

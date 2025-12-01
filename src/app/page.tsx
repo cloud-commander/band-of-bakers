@@ -179,7 +179,7 @@ export default async function Home() {
             {/* Upcoming Bake Sales or Bakers Away Message */}
             {upcomingBakeSales.length > 0 ? (
               <div className="mb-8">
-                <BakeSaleCarousel bakeSales={upcomingBakeSales} maxVisible={3} />
+                <BakeSaleCarousel bakeSales={upcomingBakeSales} />
                 <div className="mt-6">
                   <Button variant="outline" asChild>
                     <Link href="/menu">View Menu</Link>

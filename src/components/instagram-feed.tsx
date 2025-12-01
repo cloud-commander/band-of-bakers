@@ -15,11 +15,7 @@ declare global {
 }
 
 export function InstagramFeed({ embedHtml }: { embedHtml?: string | null }) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const [isMounted] = useState(true);
 
   useEffect(() => {
     if (!isMounted || !embedHtml) return;

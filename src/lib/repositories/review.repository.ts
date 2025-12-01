@@ -18,8 +18,17 @@ export class ReviewRepository extends BaseRepository<typeof reviews> {
   /**
    * Find reviews by product ID
    */
-  async findByProductId(productId: string): Promise<ReviewWithUser[]> {
+  async findByProductId(productId: string, userId?: string): Promise<ReviewWithUser[]> {
     const db = await this.getDatabase();
+    const { or } = await import("drizzle-orm");
+
+    const whereClause = userId
+      ? and(
+          eq(reviews.product_id, productId),
+          or(eq(reviews.status, "approved"), eq(reviews.user_id, userId))
+        )
+      : and(eq(reviews.product_id, productId), eq(reviews.status, "approved"));
+
     const results = await db
       .select({
         ...reviews,
@@ -28,7 +37,7 @@ export class ReviewRepository extends BaseRepository<typeof reviews> {
       })
       .from(reviews)
       .leftJoin(users, eq(reviews.user_id, users.id))
-      .where(and(eq(reviews.product_id, productId), eq(reviews.status, "approved")))
+      .where(whereClause)
       .orderBy(desc(reviews.created_at));
 
     return results as ReviewWithUser[];
@@ -72,6 +81,19 @@ export class ReviewRepository extends BaseRepository<typeof reviews> {
     const db = await this.getDatabase();
     const [newReview] = await db.insert(reviews).values(data).returning();
     return newReview;
+  }
+
+  /**
+   * Find a review by user/product regardless of status (prevent duplicates)
+   */
+  async findByUserAndProduct(userId: string, productId: string): Promise<Review | null> {
+    const db = await this.getDatabase();
+    const [existing] = await db
+      .select()
+      .from(reviews)
+      .where(and(eq(reviews.user_id, userId), eq(reviews.product_id, productId)))
+      .limit(1);
+    return existing ?? null;
   }
 }
 

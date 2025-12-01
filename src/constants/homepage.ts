@@ -13,12 +13,12 @@ export const HERO_SECTION = {
   /** Hero background image alt text */
   backgroundAlt: "Artisan Bakery Workspace",
   /** Hero main heading */
-  heading: "Baking for the Village since 2012.",
+  heading: "Fresh. Local. Out of the Oven",
   /** Hero subheading/description */
   description:
-    "Every loaf tells a story. We use traditional methods, local grains, and time to create bread that nourishes both body and soul. This is more than baking—it's a commitment to craft.",
+    "Small-batch artisan bread free from additives. The way bread was meant to be eaten.",
   /** Hero CTA button text */
-  ctaText: "Explore Our Bakes",
+  ctaText: "Pre-Order Now ",
   /** Hero CTA button link */
   ctaLink: "#bakes",
 } as const;
@@ -31,7 +31,7 @@ export const SIGNATURE_BAKES_SECTION = {
   /** Section heading */
   heading: "Signature Bakes",
   /** Section subheading */
-  subheading: "Handcrafted daily with love and precision",
+  subheading: "Handcrafted with love and precision",
 } as const;
 
 // ============================================================================
@@ -40,7 +40,7 @@ export const SIGNATURE_BAKES_SECTION = {
 
 export const STORY_SECTION = {
   /** Section heading */
-  heading: "Real Hands, Real Flour.",
+  heading: "The Alchemy of Baking",
   /** Section main text */
   mainText:
     "For over 10 years, Band of Bakers has been a fixture in our community. We believe in slow fermentation, local sourcing, and the kind of craftsmanship that can't be rushed. Every loaf that leaves our kitchen carries the warmth of family tradition and the precision of modern technique.",
@@ -58,9 +58,9 @@ export const CTA_SECTION = {
   /** Section description */
   description: "Reserve your fresh loaves today. Available for pickup.",
   /** CTA button text */
-  ctaText: "Order Online",
+  ctaText: "Pre-Order Now",
   /** CTA button link */
-  ctaLink: "#",
+  ctaLink: "\Menu",
 } as const;
 
 // ============================================================================

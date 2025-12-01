@@ -480,3 +480,14 @@ export const bakeSalesRelations = relations(bakeSales, ({ one }) => ({
     references: [locations.id],
   }),
 }));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  user: one(users, {
+    fields: [reviews.user_id],
+    references: [users.id],
+  }),
+  product: one(products, {
+    fields: [reviews.product_id],
+    references: [products.id],
+  }),
+}));

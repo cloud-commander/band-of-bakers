@@ -12,7 +12,7 @@ export const BUSINESS_INFO = {
   // Store Identity
   name: "Band of Bakers",
   shortName: "Band of Bakers",
-  tagline: "Fresh-baked goodness every day",
+  tagline: "Fresh. Local. Out of the Oven.",
   logo: "🍞",
 
   // Contact & Location

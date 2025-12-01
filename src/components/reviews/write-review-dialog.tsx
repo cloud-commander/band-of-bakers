@@ -20,14 +20,20 @@ import { cn } from "@/lib/utils";
 import { TurnstileWidget } from "@/components/turnstile/turnstile-widget";
 import { verifyTurnstileToken } from "@/lib/actions/verify-turnstile";
 
-export function WriteReviewDialog() {
+import { createReview } from "@/actions/reviews";
+
+interface WriteReviewDialogProps {
+  productId: string;
+}
+
+export function WriteReviewDialog({ productId }: WriteReviewDialogProps) {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (rating === 0) {
@@ -35,9 +41,10 @@ export function WriteReviewDialog() {
       return;
     }
 
+    setIsSubmitting(true);
+
     // Verify Turnstile token if configured
     if (turnstileToken) {
-      setIsSubmitting(true);
       const verification = await verifyTurnstileToken(turnstileToken);
 
       if (!verification.success) {
@@ -47,7 +54,22 @@ export function WriteReviewDialog() {
         setIsSubmitting(false);
         return;
       }
+    }
+
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get("title") as string;
+    const comment = formData.get("comment") as string;
+
+    const result = await createReview(productId, {
+      rating,
+      title,
+      comment,
+    });
+
+    if (result.error) {
+      toast.error(result.error);
       setIsSubmitting(false);
+      return;
     }
 
     setOpen(false);
@@ -56,6 +78,7 @@ export function WriteReviewDialog() {
     });
     setRating(0);
     setTurnstileToken(null);
+    setIsSubmitting(false);
   };
 
   return (
@@ -95,17 +118,19 @@ export function WriteReviewDialog() {
               ))}
             </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" placeholder="Your name" required />
-          </div>
+          {/* Name field removed - using profile name */}
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" placeholder="Review title" required />
+            <Input id="title" name="title" placeholder="Review title" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="comment">Review</Label>
-            <Textarea id="comment" placeholder="Tell us what you liked or disliked..." required />
+            <Textarea
+              id="comment"
+              name="comment"
+              placeholder="Tell us what you liked or disliked..."
+              required
+            />
           </div>
 
           {/* Cloudflare Turnstile Widget */}
@@ -127,7 +152,7 @@ export function WriteReviewDialog() {
 
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Verifying..." : "Submit Review"}
+              {isSubmitting ? "Submitting..." : "Submit Review"}
             </Button>
           </DialogFooter>
         </form>

@@ -9,7 +9,8 @@ export async function getLocalDb(): Promise<SqliteRemoteDatabase<typeof schema>>
   const path = (await import("path")).default;
 
   const localDbPath = path.join(process.cwd(), "local.db");
-  const sqlite = new Database(localDbPath);
+  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s timeout for busy state
+  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging for better concurrency
 
   const db = drizzleProxy(
     async (sql, params, method) => {

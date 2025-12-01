@@ -27,6 +27,11 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Logflare API error:", response.status, errorText);
+      console.error("Debug Info:", {
+        apiKeyLength: apiKey.length,
+        sourceIdLength: sourceId.length,
+        sourceIdMatch: sourceId === body.source_id,
+      });
       return NextResponse.json(
         { error: "Failed to send log to Logflare" },
         { status: response.status }

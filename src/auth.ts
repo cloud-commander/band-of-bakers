@@ -128,7 +128,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.phone = token.phone as string;
         session.user.emailVerified = token.emailVerified ? new Date() : null;
 
-        /*
         try {
           const { getDb } = await import("@/lib/db");
           const { users } = await import("@/db/schema");
@@ -143,13 +142,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             session.user.name = dbUser.name;
             session.user.image = dbUser.avatar_url;
             session.user.phone = dbUser.phone;
-            session.user.emailVerified = dbUser.email_verified;
+            session.user.emailVerified = dbUser.email_verified ? new Date() : null;
             session.user.is_banned = dbUser.is_banned;
           }
         } catch (error) {
           console.error("Error fetching user in session callback:", error);
         }
-        */
       }
       return session;
     },

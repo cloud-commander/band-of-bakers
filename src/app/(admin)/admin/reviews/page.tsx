@@ -9,7 +9,7 @@ type PageProps = {
 export default async function AdminReviewsPage({ searchParams }: PageProps) {
   const searchParamsResolved = await searchParams;
   const page = Number(searchParamsResolved?.page) || 1;
-  const pageSize = Number(searchParamsResolved?.pageSize) || 20;
+  const pageSize = Number(searchParamsResolved?.pageSize) || 10;
   const {
     data,
     total,

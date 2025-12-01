@@ -125,8 +125,8 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleCategoryChange = (categoryId: string | null) => {
-    setSelectedCategory(categoryId);
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value === "all" ? null : value);
   };
 
   const handleClearFilters = () => {
@@ -366,7 +366,8 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
                     {/* Product Info */}
                     <div className={`${DESIGN_TOKENS.cards.padding} flex flex-col flex-1`}>
                       <h3
-                        className={`${DESIGN_TOKENS.typography.h4.size} font-semibold mb-1 group-hover:text-primary transition-colors`}
+                        className={`${DESIGN_TOKENS.typography.h4.size} font-semibold mb-1 group-hover:text-primary transition-colors text-stone-900`}
+                        style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
                       >
                         {product.name}
                       </h3>
@@ -377,7 +378,12 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
                         {product.description}
                       </p>
                       <div className="flex items-center justify-between mt-auto">
-                        <span className="text-lg font-bold">£{product.base_price.toFixed(2)}</span>
+                        <span
+                          className="text-lg font-semibold text-bakery-amber-800 tracking-tight"
+                          style={{ fontFamily: DESIGN_TOKENS.typography.h4.family }}
+                        >
+                          £{product.base_price.toFixed(2)}
+                        </span>
                         <AnimatedButton
                           size="sm"
                           disabled={isOutOfStock}

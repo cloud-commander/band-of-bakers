@@ -13,12 +13,12 @@ interface BakeSaleCarouselProps {
     date: string;
     location: {
       name: string;
+      collection_hours?: string | null;
     };
   }>;
-  maxVisible?: number;
 }
 
-export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarouselProps) {
+export function BakeSaleCarousel({ bakeSales }: BakeSaleCarouselProps) {
   const [startIndex, setStartIndex] = useState(0);
   const clampedVisible = 1; // show one at a time
   const [isHovering, setIsHovering] = useState(false);
@@ -127,7 +127,10 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
 
       <div className="rounded-xl border border-stone-200/70 bg-white/70 shadow-sm p-3 sm:p-4">
         <div className="relative space-y-4 sm:space-y-5">
-          <div className="absolute left-[11px] top-4 bottom-4 w-px bg-bakery-amber-100" aria-hidden />
+          <div
+            className="absolute left-[11px] top-4 bottom-4 w-px bg-bakery-amber-100"
+            aria-hidden
+          />
           {visibleSlides.map((bakeSale, idx) => (
             <div key={bakeSale.id} className="relative pl-8">
               <span
