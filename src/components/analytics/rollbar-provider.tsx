@@ -29,6 +29,27 @@ export function RollbarProvider() {
         // Make Rollbar globally available
         (window as unknown as { Rollbar: typeof rollbar }).Rollbar = rollbar;
 
+        // Add hydration error tracking
+        window.addEventListener("error", (event) => {
+          if (event.message && event.message.toLowerCase().includes("hydration")) {
+            rollbar.error("Hydration error", {
+              message: event.message,
+              stack: event.error?.stack,
+              href: window.location.href,
+            });
+          }
+        });
+        window.addEventListener("unhandledrejection", (event) => {
+          const reason = event.reason;
+          if (reason?.message?.toLowerCase?.().includes("hydration")) {
+            rollbar.error("Hydration error (promise)", {
+              message: reason?.message,
+              stack: reason?.stack,
+              href: window.location.href,
+            });
+          }
+        });
+
         // Log initialization
         if (process.env.NEXT_PUBLIC_ROLLBAR_DEBUG === "true") {
           console.log("Rollbar initialized for client-side error tracking");

@@ -22,7 +22,6 @@ import nextDynamic from "next/dynamic";
 import { BakeSaleCarousel } from "@/components/bake-sale-carousel";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
 
 const LazyTestimonialsCarousel = nextDynamic(
   () => import("@/components/testimonials-carousel").then((mod) => mod.TestimonialsCarousel),

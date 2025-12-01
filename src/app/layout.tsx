@@ -109,7 +109,6 @@ import { LazyMotionProvider } from "@/components/providers/lazy-motion-provider"
 
 import { StructuredData } from "@/components/seo/structured-data";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
-import { ClientInit } from "@/components/client-init";
 
 const enablePartytown = process.env.NEXT_PUBLIC_PARTYTOWN === "true";
 
@@ -135,7 +134,6 @@ export default function RootLayout({
           dmSerifDisplay.variable
         )}
       >
-        <ClientInit />
         <div
           className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-multiply"
           style={{
