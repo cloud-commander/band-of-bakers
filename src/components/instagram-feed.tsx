@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Instagram } from "lucide-react";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
@@ -15,8 +15,14 @@ declare global {
 }
 
 export function InstagramFeed({ embedHtml }: { embedHtml?: string | null }) {
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
-    if (!embedHtml) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !embedHtml) return;
 
     // Ensure Instagram embed script is loaded and processed
     const processEmbed = () => window.instgrm?.Embeds?.process?.();
@@ -44,7 +50,7 @@ export function InstagramFeed({ embedHtml }: { embedHtml?: string | null }) {
     return () => {
       script.onload = null;
     };
-  }, [embedHtml]);
+  }, [isMounted, embedHtml]);
 
   return (
     <div className="w-full">
@@ -74,7 +80,7 @@ export function InstagramFeed({ embedHtml }: { embedHtml?: string | null }) {
 
       {/* Embedded post or placeholder */}
       <div className="max-w-3xl mx-auto">
-        {embedHtml ? (
+        {isMounted && embedHtml ? (
           <>
             <div className="flex justify-center">
               <div

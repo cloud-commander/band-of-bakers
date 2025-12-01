@@ -1,44 +1,27 @@
-"use client";
-
 import NextLink from "next/link";
 import { Button } from "@/components/ui/button";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { CheckCircle } from "lucide-react";
 import { formatOrderReference } from "@/lib/utils/order";
-import { getPaginatedUserOrders } from "@/actions/orders";
-import { useEffect, useState } from "react";
+import { getOrderById, getPaginatedUserOrders } from "@/actions/orders";
 
 export const dynamic = "force-dynamic";
 
-interface OrderData {
-  id: string;
-  order_number: number;
-  bakeSale?: {
-    date: string;
-    location?: {
-      collection_hours?: string;
-      address_line1?: string;
-      postcode?: string;
-    };
-  };
+interface PageProps {
+  searchParams: Promise<{ orderId?: string }>;
 }
 
-export default function CheckoutSuccessPage() {
-  const [latestOrder, setLatestOrder] = useState<OrderData | null>(null);
+export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
+  const { orderId } = await searchParams;
+  let latestOrder = null;
 
-  useEffect(() => {
-    async function fetchOrderData() {
-      try {
-        const response = await getPaginatedUserOrders(1, 1);
-        const order = response.orders[0] ?? null;
-        setLatestOrder(order);
-      } catch (error) {
-        console.error("Failed to fetch order data:", error);
-      }
-    }
-
-    fetchOrderData();
-  }, []);
+  if (orderId) {
+    latestOrder = await getOrderById(orderId);
+  } else {
+    // Fallback to latest order if no ID provided
+    const response = await getPaginatedUserOrders(1, 1);
+    latestOrder = response.orders[0] ?? null;
+  }
 
   const formattedRef = latestOrder
     ? formatOrderReference(latestOrder.id, latestOrder.order_number)

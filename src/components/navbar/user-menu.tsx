@@ -22,16 +22,14 @@ export const UserMenu = memo(function UserMenu({ isLoggedIn, userImage, userName
   if (!isLoggedIn) {
     return (
       <Button
-        asChild
         variant="ghost"
         size="sm"
         className="text-sm font-medium flex items-center gap-2 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md transition-colors"
         style={{ fontFamily: "var(--font-geist-sans)" }}
+        onClick={() => import("next-auth/react").then(({ signIn }) => signIn("cognito"))}
       >
-        <Link href="/auth/login">
-          <LogIn className="h-4 w-4" />
-          Login
-        </Link>
+        <LogIn className="h-4 w-4" />
+        Login
       </Button>
     );
   }

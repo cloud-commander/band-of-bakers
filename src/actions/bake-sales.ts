@@ -24,8 +24,10 @@ type ActionResult<T> = { success: true; data: T } | { success: false; error: str
 export async function getBakeSales() {
   try {
     const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
-    const upcoming = await bakeSaleRepository.findUpcoming();
-    const archived = await bakeSaleRepository.findArchived();
+    const [upcoming, archived] = await Promise.all([
+      bakeSaleRepository.findUpcoming(),
+      bakeSaleRepository.findArchived(),
+    ]);
     return { upcoming, archived };
   } catch (error) {
     console.error("Get bake sales error:", error);

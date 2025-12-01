@@ -464,12 +464,12 @@ export async function getPaginatedProducts(
   try {
     const { productRepository } = await import("@/lib/repositories/product.repository");
     const result = await productRepository.findPaginated(limit, offset, false);
-    const variantsMap = await productRepository.getVariantsForProducts(
-      result.data.map((p: Product) => p.id)
-    );
-    const productsWithVariants = result.data.map((product: Product) => ({
+
+    // Variants are now included in the result
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productsWithVariants = result.data.map((product: any) => ({
       ...product,
-      variants: variantsMap.get(product.id) || [],
+      variants: product.variants || [],
     }));
 
     return {

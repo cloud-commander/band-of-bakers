@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ProductRepository } from "../product.repository";
-import { products } from "@/db/schema";
 
 // Mock BaseRepository
 const mocks = vi.hoisted(() => {

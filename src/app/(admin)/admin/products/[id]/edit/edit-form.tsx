@@ -30,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ImageGallery } from "@/components/admin/image-gallery";
-import { getProductById, updateProduct, deleteProduct } from "@/actions/products";
+import { updateProduct, deleteProduct } from "@/actions/products";
 import type { Product, ProductCategory, ProductVariant } from "@/db/schema";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2 } from "lucide-react";

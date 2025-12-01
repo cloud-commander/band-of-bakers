@@ -115,6 +115,7 @@ export function CheckoutCollectionForm({
       );
 
       const createdOrderRefs: string[] = [];
+      const createdOrderIds: string[] = [];
 
       for (const [bakeSaleId, groupItems] of Object.entries(grouped)) {
         const orderData = {
@@ -138,6 +139,7 @@ export function CheckoutCollectionForm({
         }
 
         createdOrderRefs.push(formatOrderReference(result.data.id, result.data.order_number));
+        createdOrderIds.push(result.data.id);
       }
 
       clearCart();
@@ -166,7 +168,7 @@ export function CheckoutCollectionForm({
         },
         duration: 5000,
       });
-      router.push("/checkout/success");
+      router.push(`/checkout/success?orderId=${createdOrderIds[createdOrderIds.length - 1]}`);
     } catch (error) {
       toast.error("Failed to place order", {
         description: error instanceof Error ? error.message : "Please try again",

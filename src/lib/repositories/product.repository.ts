@@ -58,16 +58,21 @@ export class ProductRepository extends BaseRepository<typeof products> {
     const db = await this.getDatabase();
     const whereClause = onlyActive ? eq(products.is_active, true) : undefined;
 
-    const data = await db.query.products.findMany({
-      limit,
-      offset,
-      where: whereClause,
-      orderBy: desc(products.created_at),
-    });
-
-    const totalResult = whereClause
-      ? await db.select({ count: sql<number>`count(*)` }).from(products).where(whereClause)
-      : await db.select({ count: sql<number>`count(*)` }).from(products);
+    const [data, totalResult] = await Promise.all([
+      db.query.products.findMany({
+        limit,
+        offset,
+        where: whereClause,
+        orderBy: desc(products.created_at),
+        with: { variants: true },
+      }),
+      whereClause
+        ? db
+            .select({ count: sql<number>`count(*)` })
+            .from(products)
+            .where(whereClause)
+        : db.select({ count: sql<number>`count(*)` }).from(products),
+    ]);
 
     return { data, total: Number(totalResult[0]?.count || 0) };
   }
@@ -129,7 +134,10 @@ export class ProductRepository extends BaseRepository<typeof products> {
     if (productIds.length === 0) return new Map<string, ProductVariant[]>();
     const db = await this.getDatabase();
     const { inArray } = await import("drizzle-orm");
-    const rows = await db.select().from(productVariants).where(inArray(productVariants.product_id, productIds));
+    const rows = await db
+      .select()
+      .from(productVariants)
+      .where(inArray(productVariants.product_id, productIds));
     const map = new Map<string, ProductVariant[]>();
     for (const row of rows) {
       const list = map.get(row.product_id) || [];
@@ -160,7 +168,9 @@ export class ProductRepository extends BaseRepository<typeof products> {
     const rows = await db
       .select()
       .from(productVariants)
-      .where(and(inArray(productVariants.product_id, productIds), eq(productVariants.is_active, true)));
+      .where(
+        and(inArray(productVariants.product_id, productIds), eq(productVariants.is_active, true))
+      );
 
     const map = new Map<string, ProductVariant[]>();
     for (const row of rows) {

@@ -1,7 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getCachedImages } from "@/lib/cache";
-import { addCacheControl } from "@/lib/edge-cache";
 import { safeLog } from "@/lib/logger/safe-log";
 
 export const dynamic = "force-dynamic";

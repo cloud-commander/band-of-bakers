@@ -14,6 +14,7 @@ interface AvatarUploadProps {
   variant?: "default" | "overlay";
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
+  disabled?: boolean;
 }
 
 export function AvatarUpload({
@@ -23,6 +24,7 @@ export function AvatarUpload({
   variant = "default",
   className,
   size = "md",
+  disabled = false,
 }: AvatarUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [prevAvatarUrl, setPrevAvatarUrl] = useState(currentAvatarUrl);
@@ -68,6 +70,7 @@ export function AvatarUpload({
   };
 
   const handleTriggerUpload = () => {
+    if (disabled) return;
     fileInputRef.current?.click();
   };
 
@@ -104,12 +107,14 @@ export function AvatarUpload({
           </AvatarFallback>
         </Avatar>
 
-        <div
-          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-          onClick={handleTriggerUpload}
-        >
-          <Upload className="w-6 h-6 text-white" />
-        </div>
+        {!disabled && (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            onClick={handleTriggerUpload}
+          >
+            <Upload className="w-6 h-6 text-white" />
+          </div>
+        )}
 
         <input
           ref={fileInputRef}
@@ -117,6 +122,7 @@ export function AvatarUpload({
           accept="image/*"
           className="hidden"
           onChange={handleFileChange}
+          disabled={disabled}
         />
       </div>
     );
@@ -140,6 +146,7 @@ export function AvatarUpload({
             size="sm"
             onClick={handleTriggerUpload}
             className="text-xs"
+            disabled={disabled}
           >
             <Upload className="h-3.5 w-3.5 mr-2" />
             Upload

@@ -78,11 +78,11 @@ export default function AdminBakeSalesPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { upcoming, archived } = await getBakeSales();
+      const [bakeSalesData, locs] = await Promise.all([getBakeSales(), getAllLocations()]);
+      const { upcoming, archived } = bakeSalesData;
+
       setUpcomingBakeSales(upcoming as BakeSale[]);
       setArchivedBakeSales(archived as BakeSale[]);
-
-      const locs = await getAllLocations();
       setLocations(locs as Location[]);
     } catch (error) {
       console.error("Failed to fetch data:", error);

@@ -146,18 +146,19 @@ export class UserRepository extends BaseRepository<typeof users> {
 
     const whereClause = conditions.length > 0 ? sql.join(conditions, sql` AND `) : undefined;
 
-    const data = await db
-      .select()
-      .from(users)
-      .where(whereClause)
-      .orderBy(desc(users.created_at))
-      .limit(limit)
-      .offset(offset);
-
-    const totalResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(users)
-      .where(whereClause);
+    const [data, totalResult] = await Promise.all([
+      db
+        .select()
+        .from(users)
+        .where(whereClause)
+        .orderBy(desc(users.created_at))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(whereClause),
+    ]);
 
     return { data, total: Number(totalResult[0]?.count || 0) };
   }

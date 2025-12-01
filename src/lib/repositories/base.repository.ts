@@ -1,6 +1,6 @@
-import { getDb } from '@/lib/db';
-import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
-import { eq } from 'drizzle-orm';
+import { getDb } from "@/lib/db";
+import type { SQLiteTableWithColumns } from "drizzle-orm/sqlite-core";
+import { eq } from "drizzle-orm";
 
 /**
  * Base Repository Pattern
@@ -75,7 +75,8 @@ export abstract class BaseRepository<T extends SQLiteTableWithColumns<any>> {
    */
   async count(): Promise<number> {
     const db = await this.getDatabase();
-    const results = await db.select().from(this.table);
-    return results.length;
+    const { sql } = await import("drizzle-orm");
+    const results = await db.select({ count: sql<number>`count(*)` }).from(this.table);
+    return Number(results[0]?.count || 0);
   }
 }

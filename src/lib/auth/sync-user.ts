@@ -30,6 +30,8 @@ export async function syncUser(authData: AuthData) {
     const desiredRole = KNOWN_ADMIN_EMAILS.has(email.toLowerCase()) ? "owner" : existingUser.role;
     if (
       desiredRole !== existingUser.role ||
+      (authData.name && authData.name !== existingUser.name) ||
+      (authData.phone && authData.phone !== existingUser.phone) ||
       authData.picture ||
       authData.photoURL ||
       authData.image
@@ -38,6 +40,8 @@ export async function syncUser(authData: AuthData) {
         .update(users)
         .set({
           role: desiredRole,
+          name: authData.name || existingUser.name,
+          phone: authData.phone || existingUser.phone,
           avatar_url:
             authData.picture || authData.photoURL || authData.image || existingUser.avatar_url,
           updated_at: new Date().toISOString(),

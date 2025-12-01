@@ -162,7 +162,7 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
                     onAvatarChange={setSelectedFile}
                     variant="overlay"
                     size="lg"
-                    className={!isEditing ? "pointer-events-none" : ""}
+                    disabled={!isEditing}
                   />
                 </div>
                 <div>

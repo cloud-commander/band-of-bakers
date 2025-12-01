@@ -34,6 +34,7 @@ export function UserDetailClient({ user }: UserDetailClientProps) {
   });
 
   // State for the new avatar file (if uploaded)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   if (!user) {

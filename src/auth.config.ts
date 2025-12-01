@@ -2,7 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   pages: {
-    signIn: "/auth/login",
+    // signIn: "/auth/login", // Removed to use default Cognito Hosted UI
   },
   callbacks: {
     // This session callback runs in middleware context and must be lightweight

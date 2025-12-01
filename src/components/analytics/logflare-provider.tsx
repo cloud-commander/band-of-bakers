@@ -46,11 +46,10 @@ class LogflareClient {
         },
       };
 
-      await fetch("https://api.logflare.app/logs", {
+      await fetch("/api/logs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-KEY": this.apiKey,
         },
         body: JSON.stringify(payload),
       });
