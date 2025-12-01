@@ -72,8 +72,12 @@ export async function reportError(
 }
 
 export const serverRollbar = {
-  info: (message: string, extra?: Record<string, unknown>) => getRollbar().info(message, extra),
-  warn: (message: string, extra?: Record<string, unknown>) => getRollbar().warning(message, extra),
+  info: async (message: string, extra?: Record<string, unknown>) => {
+    await getRollbar().info(message, extra);
+  },
+  warn: async (message: string, extra?: Record<string, unknown>) => {
+    await getRollbar().warning(message, extra);
+  },
   error: (error: Error | string, extra?: Record<string, unknown>) =>
     reportError(error, "error", extra),
   critical: (error: Error | string, extra?: Record<string, unknown>) =>

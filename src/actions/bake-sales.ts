@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { bakeSaleRepository } from "@/lib/repositories/bake-sale.repository";
 import { z } from "zod";
 import { type BakeSale } from "@/db/schema";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 // Validation schema
 const bakeSaleSchema = z.object({
@@ -80,6 +81,15 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<{
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     // 2. Validation
     const rawData = {
       date: formData.get("date") as string,
@@ -144,6 +154,15 @@ export async function updateBakeSale(
     const session = await auth();
     if (!session?.user?.role || !["owner", "manager", "staff"].includes(session.user.role)) {
       return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
     }
 
     // 2. Validation

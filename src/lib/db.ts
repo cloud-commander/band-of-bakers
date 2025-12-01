@@ -29,88 +29,26 @@ export async function getDb() {
   console.warn("[DB] env.DB is undefined or context failed.");
 
   // On edge, fail fast if no D1 binding is available
-  if (process.env.NEXT_RUNTIME === "edge") {
+  if (
+    process.env.NEXT_RUNTIME === "edge" ||
+    typeof (globalThis as unknown as { EdgeRuntime?: unknown }).EdgeRuntime !== "undefined"
+  ) {
     throw new Error("D1 binding (env.DB) is required on edge runtime");
   }
 
-  // Fallback for local development
+  // Fallback for local development (never used on edge)
   if (process.env.NODE_ENV === "development" || !process.env.NODE_ENV) {
     // Check global cache first
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalForDb = globalThis as unknown as { __localDb: any };
     if (globalForDb.__localDb) {
-      // console.log("[DB] Reusing cached local connection");
       return globalForDb.__localDb;
     }
 
     console.log("[DB] Attempting local fallback...");
     try {
-      const { drizzle: drizzleProxy } = await import("drizzle-orm/sqlite-proxy");
-      const Database = (await import("better-sqlite3")).default;
-      const path = (await import("path")).default;
-
-      // Try local.db first (for local development)
-      const localDbPath = path.join(process.cwd(), "local.db");
-      console.log(`[DB] Connecting to local SQLite: ${localDbPath}`);
-      const sqlite = new Database(localDbPath);
-
-      // Use sqlite-proxy to mimic async D1 behavior
-      const db = drizzleProxy(
-        async (sql, params, method) => {
-          // Debug query shape to help troubleshoot local SQLite issues
-          if (process.env.DEBUG_SQLITE_PROXY === "1") {
-            console.log(`[DB][sqlite-proxy] ${method?.toUpperCase?.() ?? method}: ${sql}`);
-            if (params?.length) {
-              console.log("[DB][sqlite-proxy] params:", params);
-            }
-          }
-          try {
-            const stmt = sqlite.prepare(sql);
-            if (method === "run") {
-              const result = stmt.run(params);
-              // D1-like result shape
-              return {
-                rows: [],
-                success: true,
-                meta: {
-                  changed_db: false,
-                  changes: result.changes,
-                  duration: 0,
-                  last_row_id: Number(result.lastInsertRowid),
-                  rows_read: 0,
-                  rows_written: result.changes,
-                  size_after: 0,
-                },
-              };
-            }
-
-            if (method === "get") {
-              const row = stmt.raw().get(params);
-              const rowLog =
-                row === undefined ? "undefined" : JSON.stringify(row).slice(0, 200);
-              console.log("[DB] Proxy result (raw):", rowLog);
-              return { rows: row ? [row] : [] };
-            }
-
-            if (method === "values") {
-              const rows = stmt.raw().all(params);
-              console.log("[DB] Proxy result (raw):", JSON.stringify(rows).slice(0, 200));
-              return { rows };
-            }
-
-            // Default: return raw arrays to mirror D1 driver format
-            const rows = stmt.raw().all(params);
-            console.log("[DB] Proxy result (raw):", JSON.stringify(rows).slice(0, 200));
-            return { rows };
-          } catch (e) {
-            console.error("SQL Error:", e);
-            throw e;
-          }
-        },
-        { schema }
-      );
-
-      // Cache the connection
+      const { getLocalDb } = await import("./db-local");
+      const db = await getLocalDb();
       globalForDb.__localDb = db;
       return db;
     } catch (fallbackError) {

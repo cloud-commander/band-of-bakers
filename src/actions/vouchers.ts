@@ -5,6 +5,7 @@ import { validateVoucher } from "@/lib/utils/voucher";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 const voucherSchema = z.object({
   code: z.string().min(1),
@@ -108,6 +109,15 @@ export async function updateVoucher(id: string, formData: FormData): Promise<Act
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const rawData = {
       code: formData.get("code") as string,
       type: formData.get("type") as string,
@@ -152,6 +162,15 @@ export async function createVoucher(formData: FormData): Promise<ActionResult<{ 
     const session = await auth();
     if (!session?.user?.role || !["owner", "manager", "staff"].includes(session.user.role)) {
       return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
     }
 
     const rawData = {

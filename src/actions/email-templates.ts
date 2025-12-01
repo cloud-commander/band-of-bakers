@@ -5,6 +5,7 @@ import { emailTemplates } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -33,6 +34,15 @@ export async function updateEmailTemplate(
 ): Promise<ActionResult<void>> {
   if (!(await checkAdmin())) {
     return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
   }
 
   try {

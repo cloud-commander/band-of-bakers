@@ -5,6 +5,7 @@ import { faqs, InsertFaq } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 export async function getFaqs() {
   try {
@@ -34,6 +35,15 @@ export async function getPublicFaqs() {
 
 export async function createFaq(data: Omit<InsertFaq, "id" | "created_at" | "updated_at">) {
   try {
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const db = await getDb();
     const newFaq = await db
       .insert(faqs)
@@ -56,6 +66,15 @@ export async function updateFaq(
   data: Partial<Omit<InsertFaq, "id" | "created_at" | "updated_at">>
 ) {
   try {
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const db = await getDb();
     const updatedFaq = await db
       .update(faqs)
@@ -76,6 +95,15 @@ export async function updateFaq(
 
 export async function deleteFaq(id: string) {
   try {
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const db = await getDb();
     await db.delete(faqs).where(eq(faqs.id, id));
     revalidatePath("/admin/faqs");
@@ -89,6 +117,15 @@ export async function deleteFaq(id: string) {
 
 export async function toggleFaqStatus(id: string, isActive: boolean) {
   try {
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const db = await getDb();
     const updatedFaq = await db
       .update(faqs)

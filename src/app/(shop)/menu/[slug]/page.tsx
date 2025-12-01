@@ -5,11 +5,48 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ProductDetailForm } from "@/components/product/product-detail-form";
 import { ReviewSection } from "@/components/reviews/review-section";
+import type { Metadata } from "next";
 
 interface ProductPageProps {
   params: Promise<{
     slug: string;
   }>;
+}
+
+export const runtime = "edge";
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found | Band of Bakers",
+      description: "The product you're looking for could not be found.",
+    };
+  }
+
+  const price = product.base_price.toFixed(2);
+  const description =
+    product.description ||
+    `Fresh ${product.name} from our artisan bakery. Starting from £${price}. Order now for collection at our next bake sale.`;
+
+  return {
+    title: `${product.name} | Band of Bakers`,
+    description: description.slice(0, 160), // SEO best practice: 150-160 chars
+    openGraph: {
+      title: product.name,
+      description,
+      images: product.image_url ? [{ url: product.image_url, width: 1200, height: 630 }] : [],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: product.image_url ? [product.image_url] : [],
+    },
+  };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

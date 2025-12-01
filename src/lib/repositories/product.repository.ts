@@ -123,6 +123,23 @@ export class ProductRepository extends BaseRepository<typeof products> {
   }
 
   /**
+   * Get variants for many products, returned as a map keyed by product_id.
+   */
+  async getVariantsForProducts(productIds: string[]) {
+    if (productIds.length === 0) return new Map<string, ProductVariant[]>();
+    const db = await this.getDatabase();
+    const { inArray } = await import("drizzle-orm");
+    const rows = await db.select().from(productVariants).where(inArray(productVariants.product_id, productIds));
+    const map = new Map<string, ProductVariant[]>();
+    for (const row of rows) {
+      const list = map.get(row.product_id) || [];
+      list.push(row);
+      map.set(row.product_id, list);
+    }
+    return map;
+  }
+
+  /**
    * Get active product variants
    */
   async getActiveVariants(productId: string): Promise<ProductVariant[]> {
@@ -220,13 +237,27 @@ export class ProductRepository extends BaseRepository<typeof products> {
 
   /**
    * Search products by name
+   * Sanitized to prevent ReDoS and SQL injection
    */
   async searchByName(searchTerm: string): Promise<Product[]> {
     const db = await this.getDatabase();
+
+    // Trim and limit length to prevent resource exhaustion
+    const trimmed = searchTerm.trim().slice(0, 50);
+
+    // Whitelist only alphanumeric, spaces, and hyphens
+    // This prevents wildcard injection and regex catastrophic backtracking
+    const sanitized = trimmed.replace(/[^a-zA-Z0-9\s-]/g, "");
+
+    // Return early if search term is too short or empty
+    if (sanitized.length < 2) {
+      return [];
+    }
+
     return await db
       .select()
       .from(products)
-      .where(like(products.name, `%${searchTerm}%`));
+      .where(like(products.name, `%${sanitized}%`));
   }
 
   /**
@@ -280,12 +311,16 @@ export class ProductRepository extends BaseRepository<typeof products> {
       }
 
       // 4. Update existing variants
-      for (const variant of variants.update) {
-        const { id, ...updates } = variant;
-        await db
-          .update(productVariants)
-          .set({ ...updates, updated_at: new Date().toISOString() })
-          .where(eq(productVariants.id, id));
+      if (variants.update.length > 0) {
+        const now = new Date().toISOString();
+        await Promise.all(
+          variants.update.map(({ id, ...updates }) =>
+            db
+              .update(productVariants)
+              .set({ ...updates, updated_at: now })
+              .where(eq(productVariants.id, id))
+          )
+        );
       }
 
       return updatedProduct;

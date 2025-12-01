@@ -7,6 +7,7 @@ import { z } from "zod";
 import { type Location, bakeSales } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { eq, count } from "drizzle-orm";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 // Validation schema
 const locationSchema = z.object({
@@ -56,6 +57,15 @@ export async function createLocation(formData: FormData): Promise<ActionResult<{
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     // 2. Validation
     const rawData = {
       name: formData.get("name"),
@@ -103,6 +113,15 @@ export async function updateLocation(
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     // 2. Validation
     const rawData = {
       name: formData.get("name"),
@@ -145,6 +164,15 @@ export async function deleteLocation(id: string): Promise<ActionResult<void>> {
     const session = await auth();
     if (!session?.user?.role || !["owner", "manager"].includes(session.user.role)) {
       return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
     }
 
     // 2. Check for usage

@@ -3,9 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
-import { RevenueTrendChart } from "@/components/admin/revenue-chart";
-import { TopProductsChart } from "@/components/admin/top-products-chart";
-import { OrderStatusChart } from "@/components/admin/order-status-chart";
+import dynamicImport from "next/dynamic";
 import { TopVouchersList } from "@/components/admin/top-vouchers-list";
 import { Heading } from "@/components/ui/heading";
 import { KPICard } from "@/components/admin/kpi-card";
@@ -21,9 +19,23 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+
+const OrderStatusChart = dynamicImport(
+  () => import("@/components/admin/order-status-chart").then((m) => m.OrderStatusChart),
+  { loading: () => <div className="h-64 rounded-lg bg-muted/50" /> }
+);
+const TopProductsChart = dynamicImport(
+  () => import("@/components/admin/top-products-chart").then((m) => m.TopProductsChart),
+  { loading: () => <div className="h-64 rounded-lg bg-muted/50" /> }
+);
+const RevenueTrendChart = dynamicImport(
+  () => import("@/components/admin/revenue-chart").then((m) => m.RevenueTrendChart),
+  { loading: () => <div className="h-72 rounded-lg bg-muted/50" /> }
+);
 
 interface DashboardOrder {
   id: string;

@@ -1,36 +1,23 @@
-"use client";
-
-import Script from "next/script";
-
 export function GoogleAnalytics() {
-  const measurementId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  if (!gaId) return null;
 
-  if (!measurementId) {
-    return null;
-  }
+  const scriptId = `ga-${gaId}`;
 
   return (
     <>
-      {/* Google Analytics Script */}
-      <Script
-        strategy="lazyOnload"
-        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
-      />
-
-      {/* Google Analytics Configuration */}
-      <Script
-        id="google-analytics"
-        strategy="lazyOnload"
+      <script
+        id={scriptId}
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+      ></script>
+      <script
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${measurementId}', {
-              page_path: window.location.pathname,
-              allow_google_signals: true,
-              allow_ad_personalization_signals: true
-            });
+            gtag('config', '${gaId}');
           `,
         }}
       />

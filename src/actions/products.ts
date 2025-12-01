@@ -3,9 +3,11 @@
 import { auth } from "@/auth";
 import { productRepository, categoryRepository } from "@/lib/repositories";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
 import type { Product } from "@/db/schema";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
+import { CACHE_TAGS } from "@/lib/cache";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 type PaginatedResult<T> = {
@@ -112,6 +114,15 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     // 2. Extract and validate data
     const rawData = {
       name: formData.get("name") as string,
@@ -187,9 +198,11 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
       variantsToCreate
     );
 
-    // 6. Revalidate relevant pages
+    // 6. Revalidate relevant pages and cache tags
     revalidatePath("/admin/products");
     revalidatePath("/menu");
+    revalidateTag(CACHE_TAGS.products);
+    revalidateTag(CACHE_TAGS.menu);
 
     return { success: true, data: { id: product.id } };
   } catch (error) {
@@ -209,6 +222,15 @@ export async function updateProduct(
     // 1. Auth check
     if (!(await checkAdminRole())) {
       return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
     }
 
     // 2. Get existing product
@@ -271,8 +293,10 @@ export async function updateProduct(
       return { success: false, error: "Price is required if no variants are added" };
     }
 
+    const existingVariantsPromise = productRepository.getVariants(id);
+
     // Identify variants to delete
-    const existingVariants = await productRepository.getVariants(id);
+    const existingVariants = await existingVariantsPromise;
     const variantsDelete = existingVariants
       .filter((v) => !variantIdsToKeep.has(v.id))
       .map((v) => v.id);
@@ -323,10 +347,12 @@ export async function updateProduct(
       return { success: false, error: "Failed to update product" };
     }
 
-    // 7. Revalidate relevant pages
+    // 7. Revalidate relevant pages and cache tags
     revalidatePath("/admin/products");
     revalidatePath("/menu");
     revalidatePath(`/products/${existingProduct.slug}`);
+    revalidateTag(CACHE_TAGS.products);
+    revalidateTag(CACHE_TAGS.menu);
 
     return { success: true, data: { id: product.id } };
   } catch (error) {
@@ -345,6 +371,16 @@ export async function deleteProduct(id: string): Promise<ActionResult<void>> {
       return { success: false, error: "Unauthorized" };
     }
 
+    // CSRF guard
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     // 2. Get product to delete image
     const product = await productRepository.findById(id);
     if (!product) {
@@ -359,9 +395,11 @@ export async function deleteProduct(id: string): Promise<ActionResult<void>> {
     // 4. Delete product from database
     await productRepository.delete(id);
 
-    // 5. Revalidate relevant pages
+    // 5. Revalidate relevant pages and cache tags
     revalidatePath("/admin/products");
     revalidatePath("/menu");
+    revalidateTag(CACHE_TAGS.products);
+    revalidateTag(CACHE_TAGS.menu);
 
     return { success: true, data: undefined };
   } catch (error) {
@@ -376,6 +414,9 @@ export async function deleteProduct(id: string): Promise<ActionResult<void>> {
 export async function getProducts() {
   try {
     const products = await productRepository.findAll();
+    const variantsMap = await productRepository.getVariantsForProducts(
+      products.map((p: Product) => p.id)
+    );
 
     // Debug: Check for products with null/empty image_url
     const productsWithoutImages = products.filter(
@@ -397,16 +438,10 @@ export async function getProducts() {
     }
 
     // Fetch variants for each product
-    const productsWithVariants = await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      products.map(async (product: any) => {
-        const variants = await productRepository.getVariants(product.id);
-        return {
-          ...product,
-          variants,
-        };
-      })
-    );
+    const productsWithVariants = products.map((product: Product) => ({
+      ...product,
+      variants: variantsMap.get(product.id) || [],
+    }));
 
     return productsWithVariants;
   } catch (error) {
@@ -425,15 +460,13 @@ export async function getPaginatedProducts(
 
   try {
     const result = await productRepository.findPaginated(limit, offset, false);
-    const productsWithVariants = await Promise.all(
-      result.data.map(async (product: Product) => {
-        const variants = await productRepository.getVariants(product.id);
-        return {
-          ...product,
-          variants,
-        };
-      })
+    const variantsMap = await productRepository.getVariantsForProducts(
+      result.data.map((p: Product) => p.id)
     );
+    const productsWithVariants = result.data.map((product: Product) => ({
+      ...product,
+      variants: variantsMap.get(product.id) || [],
+    }));
 
     return {
       data: productsWithVariants,
@@ -449,27 +482,35 @@ export async function getPaginatedProducts(
 
 /**
  * Get active products with variants (public view)
+ * Cached for 5 minutes, invalidated by CACHE_TAGS.products
  */
 export async function getActiveProducts() {
-  try {
-    const products = await productRepository.findActiveProducts();
+  return unstable_cache(
+    async () => {
+      try {
+        const products = await productRepository.findActiveProducts();
 
-    // Fetch active variants for each product
-    const productsWithVariants = await Promise.all(
-      products.map(async (product) => {
-        const variants = await productRepository.getActiveVariants(product.id);
-        return {
+        // Fetch active variants for all products in one query
+        const variantsMap = await productRepository.getActiveVariantsForProducts(
+          products.map((p) => p.id)
+        );
+        const productsWithVariants = products.map((product) => ({
           ...product,
-          variants,
-        };
-      })
-    );
+          variants: variantsMap.get(product.id) || [],
+        }));
 
-    return productsWithVariants;
-  } catch (error) {
-    console.error("Get active products error:", error);
-    return [];
-  }
+        return productsWithVariants;
+      } catch (error) {
+        console.error("Get active products error:", error);
+        return [];
+      }
+    },
+    ["active-products"],
+    {
+      revalidate: 300, // 5 minutes
+      tags: [CACHE_TAGS.products],
+    }
+  )();
 }
 
 /**
@@ -483,8 +524,8 @@ export async function getProductById(id: string) {
     const product = await productRepository.findById(id);
     if (!product) return null;
 
-    const variants = await productRepository.getVariants(id);
-    return { ...product, variants };
+    const variantsMap = await productRepository.getVariantsForProducts([id]);
+    return { ...product, variants: variantsMap.get(id) || [] };
   } catch (error) {
     console.error("Get product error:", error);
     return null;
@@ -503,15 +544,26 @@ export async function toggleProductActive(
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     // 2. Toggle status
     const product = await productRepository.toggleActive(id);
     if (!product) {
       return { success: false, error: "Product not found" };
     }
 
-    // 3. Revalidate relevant pages
+    // 3. Revalidate relevant pages and cache tags
     revalidatePath("/admin/products");
     revalidatePath("/menu");
+    revalidateTag(CACHE_TAGS.products);
+    revalidateTag(CACHE_TAGS.menu);
 
     return { success: true, data: { id: product.id, is_active: product.is_active } };
   } catch (error) {
@@ -522,30 +574,50 @@ export async function toggleProductActive(
 
 /**
  * Get all categories sorted
+ * Cached for 10 minutes, invalidated by CACHE_TAGS.categories
  */
 export async function getCategories() {
-  try {
-    return await categoryRepository.findAllSorted();
-  } catch (error) {
-    console.error("Failed to fetch categories:", error);
-    return [];
-  }
+  return unstable_cache(
+    async () => {
+      try {
+        return await categoryRepository.findAllSorted();
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        return [];
+      }
+    },
+    ["categories-sorted"],
+    {
+      revalidate: 600, // 10 minutes
+      tags: [CACHE_TAGS.categories],
+    }
+  )();
 }
 
 /**
  * Get product by slug with variants
+ * Cached for 10 minutes to prevent cache bypass DoS
  */
 export async function getProductBySlug(slug: string) {
-  try {
-    const product = await productRepository.findBySlug(slug);
-    if (!product) return null;
+  return unstable_cache(
+    async () => {
+      try {
+        const product = await productRepository.findBySlug(slug);
+        if (!product) return null;
 
-    const variants = await productRepository.getActiveVariants(product.id);
-    return { ...product, variants };
-  } catch (error) {
-    console.error(`Failed to fetch product ${slug}:`, error);
-    return null;
-  }
+        const variantsMap = await productRepository.getActiveVariantsForProducts([product.id]);
+        return { ...product, variants: variantsMap.get(product.id) || [] };
+      } catch (error) {
+        console.error(`Failed to fetch product ${slug}:`, error);
+        return null;
+      }
+    },
+    ["product-by-slug", slug], // Include slug in cache key
+    {
+      revalidate: 600, // 10 minutes
+      tags: [CACHE_TAGS.products],
+    }
+  )();
 }
 
 /**
@@ -558,12 +630,13 @@ export async function getProductsByCategory(categorySlug: string) {
 
     const products = await productRepository.findActiveByCategoryId(category.id);
 
-    const productsWithVariants = await Promise.all(
-      products.map(async (product) => {
-        const variants = await productRepository.getActiveVariants(product.id);
-        return { ...product, variants };
-      })
+    const variantsMap = await productRepository.getActiveVariantsForProducts(
+      products.map((p) => p.id)
     );
+    const productsWithVariants = products.map((product) => ({
+      ...product,
+      variants: variantsMap.get(product.id) || [],
+    }));
 
     return productsWithVariants;
   } catch (error) {
@@ -574,23 +647,33 @@ export async function getProductsByCategory(categorySlug: string) {
 
 /**
  * Get all categories with their products (for Menu page)
+ * Cached for 10 minutes, invalidated by CACHE_TAGS.menu
  */
 export async function getMenu() {
-  try {
-    const categories = await getCategories();
+  return unstable_cache(
+    async () => {
+      try {
+        const categories = await getCategories();
 
-    const menu = await Promise.all(
-      categories.map(async (category) => {
-        const products = await getProductsByCategory(category.slug);
-        return { ...category, products };
-      })
-    );
+        const menu = await Promise.all(
+          categories.map(async (category) => {
+            const products = await getProductsByCategory(category.slug);
+            return { ...category, products };
+          })
+        );
 
-    return menu;
-  } catch (error) {
-    console.error("Failed to fetch menu:", error);
-    return [];
-  }
+        return menu;
+      } catch (error) {
+        console.error("Failed to fetch menu:", error);
+        return [];
+      }
+    },
+    ["full-menu"],
+    {
+      revalidate: 600, // 10 minutes
+      tags: [CACHE_TAGS.menu, CACHE_TAGS.products, CACHE_TAGS.categories],
+    }
+  )();
 }
 
 /**
@@ -611,12 +694,13 @@ export async function getRandomProducts(count: number = 3) {
 
     // Take the first 'count' items and add variants
     const selectedProducts = shuffled.slice(0, count);
-    const productsWithVariants = await Promise.all(
-      selectedProducts.map(async (product) => {
-        const variants = await productRepository.getActiveVariants(product.id);
-        return { ...product, variants };
-      })
+    const variantsMap = await productRepository.getActiveVariantsForProducts(
+      selectedProducts.map((p) => p.id)
     );
+    const productsWithVariants = selectedProducts.map((product) => ({
+      ...product,
+      variants: variantsMap.get(product.id) || [],
+    }));
 
     return productsWithVariants;
   } catch (error) {

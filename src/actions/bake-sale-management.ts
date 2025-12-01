@@ -8,6 +8,7 @@ import { asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { sendEmail } from "@/lib/email/service";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -21,6 +22,15 @@ export async function cancelBakeSale(
   reason: string
 ): Promise<ActionResult<{ affectedOrders: number }>> {
   if (!(await checkAdmin())) return { success: false, error: "Unauthorized" };
+
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
+  }
 
   try {
     const db = await getDb();
@@ -142,6 +152,15 @@ export async function rescheduleBakeSale(
   if (!(await checkAdmin())) return { success: false, error: "Unauthorized" };
 
   try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
+  }
+
+  try {
     const db = await getDb();
     const bakeSale = await db.query.bakeSales.findFirst({
       where: eq(bakeSales.id, id),
@@ -205,6 +224,15 @@ export async function resolveOrderIssue(
   try {
     const session = await auth();
     if (!session?.user) return { success: false, error: "Unauthorized" };
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
 
     const db = await getDb();
     const order = await db.query.orders.findFirst({

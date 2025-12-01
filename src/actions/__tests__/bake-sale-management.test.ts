@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { cancelBakeSale, rescheduleBakeSale, resolveOrderIssue } from "../bake-sale-management";
 import { auth } from "@/auth";

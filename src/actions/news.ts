@@ -5,6 +5,7 @@ import { newsRepository } from "@/lib/repositories/news.repository";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { nanoid } from "nanoid";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -79,6 +80,15 @@ export async function createNewsPost(formData: FormData): Promise<ActionResult<{
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const rawData = {
       title: formData.get("title") as string,
       summary: formData.get("summary") as string,
@@ -135,6 +145,15 @@ export async function toggleNewsPostStatus(
       return { success: false, error: "Unauthorized" };
     }
 
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     await newsRepository.update(id, {
       is_published: isPublished,
       published_at: isPublished ? new Date().toISOString() : null,
@@ -158,6 +177,15 @@ export async function deleteNewsPost(id: string): Promise<ActionResult<void>> {
     const userId = await checkAdminRole();
     if (!userId) {
       return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
     }
 
     await newsRepository.delete(id);
@@ -199,6 +227,15 @@ export async function updateNewsPost(
     const userId = await checkAdminRole();
     if (!userId) {
       return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
     }
 
     const rawData = {

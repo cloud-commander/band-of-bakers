@@ -4,11 +4,21 @@ import { auth } from "@/auth";
 import { userRepository } from "@/lib/repositories";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath } from "next/cache";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 export async function updateProfile(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
     return { error: "Not authenticated" };
+  }
+
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
   }
 
   const userId = session.user.id;
@@ -92,6 +102,15 @@ export async function savePhoneFromCheckout(phone: string) {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
   }
 
   const userId = session.user.id;

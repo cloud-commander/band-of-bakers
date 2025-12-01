@@ -108,6 +108,8 @@ import { Partytown } from "@builder.io/partytown/react";
 import { LazyMotionProvider } from "@/components/providers/lazy-motion-provider";
 
 import { StructuredData } from "@/components/seo/structured-data";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { ClientInit } from "@/components/client-init";
 
 const enablePartytown = process.env.NEXT_PUBLIC_PARTYTOWN === "true";
 
@@ -119,13 +121,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfairDisplay.variable}`}>
       <head>
+        <GoogleAnalytics />
         <link rel="preconnect" href="https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
-        {enablePartytown && (
-          <Partytown debug={false} forward={["dataLayer.push"]} />
-        )}
+        {enablePartytown && <Partytown debug={false} forward={["dataLayer.push"]} />}
         <StructuredData />
       </head>
       <body
@@ -134,6 +135,7 @@ export default function RootLayout({
           dmSerifDisplay.variable
         )}
       >
+        <ClientInit />
         <div
           className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-multiply"
           style={{

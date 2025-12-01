@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { auth } from "@/auth";
@@ -14,6 +14,9 @@ import { sendEmail } from "@/lib/email/service";
 import { verifyTurnstileToken } from "@/lib/actions/verify-turnstile";
 import { formatOrderReference } from "@/lib/utils/order";
 import { cache } from "react";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
+import { CACHE_TAGS } from "@/lib/cache";
+import { logger } from "@/lib/logger";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -57,6 +60,15 @@ export async function createOrder(
   let voucherReservation: string | null = null;
 
   try {
+    try {
+      await requireCsrf();
+    } catch (e) {
+      if (e instanceof CsrfError) {
+        return { success: false, error: "Request blocked. Please refresh and try again." };
+      }
+      throw e;
+    }
+
     const validated = orderSchema.safeParse(data);
     if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
@@ -274,6 +286,8 @@ export async function createOrder(
     );
 
     revalidatePath("/admin/orders");
+    revalidateTag(CACHE_TAGS.orders);
+    revalidateTag(CACHE_TAGS.dashboard);
 
     return { success: true, data: { id: order.id, order_number: order.order_number } };
   } catch (error) {
@@ -289,7 +303,11 @@ export async function createOrder(
       await voucherRepository.decrementUsage(voucherReservation);
     }
 
-    console.error("Create order error:", error);
+    await logger.error("Create order failed", error, {
+      action: "createOrder",
+      email: data.email,
+      itemCount: data.items?.length,
+    });
     return { success: false, error: "Failed to create order" };
   }
 }
@@ -447,10 +465,16 @@ export async function updateOrderStatus(
 
     revalidatePath("/admin/orders");
     revalidatePath(`/orders/${orderId}`);
+    revalidateTag(CACHE_TAGS.orders);
+    revalidateTag(CACHE_TAGS.dashboard);
 
     return { success: true, data: { id: updated.id, status: updated.status } };
   } catch (error) {
-    console.error("Update order status error:", error);
+    await logger.error("Update order status failed", error, {
+      action: "updateOrderStatus",
+      orderId,
+      newStatus: status,
+    });
     return { success: false, error: "Failed to update order status" };
   }
 }

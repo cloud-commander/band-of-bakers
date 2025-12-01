@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { productCategories, products } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { eq } from "drizzle-orm";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -36,6 +37,14 @@ export async function createCategory(data: {
 }): Promise<ActionResult<{ id: string }>> {
   if (!(await checkAdmin())) {
     return { success: false, error: "Unauthorized" };
+  }
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
   }
 
   try {
@@ -78,6 +87,14 @@ export async function updateCategory(
   if (!(await checkAdmin())) {
     return { success: false, error: "Unauthorized" };
   }
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
+  }
 
   try {
     const db = await getDb();
@@ -114,6 +131,14 @@ export async function deleteCategory(id: string): Promise<ActionResult<void>> {
   if (!(await checkAdmin())) {
     return { success: false, error: "Unauthorized" };
   }
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
+  }
 
   try {
     const db = await getDb();
@@ -146,6 +171,14 @@ export async function reorderCategories(
 ): Promise<ActionResult<void>> {
   if (!(await checkAdmin())) {
     return { success: false, error: "Unauthorized" };
+  }
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
   }
 
   try {

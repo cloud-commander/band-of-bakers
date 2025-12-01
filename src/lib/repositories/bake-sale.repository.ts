@@ -54,6 +54,7 @@ export class BakeSaleRepository extends BaseRepository<typeof bakeSales> {
 
   /**
    * Find archived bake sales (past)
+   * Limited to 100 most recent to prevent unbounded query growth
    */
   async findArchived(): Promise<BakeSaleWithLocation[]> {
     const db = await this.getDatabase();
@@ -64,7 +65,8 @@ export class BakeSaleRepository extends BaseRepository<typeof bakeSales> {
       .from(bakeSales)
       .innerJoin(locations, eq(bakeSales.location_id, locations.id))
       .where(lt(bakeSales.date, today))
-      .orderBy(desc(bakeSales.date));
+      .orderBy(desc(bakeSales.date))
+      .limit(100); // Prevent unbounded growth over years
 
     return results.map(
       ({ bake_sales, locations }: { bake_sales: BakeSale; locations: Location }) => ({

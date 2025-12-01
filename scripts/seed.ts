@@ -52,6 +52,7 @@ const args = process.argv.slice(2);
 const isAdminOnly = args.includes("--admin-only");
 const skipR2 = args.includes("--skip-r2");
 const useRealProducts = args.includes("--real-products");
+const imagesOnly = args.includes("--images-only"); // Full reset mode with only images focus
 const r2Target = args.includes("--r2-remote") ? "remote" : "local";
 const r2Flag = r2Target === "remote" ? "--remote" : "--local";
 
@@ -61,7 +62,9 @@ const publicUrlForR2Path = (r2Path: string) => `/${normalizeR2Path(r2Path)}`;
 
 async function main() {
   console.log("🌱 Starting seed process...");
-  console.log(`   Mode: ${isAdminOnly ? "Admin Only" : "Full Seed"}`);
+  console.log(
+    `   Mode: ${imagesOnly ? "Images Only (Full Reset)" : isAdminOnly ? "Admin Only" : "Full Seed"}`
+  );
   console.log(`   Products: ${useRealProducts ? "Real Products" : "Mock Products"}`);
   console.log(
     `   R2: ${skipR2 ? "Skipping" : r2Target === "remote" ? "Enabled (remote)" : "Enabled (local)"}`
@@ -953,7 +956,7 @@ async function main() {
         category: string,
         tags: string[] = []
       ) => {
-        const seedProductsDir = path.join(process.cwd(), "seed-products");
+        const seedProductsDir = path.join(process.cwd(), "scripts/seed-data");
         const fullLocalPath = path.join(seedProductsDir, localFilePath);
 
         if (!fs.existsSync(seedProductsDir)) {

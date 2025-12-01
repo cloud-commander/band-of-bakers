@@ -11,7 +11,13 @@ export const CACHE_TAGS = {
   products: "products",
   orders: "orders",
   news: "news",
-};
+  dashboard: "dashboard",
+  menu: "menu",
+  categories: "categories",
+  bakeSales: "bakeSales",
+  testimonials: "testimonials",
+  faqs: "faqs",
+} as const;
 
 /**
  * Cached fetch for images; cache key includes category/tag so filters work.

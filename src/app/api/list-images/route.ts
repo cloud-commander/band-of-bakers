@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getCachedImages } from "@/lib/cache";
+import { addCacheControl } from "@/lib/edge-cache";
+import { safeLog } from "@/lib/logger/safe-log";
 
 export const runtime = "edge";
 
@@ -27,9 +29,7 @@ export async function GET(request: NextRequest) {
     // (Optional: add zod validation here)
 
     // 3. Query DB (Cached)
-    console.log(
-      `[API] list-images: Fetching for category=${category}, bucket=${bucket}, tag=${tag}`
-    );
+    safeLog("info", "[API] list-images", { category, bucket, tag, limit });
 
     // Base fetch (cached) then bucket-filter locally
     const filteredImages = await getCachedImages(
@@ -51,19 +51,22 @@ export async function GET(request: NextRequest) {
 
     const limited = bucketFiltered.slice(0, limit);
 
-    console.log(
-      `[API] list-images: Found ${bucketFiltered.length} images after bucket filter (returning ${limited.length})`
-    );
+    safeLog("info", "[API] list-images result", {
+      totalAfterBucket: bucketFiltered.length,
+      returning: limited.length,
+    });
 
     const imageUrls = limited.map((img) => img.url);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       images: imageUrls,
       data: limited, // Include full data for new components
       total: bucketFiltered.length,
     });
+    addCacheControl(response, 60, 600); // 1m cache with SWR
+    return response;
   } catch (error) {
-    console.error("List images error:", error);
+    safeLog("error", "List images error", { error: (error as Error)?.message });
     return NextResponse.json({ error: "Failed to list images" }, { status: 500 });
   }
 }

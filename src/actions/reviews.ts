@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { reviews, users } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import { requireCsrf, CsrfError } from "@/lib/csrf";
 
 type OrderHelpers = { desc: typeof desc };
 
@@ -85,6 +86,14 @@ export async function deleteReview(id: string) {
   if (!(await checkAdminRole())) {
     throw new Error("Unauthorized");
   }
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      throw new Error("Request blocked. Please refresh and try again.");
+    }
+    throw e;
+  }
   await reviewRepository.delete(id);
   revalidatePath("/admin/reviews");
 }
@@ -95,6 +104,14 @@ export async function deleteReview(id: string) {
 export async function updateReviewStatus(id: string, status: "pending" | "approved" | "rejected") {
   if (!(await checkAdminRole())) {
     throw new Error("Unauthorized");
+  }
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      throw new Error("Request blocked. Please refresh and try again.");
+    }
+    throw e;
   }
   await reviewRepository.update(id, { status });
   revalidatePath("/admin/reviews");

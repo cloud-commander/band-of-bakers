@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseRepository } from "./base.repository";
 import {
   orders,
@@ -270,6 +269,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .groupBy(day)
       .orderBy(day);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return rows.map((row: any) => ({
       day: row.day,
       revenue: Number(row.revenue ?? 0),
@@ -289,6 +289,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .from(orders)
       .groupBy(orders.status);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return counts.map((row: any) => ({
       status: row.status,
       count: Number(row.count ?? 0),
@@ -316,6 +317,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .orderBy(desc(units))
       .limit(limit);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return rows.map((row: any) => ({
       product_id: row.product_id,
       name: row.name,
@@ -372,6 +374,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       .where(and(inArray(orders.status, targetStatuses), lt(bakeSales.date, todayIsoDate)))
       .groupBy(orders.status);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return rows.map((row: any) => ({
       status: row.status,
       count: Number(row.count ?? 0),

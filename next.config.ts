@@ -142,15 +142,9 @@ const nextConfig: NextConfig = {
 };
 
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import withSerwistInit from "@serwist/next";
-
-const withSerwist = withSerwistInit({
-  swSrc: "src/app/sw.ts",
-  swDest: "public/sw.js",
-});
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default bundleAnalyzer(withSerwist(nextConfig));
+export default bundleAnalyzer(nextConfig);
