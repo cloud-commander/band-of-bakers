@@ -4,6 +4,8 @@ import { getPaginatedOrders } from "@/actions/orders";
 import { OrdersTable } from "./orders-table";
 import { AdminOrdersSkeleton } from "@/components/skeletons/admin-orders-skeleton";
 
+import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
+
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -13,7 +15,7 @@ type PageProps = {
 export default async function AdminOrdersPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Number(params?.page) || 1;
-  const pageSize = Number(params?.pageSize) || 20;
+  const pageSize = PAGINATION_CONFIG.ADMIN_ORDERS_ITEMS_PER_PAGE;
   const {
     orders,
     total,

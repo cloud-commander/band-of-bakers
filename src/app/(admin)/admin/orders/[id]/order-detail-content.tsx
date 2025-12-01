@@ -73,7 +73,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function OrderDetailContent({ order }: OrderDetailContentProps) {
   const router = useRouter();
@@ -87,8 +86,6 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
   } | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [changeType, setChangeType] = useState<"bakery" | "customer">("bakery");
-  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   // Helper function to get product name
   const getProductName = (item: OrderDetailContentProps["order"]["items"][0]) => {
@@ -208,6 +205,21 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     }
   };
 
+  const handleUndoFulfilled = async () => {
+    try {
+      const result = await updateOrderStatus(order.id, "ready");
+      if (result.success) {
+        toast.success("Status reverted to Ready");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to revert status");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred");
+    }
+  };
+
   const handleMarkComplete = async () => {
     try {
       const result = await markOrderComplete(order.id);
@@ -262,25 +274,10 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
     }
   };
 
-  const handleSheetTouchStart = (e: React.TouchEvent) => {
-    setTouchStartY(e.touches[0].clientY);
-  };
-
-  const handleSheetTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY === null) return;
-    const deltaY = e.changedTouches[0].clientY - touchStartY;
-    if (deltaY < -25) {
-      setIsActionSheetOpen(true);
-    } else if (deltaY > 25) {
-      setIsActionSheetOpen(false);
-    }
-    setTouchStartY(null);
-  };
-
   return (
     <div className="pb-24">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4">
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link href="/admin/orders">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -295,7 +292,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
             day: "numeric",
           })}`}
         />
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex items-center gap-2 flex-wrap">
           <Badge className="uppercase">{order.status}</Badge>
           <Badge variant="outline" className="capitalize">
             {order.fulfillment_method}
@@ -309,30 +306,32 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
       {/* Status Timeline */}
       <div className="mb-4 bg-muted/50 border rounded-lg p-4">
         <p className="text-sm font-medium mb-2">Status Timeline</p>
-        <div className="flex items-center gap-4">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-3">
           {["pending", "processing", "ready", "fulfilled"].map((stage, idx) => {
             const stagesOrder = ["pending", "processing", "ready", "fulfilled"];
             const currentIdx = stagesOrder.indexOf(order.status);
             const active = currentIdx >= idx;
             return (
-              <div key={stage} className="flex items-center gap-2">
+              <div key={stage} className="flex items-center gap-2 min-w-[130px]">
                 <div
                   className={cn(
-                    "h-3 w-3 rounded-full border",
+                    "h-3 w-3 rounded-full border shrink-0",
                     active ? "bg-green-600 border-green-600" : "bg-white border-stone-300"
                   )}
                   aria-label={stage}
                 />
                 <span
                   className={cn(
-                    "text-xs capitalize",
+                    "text-xs capitalize whitespace-nowrap",
                     active ? "text-green-700" : "text-muted-foreground"
                   )}
                 >
                   {stage}
                 </span>
                 {idx < stagesOrder.length - 1 && (
-                  <div className={cn("h-[1px] w-8", active ? "bg-green-500" : "bg-stone-300")} />
+                  <div
+                    className={cn("h-[1px] w-8 shrink-0", active ? "bg-green-500" : "bg-stone-300")}
+                  />
                 )}
               </div>
             );
@@ -342,7 +341,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
 
       {/* Change Type Selection */}
       <Card className="mb-4">
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 pb-4">
           <RadioGroup
             value={changeType}
             onValueChange={(value) => setChangeType(value as "bakery" | "customer")}
@@ -350,22 +349,17 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="bakery" id="bakery" />
-              <Label htmlFor="bakery" className="cursor-pointer font-medium">
-                Bakery Initiated Change
+              <Label htmlFor="bakery" className="cursor-pointer font-medium text-sm">
+                Bakery Initiated
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="customer" id="customer" />
-              <Label htmlFor="customer" className="cursor-pointer font-medium">
-                Customer Requested Change
+              <Label htmlFor="customer" className="cursor-pointer font-medium text-sm">
+                Customer Requested
               </Label>
             </div>
           </RadioGroup>
-          <p className="text-sm text-muted-foreground mt-2">
-            {changeType === "bakery"
-              ? "Changes will be communicated to the customer as bakery-initiated updates."
-              : "Changes will be confirmed to the customer as per their request."}
-          </p>
         </CardContent>
       </Card>
 
@@ -374,12 +368,12 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
         <div className="lg:col-span-2 space-y-4">
           {/* Order Items */}
           <Card>
-            <CardHeader className="pb-3">
-              <Heading level={4} className="mb-0">
+            <CardHeader className="pb-3 pt-4 px-4">
+              <Heading level={4} className="mb-0 text-base">
                 Order Items
               </Heading>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 pb-4">
               <div className="space-y-2">
                 {order.items.map((item) => {
                   const availableQty = availableQuantities[item.id] ?? item.quantity;
@@ -391,7 +385,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                     <div
                       key={item.id}
                       className={cn(
-                        "flex flex-col p-3 border rounded-lg transition-all gap-3",
+                        "flex flex-col p-2.5 border rounded-lg transition-all gap-2.5",
                         isUnavailable
                           ? "bg-red-50 border-red-200 opacity-60"
                           : isPartiallyAvailable
@@ -400,7 +394,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                       )}
                     >
                       {/* Top Row: Info */}
-                      <div className="flex justify-between items-start w-full">
+                      <div className="flex justify-between items-start w-full gap-2">
                         <div className="flex items-center gap-3 flex-1">
                           <div
                             className={cn(
@@ -457,8 +451,8 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                       </div>
 
                       {/* Bottom Row: Quantity Controls & Actions */}
-                      <div className="flex items-center justify-between pl-11">
-                        <div className="flex items-center gap-3">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 sm:pl-11">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                           {/* Quantity Controls */}
                           {!isUnavailable && (
                             <div className="flex items-center border rounded-md bg-white">
@@ -471,7 +465,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                               >
                                 <Minus className="h-3.5 w-3.5" />
                               </Button>
-                              <div className="px-3 min-w-[40px] text-center border-x">
+                              <div className="px-2 sm:px-3 min-w-[40px] text-center border-x">
                                 <span className="text-sm font-medium">{availableQty}</span>
                                 <span className="text-xs text-muted-foreground ml-1">
                                   / {item.quantity}
@@ -505,7 +499,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
                               }
                             }}
                             className={cn(
-                              "h-8 text-xs px-3",
+                              "h-8 text-xs px-3 whitespace-nowrap",
                               isUnavailable &&
                                 "text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
                             )}
@@ -559,7 +553,9 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
             <CardContent className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Name</p>
-                <p className="font-medium">{order.user?.name || "Unknown"}</p>
+                <p className="font-medium">
+                  {order.user?.name || order.user?.email || "Guest Customer"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Email</p>
@@ -623,15 +619,15 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
         </div>
       </div>
 
-      {/* Sticky Footer with Actions (Desktop) */}
-      <div className="hidden md:block fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 shadow-lg lg:left-64">
+      {/* Sticky Footer with Actions */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 shadow-lg lg:left-64 z-40">
         <div className="container mx-auto max-w-7xl">
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
             {hasUnavailableItems && (
               <Button
                 variant="outline"
                 onClick={handleSendEmail}
-                className="sm:w-auto"
+                className="w-full sm:w-auto order-1 sm:order-none"
                 disabled={isSendingEmail}
               >
                 <Mail className="w-4 h-4 mr-2" />
@@ -642,7 +638,7 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
               order.status.toLowerCase() === "processing") && (
               <Button
                 onClick={handleMarkReady}
-                className="bg-blue-600 hover:bg-blue-700 text-white sm:w-auto"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white order-2 sm:order-none"
               >
                 <Package className="w-4 h-4 mr-2" />
                 Mark Ready for Collection
@@ -652,84 +648,26 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
               <>
                 <Button
                   onClick={handleMarkComplete}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white sm:w-auto"
+                  className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white order-2 sm:order-none"
                 >
                   <Check className="w-4 h-4 mr-2" />
                   Mark as Complete
                 </Button>
-                <Button variant="outline" onClick={handleUndoReady} className="sm:w-auto">
+                <Button
+                  variant="outline"
+                  onClick={handleUndoReady}
+                  className="w-full sm:w-auto order-1 sm:order-none"
+                >
                   Undo Ready
                 </Button>
               </>
             )}
+            {order.status.toLowerCase() === "fulfilled" && (
+              <Button variant="outline" onClick={handleUndoFulfilled} className="w-full sm:w-auto">
+                Undo Fulfilled
+              </Button>
+            )}
           </div>
-        </div>
-      </div>
-
-      {/* Mobile Swipe-Up Action Sheet */}
-      <div
-        className="fixed md:hidden bottom-0 inset-x-0 z-40"
-        onTouchStart={handleSheetTouchStart}
-        onTouchEnd={handleSheetTouchEnd}
-      >
-        <div className="mx-auto max-w-3xl px-4 pb-3">
-          <Sheet open={isActionSheetOpen} onOpenChange={setIsActionSheetOpen}>
-            <SheetTrigger asChild>
-              <div className="pointer-events-auto mx-auto mb-2 flex w-full items-center justify-center">
-                <button
-                  className="w-full max-w-xs rounded-full border bg-white/95 px-4 py-2 shadow-sm flex items-center justify-center gap-2 text-sm text-muted-foreground"
-                  type="button"
-                >
-                  <span className="h-1 w-10 rounded-full bg-stone-300" />
-                  <span>{isActionSheetOpen ? "Close actions" : "Swipe up for actions"}</span>
-                </button>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="pb-8">
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Next steps for {formatOrderReference(order.id, order.order_number)}
-                </p>
-                <div className="flex flex-col gap-2">
-                  {(order.status.toLowerCase() === "pending" ||
-                    order.status.toLowerCase() === "processing") && (
-                    <Button
-                      onClick={handleMarkReady}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11"
-                    >
-                      <Package className="w-4 h-4 mr-2" />
-                      Mark Ready for Collection
-                    </Button>
-                  )}
-                  {order.status.toLowerCase() === "ready" && (
-                    <>
-                      <Button
-                        onClick={handleMarkComplete}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11"
-                      >
-                        <Check className="w-4 h-4 mr-2" />
-                        Mark as Fulfilled
-                      </Button>
-                      <Button variant="outline" onClick={handleUndoReady} className="w-full h-11">
-                        Undo Ready
-                      </Button>
-                    </>
-                  )}
-                  {hasUnavailableItems && (
-                    <Button
-                      variant="outline"
-                      onClick={handleSendEmail}
-                      className="w-full h-11"
-                      disabled={isSendingEmail}
-                    >
-                      <Mail className="w-4 h-4 mr-2" />
-                      {isSendingEmail ? "Sending..." : "Send Update Email"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
 

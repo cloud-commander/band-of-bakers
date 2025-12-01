@@ -9,6 +9,13 @@ import Link from "next/link";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Search, ChevronUp, ChevronDown, X, Check, Package } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { updateOrderStatus } from "@/actions/orders";
@@ -98,13 +105,9 @@ export function OrdersTable({
   const searchParams = useSearchParams();
 
   // Determine the active bake sale filter
-  // If a user has selected a filter, use it. Otherwise, default to the first available bake sale.
   const activeBakeSaleId = useMemo(() => {
-    if (bakeSaleFilter && allBakeSales.some((bs) => bs.id === bakeSaleFilter)) {
-      return bakeSaleFilter;
-    }
-    return allBakeSales.length > 0 ? allBakeSales[0].id : "";
-  }, [bakeSaleFilter, allBakeSales]);
+    return bakeSaleFilter;
+  }, [bakeSaleFilter]);
 
   // Helper function to get bake sale date
   const getBakeSaleDate = (order: OrderWithRelations) => {
@@ -113,7 +116,9 @@ export function OrdersTable({
 
   // Helper function to get customer name
   const getCustomerName = (order: OrderWithRelations) => {
-    return order.user?.name || order.user?.email || "Unknown";
+    if (order.user?.name) return order.user.name;
+    if (order.user?.email) return order.user.email;
+    return "Guest Customer";
   };
 
   // Filter and sort orders
@@ -199,7 +204,7 @@ export function OrdersTable({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("page", String(page));
-    params.set("pageSize", String(pageSize));
+    // params.set("pageSize", String(pageSize)); // Don't enforce page size in URL
     router.push(`${pathname}?${params.toString()}`);
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -374,43 +379,70 @@ export function OrdersTable({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Bake Sale Filter */}
-          <select
+          <Select
             value={activeBakeSaleId}
-            onChange={(e) => {
-              setBakeSaleFilter(e.target.value);
+            onValueChange={(value) => {
+              setBakeSaleFilter(value === "all" ? "" : value);
               setCurrentPage(1);
             }}
-            className="w-full px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
           >
-            {allBakeSales.map((bakeSale) => (
-              <option key={bakeSale.id} value={bakeSale.id}>
-                {new Date(bakeSale.date).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full h-12 text-base bg-white border-stone-200">
+              <SelectValue placeholder="All Bake Sales" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-base py-3">
+                All Bake Sales
+              </SelectItem>
+              {allBakeSales.map((bakeSale) => (
+                <SelectItem key={bakeSale.id} value={bakeSale.id} className="text-base py-3">
+                  {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Status Filter */}
-          <select
+          <Select
             value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as StatusFilter);
+            onValueChange={(value) => {
+              setStatusFilter(value as StatusFilter);
               setCurrentPage(1);
             }}
-            className="w-full px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="ready">Ready for Collection</option>
-            <option value="fulfilled">Fulfilled</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
-            <option value="action_required">Action Required</option>
-          </select>
+            <SelectTrigger className="w-full h-12 text-base bg-white border-stone-200">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-base py-3">
+                All Status
+              </SelectItem>
+              <SelectItem value="pending" className="text-base py-3">
+                Pending
+              </SelectItem>
+              <SelectItem value="processing" className="text-base py-3">
+                Processing
+              </SelectItem>
+              <SelectItem value="ready" className="text-base py-3">
+                Ready for Collection
+              </SelectItem>
+              <SelectItem value="fulfilled" className="text-base py-3">
+                Fulfilled
+              </SelectItem>
+              <SelectItem value="cancelled" className="text-base py-3">
+                Cancelled
+              </SelectItem>
+              <SelectItem value="refunded" className="text-base py-3">
+                Refunded
+              </SelectItem>
+              <SelectItem value="action_required" className="text-base py-3">
+                Action Required
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

@@ -18,6 +18,13 @@ import {
   formatUsage,
 } from "@/lib/utils/voucher";
 import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_USERS_ITEMS_PER_PAGE;
 
@@ -183,20 +190,24 @@ export function VouchersTable({ vouchers }: VouchersTableProps) {
         </div>
 
         {/* Status Filter */}
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value as StatusFilter);
+          onValueChange={(value) => {
+            setStatusFilter(value as StatusFilter);
             setCurrentPage(1);
           }}
-          className="px-4 py-2 border border-stone-200 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-bakery-amber-500"
         >
-          <option value="all">All Vouchers</option>
-          <option value="active">Active Only</option>
-          <option value="expired">Expired</option>
-          <option value="maxed">Max Uses Reached</option>
-          <option value="inactive">Inactive</option>
-        </select>
+          <SelectTrigger className="w-full sm:w-[200px] bg-white border-stone-200">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Vouchers</SelectItem>
+            <SelectItem value="active">Active Only</SelectItem>
+            <SelectItem value="expired">Expired</SelectItem>
+            <SelectItem value="maxed">Max Uses Reached</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Pagination Info */}

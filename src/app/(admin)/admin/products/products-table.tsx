@@ -117,7 +117,9 @@ export function AdminProductsTable({
   // When client filters are active, paginate client-side; otherwise rely on server paging.
   const startIndex = hasClientFilters ? (pageState - 1) * pageSize : 0;
   const endIndex = hasClientFilters ? startIndex + pageSize : sortedProducts.length;
-  const paginatedProducts = hasClientFilters ? sortedProducts.slice(startIndex, endIndex) : sortedProducts;
+  const paginatedProducts = hasClientFilters
+    ? sortedProducts.slice(startIndex, endIndex)
+    : sortedProducts;
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
@@ -218,8 +220,8 @@ export function AdminProductsTable({
         )}
       </div>
 
-      {/* Products Table */}
-      <div className="overflow-x-auto border rounded-lg shadow-sm bg-white">
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto border rounded-lg shadow-sm bg-white">
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
@@ -238,7 +240,7 @@ export function AdminProductsTable({
                 <td className="p-4">
                   <div className="flex flex-col">
                     <Link
-                      href={`/admin/products/${product.id}`}
+                      href={`/admin/products/${product.id}/edit`}
                       className="font-medium text-foreground hover:text-primary"
                     >
                       {product.name}
@@ -258,7 +260,9 @@ export function AdminProductsTable({
                     {product.is_active ? "Active" : "Inactive"}
                   </Badge>
                 </td>
-                <td className="p-4 text-sm text-muted-foreground">{product.variants?.length || 0} variants</td>
+                <td className="p-4 text-sm text-muted-foreground">
+                  {product.variants?.length || 0} variants
+                </td>
                 <td className="p-4">
                   {product.image_url ? (
                     <div className="w-12 h-12 rounded overflow-hidden border bg-muted relative">
@@ -278,7 +282,7 @@ export function AdminProductsTable({
                   )}
                 </td>
                 <td className="p-4 text-right">
-                  <Link href={`/admin/products/${product.id}`} className="text-primary">
+                  <Link href={`/admin/products/${product.id}/edit`} className="text-primary">
                     Edit
                   </Link>
                 </td>
@@ -288,6 +292,67 @@ export function AdminProductsTable({
         </table>
       </div>
 
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {paginatedProducts.map((product) => (
+          <div key={product.id} className="border rounded-lg p-4 bg-white shadow-sm space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                {product.image_url ? (
+                  <div className="w-12 h-12 rounded overflow-hidden border bg-muted relative shrink-0">
+                    <Image
+                      src={product.image_url}
+                      alt={product.name}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded border bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                    <ImageOff className="h-5 w-5" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-medium text-foreground">
+                    <Link href={`/admin/products/${product.id}/edit`}>{product.name}</Link>
+                  </h3>
+                  <p className="text-xs text-muted-foreground">/{product.slug}</p>
+                </div>
+              </div>
+              <Badge
+                variant={product.is_active ? "default" : "secondary"}
+                className={product.is_active ? "bg-green-100 text-green-700" : ""}
+              >
+                {product.is_active ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground">Category</p>
+                <p>{categories.find((c) => c.id === product.category_id)?.name || "Unassigned"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Price</p>
+                <p className="font-medium">£{product.base_price.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Variants</p>
+                <p>{product.variants?.length || 0} variants</p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t flex justify-end">
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/admin/products/${product.id}/edit`}>Edit Product</Link>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Pagination */}
       <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <PaginationInfo
@@ -295,7 +360,11 @@ export function AdminProductsTable({
           pageSize={pageSize}
           totalItems={hasClientFilters ? sortedProducts.length : totalCount}
         />
-        <Pagination currentPage={pageState} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          currentPage={pageState}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

@@ -27,6 +27,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 const knownProductCategories = [
   "breads-loaves",
   "pastries",
@@ -457,17 +464,17 @@ export function ImageGallery({
                 <label htmlFor="category-filter" className="text-sm font-medium">
                   Category:
                 </label>
-                <select
-                  id="category-filter"
-                  value={selectedFilter}
-                  onChange={(e) => setSelectedFilter(e.target.value)}
-                  className="px-3 py-1.5 text-sm border border-input rounded-md bg-background"
-                >
-                  <option value="all">All</option>
-                  <option value="products">Products</option>
-                  <option value="news">News</option>
-                  <option value="uncategorized">Uncategorized</option>
-                </select>
+                <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+                  <SelectTrigger className="w-[140px] h-8 text-xs bg-background">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="products">Products</SelectItem>
+                    <SelectItem value="news">News</SelectItem>
+                    <SelectItem value="uncategorized">Uncategorized</SelectItem>
+                  </SelectContent>
+                </Select>
               </>
             )}
             <Button type="button" variant="ghost" size="icon" onClick={fetchImages} title="Refresh">
@@ -751,7 +758,12 @@ export function ImageGallery({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setImageToEdit(null)} disabled={isEditing}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setImageToEdit(null)}
+              disabled={isEditing}
+            >
               Cancel
             </Button>
             <Button type="button" onClick={handleUpdateImage} disabled={isEditing}>

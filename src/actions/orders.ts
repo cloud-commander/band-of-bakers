@@ -400,19 +400,20 @@ export const getPaginatedUserOrders = cache(async function getPaginatedUserOrder
 
 const ADMIN_ROLES = ["owner", "manager", "staff"] as const;
 const VALID_STATUS_TRANSITIONS: Record<
-  "ready" | "fulfilled" | "cancelled" | "refunded" | "action_required",
+  "ready" | "fulfilled" | "cancelled" | "refunded" | "action_required" | "processing",
   Array<string>
 > = {
-  ready: ["pending", "processing"],
+  ready: ["pending", "processing", "fulfilled"],
   fulfilled: ["ready"],
   cancelled: ["pending", "processing", "ready"],
   refunded: ["fulfilled", "cancelled"],
   action_required: ["pending", "processing"],
+  processing: ["ready", "fulfilled"],
 };
 
 export async function updateOrderStatus(
   orderId: string,
-  nextStatus: "ready" | "fulfilled" | "cancelled" | "refunded" | "action_required"
+  nextStatus: "ready" | "fulfilled" | "cancelled" | "refunded" | "action_required" | "processing"
 ): Promise<ActionResult<{ id: string; status: string }>> {
   try {
     const session = await auth();

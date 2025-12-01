@@ -118,29 +118,55 @@ export class OrderRepository extends BaseRepository<typeof orders> {
    */
   async findPaginated(limit: number, offset: number) {
     const db = await this.getDatabase();
-    const data = await db
-      .select({
-        id: orders.id,
-        order_number: orders.order_number,
-        user_id: orders.user_id,
-        bake_sale_id: orders.bake_sale_id,
-        status: orders.status,
-        fulfillment_method: orders.fulfillment_method,
-        payment_method: orders.payment_method,
-        subtotal: orders.subtotal,
-        delivery_fee: orders.delivery_fee,
-        voucher_discount: orders.voucher_discount,
-        total: orders.total,
-        created_at: orders.created_at,
-        item_count:
-          sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
-            "item_count"
-          ),
-      })
+
+    // Get the order IDs first with pagination
+    const orderIds = await db
+      .select({ id: orders.id })
       .from(orders)
       .limit(limit)
       .offset(offset)
       .orderBy(desc(orders.created_at));
+
+    if (orderIds.length === 0) {
+      const totalResult = await db.select({ count: sql<number>`count(*)` }).from(orders);
+      return { data: [], total: Number(totalResult[0]?.count || 0) };
+    }
+
+    // Get full order data with relations
+    const data = await db.query.orders.findMany({
+      where: inArray(
+        orders.id,
+        orderIds.map((o: { id: string }) => o.id)
+      ),
+      with: {
+        user: {
+          columns: {
+            name: true,
+            email: true,
+          },
+        },
+        bakeSale: {
+          columns: {
+            date: true,
+          },
+          with: {
+            location: {
+              columns: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      extras: {
+        item_count:
+          sql<number>`(SELECT count(*) FROM ${orderItems} oi WHERE oi.order_id = ${orders.id})`.as(
+            "item_count"
+          ),
+      },
+      orderBy: desc(orders.created_at),
+    });
+
     const totalResult = await db.select({ count: sql<number>`count(*)` }).from(orders);
     return { data, total: Number(totalResult[0]?.count || 0) };
   }

@@ -8,6 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationInfo } from "@/components/ui/pagination";
 import { formatOrderReference } from "@/lib/utils/order";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -89,20 +96,24 @@ export function OrdersList({ orders, totalItems, currentPage, pageSize, sort }: 
           <PaginationInfo currentPage={currentPage} pageSize={pageSize} totalItems={totalItems} />
           <div className="mt-3 flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Sort by:</span>
-            <select
+            <Select
               value={sort}
-              onChange={(e) => {
+              onValueChange={(value) => {
                 const params = new URLSearchParams(searchParams?.toString() || "");
                 params.set("page", "1");
                 params.set("pageSize", String(pageSize));
-                params.set("sort", e.target.value);
+                params.set("sort", value);
                 router.push(`${pathname}?${params.toString()}`);
               }}
-              className="border rounded-md px-3 py-1 text-sm"
             >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
+              <SelectTrigger className="w-[140px] h-8 text-sm bg-background">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
