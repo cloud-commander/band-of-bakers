@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@/auth";
-import { newsRepository } from "@/lib/repositories/news.repository";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { nanoid } from "nanoid";
@@ -38,6 +37,7 @@ export async function getNewsPosts() {
     if (!userId) {
       throw new Error("Unauthorized");
     }
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     return await newsRepository.findAll();
   } catch (error) {
     console.error("Failed to fetch news posts:", error);
@@ -50,6 +50,7 @@ export async function getNewsPosts() {
  */
 export async function getPublishedNewsPosts() {
   try {
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     return await newsRepository.findPublished();
   } catch (error) {
     console.error("Failed to fetch published news posts:", error);
@@ -62,6 +63,7 @@ export async function getPublishedNewsPosts() {
  */
 export async function getRecentNewsPosts(limit: number = 3) {
   try {
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     const posts = await newsRepository.findPublished();
     return posts.slice(0, limit);
   } catch (error) {
@@ -111,6 +113,7 @@ export async function createNewsPost(formData: FormData): Promise<ActionResult<{
       "-" +
       nanoid(6);
 
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     const post = await newsRepository.create({
       id: nanoid(),
       title: validated.data.title,
@@ -154,6 +157,7 @@ export async function toggleNewsPostStatus(
       throw e;
     }
 
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     await newsRepository.update(id, {
       is_published: isPublished,
       published_at: isPublished ? new Date().toISOString() : null,
@@ -188,6 +192,7 @@ export async function deleteNewsPost(id: string): Promise<ActionResult<void>> {
       throw e;
     }
 
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     await newsRepository.delete(id);
 
     revalidatePath("/admin/news");
@@ -209,6 +214,7 @@ export async function getNewsPostById(id: string) {
     if (!userId) {
       throw new Error("Unauthorized");
     }
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     return await newsRepository.findById(id);
   } catch (error) {
     console.error("Failed to fetch news post:", error);
@@ -260,6 +266,7 @@ export async function updateNewsPost(
       "-" +
       nanoid(6);
 
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
     await newsRepository.update(id, {
       title: validated.data.title,
       slug,

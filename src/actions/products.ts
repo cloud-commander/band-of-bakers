@@ -1,11 +1,10 @@
 "use server";
 
 import { auth } from "@/auth";
-import { productRepository, categoryRepository } from "@/lib/repositories";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
-import type { Product } from "@/db/schema";
+import type { Product, ProductVariant } from "@/db/schema";
 import { requireCsrf, CsrfError } from "@/lib/csrf";
 import { CACHE_TAGS } from "@/lib/cache";
 
@@ -18,7 +17,7 @@ type PaginatedResult<T> = {
 };
 
 type ProductWithVariants = Product & {
-  variants: Awaited<ReturnType<typeof productRepository.getVariants>>;
+  variants: ProductVariant[];
 };
 
 // Validation schema for product creation/update
@@ -184,6 +183,7 @@ export async function createProduct(formData: FormData): Promise<ActionResult<{ 
 
     // 5. Create product in database
     const productId = `prod-${Date.now()}`;
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const product = await productRepository.createWithVariants(
       {
         id: productId,
@@ -234,6 +234,7 @@ export async function updateProduct(
     }
 
     // 2. Get existing product
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const existingProduct = await productRepository.findById(id);
     if (!existingProduct) {
       return { success: false, error: "Product not found" };
@@ -382,6 +383,7 @@ export async function deleteProduct(id: string): Promise<ActionResult<void>> {
     }
 
     // 2. Get product to delete image
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const product = await productRepository.findById(id);
     if (!product) {
       return { success: false, error: "Product not found" };
@@ -413,6 +415,7 @@ export async function deleteProduct(id: string): Promise<ActionResult<void>> {
  */
 export async function getProducts() {
   try {
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const products = await productRepository.findAll();
     const variantsMap = await productRepository.getVariantsForProducts(
       products.map((p: Product) => p.id)
@@ -459,6 +462,7 @@ export async function getPaginatedProducts(
   const offset = (currentPage - 1) * limit;
 
   try {
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const result = await productRepository.findPaginated(limit, offset, false);
     const variantsMap = await productRepository.getVariantsForProducts(
       result.data.map((p: Product) => p.id)
@@ -488,6 +492,7 @@ export async function getActiveProducts() {
   return unstable_cache(
     async () => {
       try {
+        const { productRepository } = await import("@/lib/repositories/product.repository");
         const products = await productRepository.findActiveProducts();
 
         // Fetch active variants for all products in one query
@@ -521,6 +526,7 @@ export async function getActiveProducts() {
  */
 export async function getProductById(id: string) {
   try {
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const product = await productRepository.findById(id);
     if (!product) return null;
 
@@ -554,6 +560,7 @@ export async function toggleProductActive(
     }
 
     // 2. Toggle status
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const product = await productRepository.toggleActive(id);
     if (!product) {
       return { success: false, error: "Product not found" };
@@ -580,6 +587,7 @@ export async function getCategories() {
   return unstable_cache(
     async () => {
       try {
+        const { categoryRepository } = await import("@/lib/repositories/category.repository");
         return await categoryRepository.findAllSorted();
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -602,6 +610,7 @@ export async function getProductBySlug(slug: string) {
   return unstable_cache(
     async () => {
       try {
+        const { productRepository } = await import("@/lib/repositories/product.repository");
         const product = await productRepository.findBySlug(slug);
         if (!product) return null;
 
@@ -625,9 +634,11 @@ export async function getProductBySlug(slug: string) {
  */
 export async function getProductsByCategory(categorySlug: string) {
   try {
+    const { categoryRepository } = await import("@/lib/repositories/category.repository");
     const category = await categoryRepository.findBySlug(categorySlug);
     if (!category) return [];
 
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const products = await productRepository.findActiveByCategoryId(category.id);
 
     const variantsMap = await productRepository.getActiveVariantsForProducts(
@@ -681,6 +692,7 @@ export async function getMenu() {
  */
 export async function getRandomProducts(count: number = 3) {
   try {
+    const { productRepository } = await import("@/lib/repositories/product.repository");
     const allProducts = await productRepository.findActiveProducts();
 
     if (allProducts.length === 0) return [];

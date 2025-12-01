@@ -21,7 +21,7 @@ import { getInstagramSettings } from "@/actions/instagram";
 import nextDynamic from "next/dynamic";
 import { BakeSaleCarousel } from "@/components/bake-sale-carousel";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // Revalidate every minute
 
 const LazyTestimonialsCarousel = nextDynamic(
   () => import("@/components/testimonials-carousel").then((mod) => mod.TestimonialsCarousel),

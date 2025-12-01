@@ -2,10 +2,8 @@
 
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { locationRepository } from "@/lib/repositories/location.repository";
 import { z } from "zod";
 import { type Location, bakeSales } from "@/db/schema";
-import { getDb } from "@/lib/db";
 import { eq, count } from "drizzle-orm";
 import { requireCsrf, CsrfError } from "@/lib/csrf";
 
@@ -27,6 +25,7 @@ type ActionResult<T> = { success: true; data: T } | { success: false; error: str
  */
 export async function getAllLocations() {
   try {
+    const { locationRepository } = await import("@/lib/repositories/location.repository");
     return await locationRepository.findAll();
   } catch (error) {
     console.error("Get all locations error:", error);
@@ -39,6 +38,7 @@ export async function getAllLocations() {
  */
 export async function getActiveLocations() {
   try {
+    const { locationRepository } = await import("@/lib/repositories/location.repository");
     return await locationRepository.findActive();
   } catch (error) {
     console.error("Get active locations error:", error);
@@ -84,6 +84,7 @@ export async function createLocation(formData: FormData): Promise<ActionResult<{
 
     // 3. Create record
     const id = crypto.randomUUID();
+    const { locationRepository } = await import("@/lib/repositories/location.repository");
     const location = await locationRepository.create({
       id,
       ...validated.data,
@@ -139,6 +140,7 @@ export async function updateLocation(
     }
 
     // 3. Update record
+    const { locationRepository } = await import("@/lib/repositories/location.repository");
     const location = (await locationRepository.update(id, validated.data)) as Location | null;
 
     if (!location) {
@@ -176,6 +178,7 @@ export async function deleteLocation(id: string): Promise<ActionResult<void>> {
     }
 
     // 2. Check for usage
+    const { getDb } = await import("@/lib/db");
     const db = await getDb();
     const usage = await db
       .select({ count: count() })
@@ -191,6 +194,7 @@ export async function deleteLocation(id: string): Promise<ActionResult<void>> {
     }
 
     // 3. Delete record
+    const { locationRepository } = await import("@/lib/repositories/location.repository");
     await locationRepository.delete(id);
 
     // 4. Revalidate

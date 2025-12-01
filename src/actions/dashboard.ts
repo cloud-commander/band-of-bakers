@@ -1,10 +1,6 @@
 "use server";
 
 import { unstable_cache } from "next/cache";
-import { orderRepository } from "@/lib/repositories/order.repository";
-import { productRepository } from "@/lib/repositories/product.repository";
-import { userRepository } from "@/lib/repositories/user.repository";
-import { bakeSaleRepository } from "@/lib/repositories/bake-sale.repository";
 import { CACHE_TAGS } from "@/lib/cache";
 
 const daysAgo = (days: number) => {
@@ -21,6 +17,11 @@ export async function getDashboardStats() {
   return unstable_cache(
     async () => {
       try {
+        const { orderRepository } = await import("@/lib/repositories/order.repository");
+        const { productRepository } = await import("@/lib/repositories/product.repository");
+        const { userRepository } = await import("@/lib/repositories/user.repository");
+        const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
+
         const [
           totalOrders,
           totalRevenue,

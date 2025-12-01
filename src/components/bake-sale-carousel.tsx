@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BakeSaleCarouselProps {
@@ -29,24 +29,26 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
   const canPrev = startIndex > 0;
   const canNext = startIndex + clampedVisible < slides.length;
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (canPrev) setStartIndex((prev) => Math.max(0, prev - 1));
-  };
+  }, [canPrev]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (canNext) setStartIndex((prev) => Math.min(slides.length - clampedVisible, prev + 1));
-  };
+  }, [canNext, slides.length, clampedVisible]);
 
   // Auto-advance (pause on hover)
   useEffect(() => {
     if (isHovering || slides.length <= clampedVisible || !autoPlay) return;
     const timer = setInterval(() => {
       setStartIndex((prev) =>
-        prev + clampedVisible >= slides.length ? 0 : Math.min(prev + 1, slides.length - clampedVisible)
+        prev + clampedVisible >= slides.length
+          ? 0
+          : Math.min(prev + 1, slides.length - clampedVisible)
       );
     }, 5000);
     return () => clearInterval(timer);
-  }, [isHovering, slides.length, clampedVisible]);
+  }, [isHovering, slides.length, clampedVisible, autoPlay]);
 
   // Basic touch swipe
   useEffect(() => {
@@ -88,10 +90,22 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
       onMouseLeave={() => setIsHovering(false)}
     >
       <div className="flex justify-end gap-2">
-        <Button variant="outline" size="icon" onClick={handlePrev} disabled={!canPrev} aria-label="Previous bake sale">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handlePrev}
+          disabled={!canPrev}
+          aria-label="Previous bake sale"
+        >
           <ChevronLeft className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={handleNext} disabled={!canNext} aria-label="Next bake sale">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNext}
+          disabled={!canNext}
+          aria-label="Next bake sale"
+        >
           <ChevronRight className="w-4 h-4" />
         </Button>
         <Button
@@ -120,7 +134,8 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
               <Link href={`/menu?bakeSale=${bakeSale.id}`} className="block h-full group">
                 <Card className="h-full text-center hover:shadow-lg transition-all cursor-pointer border border-transparent group-hover:border-bakery-amber-200 focus-within:ring-2 focus-within:ring-bakery-amber-200 focus-within:ring-offset-2 group-hover:scale-[1.01]">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg transition-colors group-hover:text-bakery-amber-700">
+                    <CardTitle className="text-lg flex items-center justify-center gap-2 transition-colors text-bakery-amber-800 group-hover:text-bakery-amber-900">
+                      <Calendar className="w-5 h-5" />
                       {new Date(bakeSale.date).toLocaleDateString("en-GB", {
                         weekday: "long",
                         day: "numeric",
@@ -129,7 +144,7 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-center gap-2 text-sm font-medium text-stone-700">
                       <MapPin className="w-4 h-4" />
                       <span>{bakeSale.location.name}</span>
                     </div>
@@ -140,7 +155,7 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
           ))}
         </div>
       </div>
-      <div className="flex justify-center gap-2" role="tablist" aria-label="Bake sale slides">
+      <div className="flex justify-center gap-2" aria-label="Bake sale slide indicators">
         {Array.from({ length: Math.max(1, slides.length - clampedVisible + 1) }).map((_, idx) => (
           <button
             key={idx}
@@ -150,7 +165,7 @@ export function BakeSaleCarousel({ bakeSales, maxVisible = 3 }: BakeSaleCarousel
               idx === startIndex ? "bg-bakery-amber-600" : "bg-stone-300"
             )}
             aria-label={`Show slides ${idx + 1} to ${idx + clampedVisible}`}
-            aria-selected={idx === startIndex}
+            aria-current={idx === startIndex ? "true" : undefined}
             onClick={() => setStartIndex(idx)}
           />
         ))}

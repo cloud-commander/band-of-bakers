@@ -2,7 +2,6 @@ import NextAuth, { type DefaultSession } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
-import { syncUser } from "./lib/auth/sync-user";
 import { JWT } from "next-auth/jwt";
 import { verifyIdToken } from "./lib/google-identity";
 
@@ -191,6 +190,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
 
           // Sync user to D1
+          const { syncUser } = await import("./lib/auth/sync-user");
           const dbUser = await syncUser(user);
 
           return {
@@ -212,6 +212,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Credentials provider already returns the correct shape in `authorize`
           // But `user` object here comes from `authorize` return
 
+          const { syncUser } = await import("./lib/auth/sync-user");
           const dbUser = await syncUser(user);
 
           return {

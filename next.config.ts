@@ -124,7 +124,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "5mb",
     },
   },
-  serverExternalPackages: ["better-sqlite3"],
   webpack: (config) => {
     config.module.rules.push({
       test: /https:\/\/fonts\.gstatic\.com\/.*\.ttf$/,

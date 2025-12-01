@@ -413,6 +413,13 @@ function createOrder(
 
   const total = subtotal; // No delivery fee for collection orders
 
+  // Determine payment status based on order status
+  // payment_on_collection: pending until fulfilled, then completed
+  let paymentStatus: "pending" | "completed" = "pending";
+  if (status === "fulfilled") {
+    paymentStatus = "completed";
+  }
+
   realOrders.push({
     id: orderId,
     order_number: orderNumber,
@@ -421,7 +428,7 @@ function createOrder(
     status,
     fulfillment_method: "collection",
     payment_method: "payment_on_collection",
-    payment_status: status === "fulfilled" ? "completed" : "pending",
+    payment_status: paymentStatus,
     payment_intent_id: null,
     subtotal,
     delivery_fee: 0,
@@ -455,15 +462,54 @@ realPastBakeSales.forEach((bakeSale) => {
   }
 });
 
-// Generate some orders for upcoming bake sales (pending status)
-realFutureBakeSales.slice(0, 3).forEach((bakeSale) => {
-  const ordersForThisSale = Math.floor(Math.random() * 3) + 1; // 1-3 orders
-
-  for (let i = 0; i < ordersForThisSale; i++) {
+// Generate orders for upcoming bake sales with various statuses
+// First upcoming sale (Dec 13) - mix of pending and processing orders
+if (realFutureBakeSales[0]) {
+  const bakeSale1 = realFutureBakeSales[0];
+  // 5-8 orders for this sale in various states
+  for (let i = 0; i < 7; i++) {
     const userId = customerIds[Math.floor(Math.random() * customerIds.length)];
-    createOrder(bakeSale.id, bakeSale.date, userId, 1, "pending");
+    const status = i < 3 ? "pending" : i < 5 ? "processing" : "pending";
+    createOrder(bakeSale1.id, bakeSale1.date, userId, 5 - i, status as "pending" | "processing");
   }
-});
+}
+
+// Second upcoming sale (Dec 21) - mostly pending with some processing
+if (realFutureBakeSales[1]) {
+  const bakeSale2 = realFutureBakeSales[1];
+  // 4-6 orders for this sale
+  for (let i = 0; i < 5; i++) {
+    const userId = customerIds[Math.floor(Math.random() * customerIds.length)];
+    const status = i < 2 ? "processing" : "pending";
+    createOrder(bakeSale2.id, bakeSale2.date, userId, 8 - i, status as "pending" | "processing");
+  }
+}
+
+// Third upcoming sale (Jan 10) - mix including ready orders
+if (realFutureBakeSales[2]) {
+  const bakeSale3 = realFutureBakeSales[2];
+  // 3-5 orders for this sale
+  for (let i = 0; i < 4; i++) {
+    const userId = customerIds[Math.floor(Math.random() * customerIds.length)];
+    const status = i === 0 ? "ready" : i < 2 ? "processing" : "pending";
+    createOrder(
+      bakeSale3.id,
+      bakeSale3.date,
+      userId,
+      10 - i,
+      status as "pending" | "processing" | "ready"
+    );
+  }
+}
+
+// Fourth upcoming sale (Feb 7) - just a few pending orders
+if (realFutureBakeSales[3]) {
+  const bakeSale4 = realFutureBakeSales[3];
+  for (let i = 0; i < 2; i++) {
+    const userId = customerIds[Math.floor(Math.random() * customerIds.length)];
+    createOrder(bakeSale4.id, bakeSale4.date, userId, 15, "pending");
+  }
+}
 
 // ============================================================================
 // PRODUCT REVIEWS

@@ -4,10 +4,6 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { auth } from "@/auth";
-import { orderRepository } from "@/lib/repositories/order.repository";
-import { userRepository } from "@/lib/repositories/user.repository";
-import { productRepository } from "@/lib/repositories/product.repository";
-import { voucherRepository } from "@/lib/repositories/voucher.repository";
 import { SHIPPING_COST } from "@/lib/constants/app";
 import { validateVoucher } from "@/lib/utils/voucher";
 import { sendEmail } from "@/lib/email/service";
@@ -58,6 +54,12 @@ export async function createOrder(
   // Track stock reservations to allow rollback on failure
   const stockReservations: Array<{ productId: string; quantity: number }> = [];
   let voucherReservation: string | null = null;
+
+  // Dynamic imports
+  const { orderRepository } = await import("@/lib/repositories/order.repository");
+  const { userRepository } = await import("@/lib/repositories/user.repository");
+  const { productRepository } = await import("@/lib/repositories/product.repository");
+  const { voucherRepository } = await import("@/lib/repositories/voucher.repository");
 
   try {
     try {
@@ -128,7 +130,8 @@ export async function createOrder(
     // 2. Calculate Totals & Verify Prices + Stock
     let subtotal = 0;
     const orderItemsData = [];
-    const productCache = new Map<string, Awaited<ReturnType<typeof productRepository.findById>>>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productCache = new Map<string, any>();
     const stockRequirements = new Map<string, number>();
 
     // Prefetch variants for all products to avoid N+1
@@ -139,8 +142,10 @@ export async function createOrder(
         ? await productRepository.findByIds(productIds)
         : await Promise.all(productIds.map((id) => productRepository.findById(id)))
       )
-        .filter((p: Awaited<ReturnType<typeof productRepository.findById>>) => p !== null)
-        .map((p: Awaited<ReturnType<typeof productRepository.findById>>) => [p!.id, p!])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((p: any) => p !== null)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((p: any) => [p!.id, p!])
     );
 
     for (const item of items) {
@@ -201,7 +206,8 @@ export async function createOrder(
     const orderTotalBeforeDiscount = subtotal + deliveryFee;
 
     let voucherDiscount = 0;
-    let appliedVoucher: Awaited<ReturnType<typeof voucherRepository.findByCode>> | null | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let appliedVoucher: any | null | undefined;
 
     if (voucherCode) {
       const voucher = await voucherRepository.findByCode(voucherCode.toUpperCase());
@@ -314,6 +320,7 @@ export async function createOrder(
 
 export async function getOrders() {
   try {
+    const { orderRepository } = await import("@/lib/repositories/order.repository");
     const orders = await orderRepository.findAll();
     return orders;
   } catch (error) {
@@ -324,6 +331,7 @@ export async function getOrders() {
 
 export async function getOrderById(id: string) {
   try {
+    const { orderRepository } = await import("@/lib/repositories/order.repository");
     const order = await orderRepository.findByIdWithRelations(id);
     return order;
   } catch (error) {
@@ -338,6 +346,7 @@ export async function getUserOrders() {
     if (!session?.user?.id) {
       return [];
     }
+    const { orderRepository } = await import("@/lib/repositories/order.repository");
     const orders = await orderRepository.findByUserId(session.user.id);
     return orders;
   } catch (error) {
@@ -351,6 +360,7 @@ export async function getPaginatedOrders(page = 1, pageSize = 20) {
   const currentPage = Math.max(1, page);
   const offset = (currentPage - 1) * limit;
 
+  const { orderRepository } = await import("@/lib/repositories/order.repository");
   const result = await orderRepository.findPaginated(limit, offset);
   return {
     orders: result.data,
@@ -374,6 +384,7 @@ export const getPaginatedUserOrders = cache(async function getPaginatedUserOrder
     const currentPage = Math.max(1, page);
     const offset = (currentPage - 1) * limit;
 
+    const { orderRepository } = await import("@/lib/repositories/order.repository");
     const result = await orderRepository.findPaginatedByUser(session.user.id, limit, offset, sort);
     return {
       orders: result.data,
@@ -412,6 +423,7 @@ export async function updateOrderStatus(
       return { success: false, error: "Unauthorized" };
     }
 
+    const { orderRepository } = await import("@/lib/repositories/order.repository");
     const order = await orderRepository.findByIdWithRelations(orderId);
     if (!order) {
       return { success: false, error: "Order not found" };
@@ -473,7 +485,7 @@ export async function updateOrderStatus(
     await logger.error("Update order status failed", error, {
       action: "updateOrderStatus",
       orderId,
-      newStatus: status,
+      newStatus: nextStatus,
     });
     return { success: false, error: "Failed to update order status" };
   }

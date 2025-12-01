@@ -2,7 +2,6 @@
 
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { bakeSaleRepository } from "@/lib/repositories/bake-sale.repository";
 import { z } from "zod";
 import { type BakeSale } from "@/db/schema";
 import { requireCsrf, CsrfError } from "@/lib/csrf";
@@ -24,6 +23,7 @@ type ActionResult<T> = { success: true; data: T } | { success: false; error: str
  */
 export async function getBakeSales() {
   try {
+    const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
     const upcoming = await bakeSaleRepository.findUpcoming();
     const archived = await bakeSaleRepository.findArchived();
     return { upcoming, archived };
@@ -38,6 +38,7 @@ export async function getBakeSales() {
  */
 export async function getUpcomingBakeSales() {
   try {
+    const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
     return await bakeSaleRepository.findUpcoming();
   } catch (error) {
     console.error("Get upcoming bake sales error:", error);
@@ -63,6 +64,7 @@ export async function getLocations() {
  */
 export async function getBakeSaleById(id: string) {
   try {
+    const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
     return await bakeSaleRepository.findByIdWithLocation(id);
   } catch (error) {
     console.error("Get bake sale error:", error);
@@ -106,7 +108,6 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<{
     }
 
     // 3. Find or create location
-    // We need to import locationRepository dynamically or at top level if not circular
     const { locationRepository } = await import("@/lib/repositories/location.repository");
     let location = await locationRepository.findByName(validated.data.location);
 
@@ -123,6 +124,7 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<{
 
     // 4. Create record
     const id = crypto.randomUUID();
+    const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
     const bakeSale = await bakeSaleRepository.create({
       id,
       date: validated.data.date,
@@ -179,6 +181,7 @@ export async function updateBakeSale(
     }
 
     // 3. Update record
+    const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
     const bakeSale = (await bakeSaleRepository.update(id, validated.data)) as BakeSale | null;
 
     if (!bakeSale) {
@@ -208,6 +211,7 @@ export async function deleteBakeSale(id: string): Promise<ActionResult<void>> {
     }
 
     // 2. Delete record
+    const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
     await bakeSaleRepository.delete(id);
 
     // 3. Revalidate

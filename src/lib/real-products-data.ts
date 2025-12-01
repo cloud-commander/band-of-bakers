@@ -296,8 +296,8 @@ export const realProducts: InsertProduct[] = [
     slug: "cake_slice",
     description: "Individual slice of delicious cake",
     base_price: 2.5,
-    image_url: "/images/products/cakes-slices/frangipane_slice-card.webp",
-    is_active: true,
+    image_url: "/images/products/cakes-slices/frangipane_slice-card.webp", // Using frangipane as fallback
+    is_active: false, // Disabled - generic placeholder product
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -332,8 +332,8 @@ export const realProducts: InsertProduct[] = [
     slug: "whole_cake",
     description: "Whole celebration cake",
     base_price: 20.0,
-    image_url: "/images/products/cakes-slices/whole_cake-card.webp",
-    is_active: true,
+    image_url: "/images/products/cakes-slices/whole_lemon_drizzle_cake-card.webp", // Using lemon drizzle as fallback
+    is_active: false, // Disabled - generic placeholder product
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
