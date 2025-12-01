@@ -340,6 +340,16 @@ export const realFutureBakeSales: InsertBakeSale[] = [
 function getOrderDate(bakeSaleDate: string, daysBefore: number): string {
   const date = new Date(bakeSaleDate);
   date.setDate(date.getDate() - daysBefore);
+
+  const now = new Date();
+  if (date > now) {
+    // If calculated date is in the future, set it to a random time in the last 7 days
+    const randomDaysAgo = Math.floor(Math.random() * 7);
+    const pastDate = new Date(now);
+    pastDate.setDate(now.getDate() - randomDaysAgo);
+    return pastDate.toISOString();
+  }
+
   return date.toISOString();
 }
 

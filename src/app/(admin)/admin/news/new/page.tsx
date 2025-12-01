@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { createNewsPost } from "@/actions/news";
+import { ImageGallery } from "@/components/admin/image-gallery";
 
 const WysiwygEditor = dynamic(
   () => import("@/components/admin/wysiwyg-editor").then((mod) => mod.WysiwygEditor),
@@ -44,6 +46,7 @@ type NewsPostForm = z.infer<typeof newsPostFormSchema>;
 
 export default function NewNewsPostPage() {
   const router = useRouter();
+  const [selectedImage, setSelectedImage] = useState<string>("");
 
   const {
     register,
@@ -74,6 +77,20 @@ export default function NewNewsPostPage() {
       formData.append("content", data.content);
       formData.append("status", data.status);
       formData.append("publishedAt", data.publishedAt);
+
+      // Handle image if selected
+      if (selectedImage) {
+        // If it's a blob URL (newly uploaded), convert to file
+        if (selectedImage.startsWith("blob:")) {
+          const response = await fetch(selectedImage);
+          const blob = await response.blob();
+          const file = new File([blob], "news-image.jpg", { type: blob.type });
+          formData.append("image", file);
+        } else {
+          // If it's a path from the gallery, send it as image_url
+          formData.append("image_url", selectedImage);
+        }
+      }
 
       const result = await createNewsPost(formData);
 
@@ -217,6 +234,22 @@ export default function NewNewsPostPage() {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Heading level={3} className="mb-0">
+                  Featured Image
+                </Heading>
+              </CardHeader>
+              <CardContent>
+                <ImageGallery
+                  selectedImage={selectedImage}
+                  onImageSelect={setSelectedImage}
+                  category="news"
+                  allowUpload={true}
+                />
               </CardContent>
             </Card>
           </div>

@@ -9,7 +9,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    // Check if body is empty
+    const text = await request.text();
+    if (!text) {
+      return NextResponse.json({ error: "Empty request body" }, { status: 400 });
+    }
+
+    let body;
+    try {
+      body = JSON.parse(text);
+    } catch (e) {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
 
     // Forward to Logflare
     const response = await fetch("https://api.logflare.app/logs", {
@@ -19,7 +30,7 @@ export async function POST(request: NextRequest) {
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify({
-        source_id: sourceId,
+        source: sourceId,
         log_entry: body.log_entry,
       }),
     });

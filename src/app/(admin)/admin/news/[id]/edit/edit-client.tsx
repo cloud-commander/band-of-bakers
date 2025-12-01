@@ -23,6 +23,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { updateNewsPost } from "@/actions/news";
 import { useEffect, useState } from "react";
+import { ImageGallery } from "@/components/admin/image-gallery";
 
 const WysiwygEditor = dynamic(
   () => import("@/components/admin/wysiwyg-editor").then((mod) => mod.WysiwygEditor),
@@ -50,6 +51,7 @@ interface EditNewsPostClientProps {
     content: string;
     is_published: boolean;
     published_at: string | null;
+    image_url?: string | null;
   };
   id: string;
 }
@@ -57,6 +59,7 @@ interface EditNewsPostClientProps {
 export function EditNewsPostClient({ post, id }: EditNewsPostClientProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>(post.image_url || "");
 
   const {
     register,
@@ -92,6 +95,7 @@ export function EditNewsPostClient({ post, id }: EditNewsPostClientProps) {
         ? new Date(post.published_at).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0],
     });
+    setSelectedImage(post.image_url || "");
     setIsLoading(false);
   }, [post, reset]);
 
@@ -103,6 +107,20 @@ export function EditNewsPostClient({ post, id }: EditNewsPostClientProps) {
       formData.append("content", data.content);
       formData.append("status", data.status);
       formData.append("publishedAt", data.publishedAt);
+
+      // Handle image if selected
+      if (selectedImage) {
+        // If it's a blob URL (newly uploaded), convert to file
+        if (selectedImage.startsWith("blob:")) {
+          const response = await fetch(selectedImage);
+          const blob = await response.blob();
+          const file = new File([blob], "news-image.jpg", { type: blob.type });
+          formData.append("image", file);
+        } else {
+          // If it's a path from the gallery, send it as image_url
+          formData.append("image_url", selectedImage);
+        }
+      }
 
       const result = await updateNewsPost(id, formData);
 
@@ -254,6 +272,22 @@ export function EditNewsPostClient({ post, id }: EditNewsPostClientProps) {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Heading level={3} className="mb-0">
+                  Featured Image
+                </Heading>
+              </CardHeader>
+              <CardContent>
+                <ImageGallery
+                  selectedImage={selectedImage}
+                  onImageSelect={setSelectedImage}
+                  category="news"
+                  allowUpload={true}
+                />
               </CardContent>
             </Card>
           </div>

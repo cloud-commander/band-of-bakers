@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { requireCsrf, CsrfError } from "@/lib/csrf";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -15,6 +16,7 @@ const newsPostSchema = z.object({
   content: z.string().min(1, "Content is required"),
   status: z.enum(["draft", "published"]),
   publishedAt: z.string().min(1, "Publish date is required"),
+  imageUrl: z.string().optional(),
 });
 
 /**
@@ -26,6 +28,58 @@ async function checkAdminRole() {
     return false;
   }
   return session.user.id;
+}
+
+/**
+ * Upload image to R2
+ */
+async function uploadImageToR2(file: File): Promise<string | null> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(env as any).R2) {
+      console.error("R2 binding not available");
+      return null;
+    }
+
+    const fileName = `images/news/${Date.now()}-${file.name}`;
+    const arrayBuffer = await file.arrayBuffer();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (env as any).R2.put(fileName, arrayBuffer, {
+      httpMetadata: {
+        contentType: file.type,
+      },
+    });
+
+    return `/${fileName}`;
+  } catch (error) {
+    console.error("R2 upload error:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete image from R2
+ */
+async function deleteImageFromR2(imageUrl: string): Promise<void> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(env as any).R2) {
+      console.error("R2 binding not available");
+      return;
+    }
+
+    // Extract R2 key from URL (remove leading slash)
+    const r2Key = imageUrl.startsWith("/") ? imageUrl.slice(1) : imageUrl;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (env as any).R2.delete(r2Key);
+  } catch (error) {
+    console.error("R2 delete error:", error);
+  }
 }
 
 /**
@@ -97,11 +151,24 @@ export async function createNewsPost(formData: FormData): Promise<ActionResult<{
       content: formData.get("content") as string,
       status: formData.get("status") as string,
       publishedAt: formData.get("publishedAt") as string,
+      imageUrl: (formData.get("image_url") as string) || undefined,
     };
 
     const validated = newsPostSchema.safeParse(rawData);
     if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
+
+    // Handle image upload
+    const imageFile = formData.get("image") as File | null;
+    let imageUrl = validated.data.imageUrl;
+
+    if (imageFile && imageFile.size > 0) {
+      const uploadedUrl = await uploadImageToR2(imageFile);
+      if (!uploadedUrl) {
+        return { success: false, error: "Failed to upload image" };
+      }
+      imageUrl = uploadedUrl;
     }
 
     // Generate slug from title
@@ -123,6 +190,7 @@ export async function createNewsPost(formData: FormData): Promise<ActionResult<{
       author_id: userId,
       is_published: validated.data.status === "published",
       published_at: validated.data.publishedAt,
+      image_url: imageUrl,
     });
 
     revalidatePath("/admin/news");
@@ -193,6 +261,12 @@ export async function deleteNewsPost(id: string): Promise<ActionResult<void>> {
     }
 
     const { newsRepository } = await import("@/lib/repositories/news.repository");
+    const post = await newsRepository.findById(id);
+
+    if (post?.image_url) {
+      await deleteImageFromR2(post.image_url);
+    }
+
     await newsRepository.delete(id);
 
     revalidatePath("/admin/news");
@@ -250,11 +324,42 @@ export async function updateNewsPost(
       content: formData.get("content") as string,
       status: formData.get("status") as string,
       publishedAt: formData.get("publishedAt") as string,
+      imageUrl: (formData.get("image_url") as string) || undefined,
     };
 
     const validated = newsPostSchema.safeParse(rawData);
     if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
+    }
+
+    const { newsRepository } = await import("@/lib/repositories/news.repository");
+    const existingPost = await newsRepository.findById(id);
+
+    if (!existingPost) {
+      return { success: false, error: "News post not found" };
+    }
+
+    // Handle image upload
+    const imageFile = formData.get("image") as File | null;
+    let imageUrl = existingPost.image_url;
+
+    // If a new file is uploaded
+    if (imageFile && imageFile.size > 0) {
+      // Delete old image if exists
+      if (existingPost.image_url) {
+        await deleteImageFromR2(existingPost.image_url);
+      }
+      const uploadedUrl = await uploadImageToR2(imageFile);
+      if (!uploadedUrl) {
+        return { success: false, error: "Failed to upload image" };
+      }
+      imageUrl = uploadedUrl;
+    } else if (validated.data.imageUrl !== undefined) {
+      // If image_url is explicitly provided (e.g. from gallery selection)
+      // If it's different from existing, update it
+      // Note: if validated.data.imageUrl is empty string, it means remove image?
+      // Or just changed to another image.
+      imageUrl = validated.data.imageUrl;
     }
 
     // Generate slug from title
@@ -266,7 +371,6 @@ export async function updateNewsPost(
       "-" +
       nanoid(6);
 
-    const { newsRepository } = await import("@/lib/repositories/news.repository");
     await newsRepository.update(id, {
       title: validated.data.title,
       slug,
@@ -274,6 +378,7 @@ export async function updateNewsPost(
       excerpt: validated.data.summary,
       is_published: validated.data.status === "published",
       published_at: validated.data.publishedAt,
+      image_url: imageUrl,
     });
 
     revalidatePath("/admin/news");

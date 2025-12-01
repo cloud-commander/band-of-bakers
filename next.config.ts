@@ -119,7 +119,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    reactCompiler: true,
+    reactCompiler: false,
     serverActions: {
       bodySizeLimit: "5mb",
     },

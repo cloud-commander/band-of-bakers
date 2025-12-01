@@ -11,14 +11,5 @@ export default async function FAQPage() {
   const result = await getPublicFaqs();
   const faqs = result.success && result.data.length > 0 ? result.data : FAQS;
 
-  // Apply SWR headers
-  const res = NextResponse.next();
-  addCacheControl(res, 60, 600);
-
-  return (
-    <>
-      {res}
-      <FaqContent faqs={faqs} categories={FAQ_CATEGORIES} />
-    </>
-  );
+  return <FaqContent faqs={faqs} categories={FAQ_CATEGORIES} />;
 }
