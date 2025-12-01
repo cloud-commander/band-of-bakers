@@ -4,6 +4,7 @@ import { getCachedImages } from "@/lib/cache";
 import { addCacheControl } from "@/lib/edge-cache";
 import { safeLog } from "@/lib/logger/safe-log";
 
+export const dynamic = "force-dynamic";
 export const runtime = "edge";
 
 /**
@@ -18,6 +19,8 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get("tag") || "all";
     const limitParam = Number(searchParams.get("limit") || 50);
     const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 200) : 50;
+    const page = Number(searchParams.get("page") || 1);
+    const offset = (page - 1) * limit;
 
     // 1. Auth check
     const session = await auth();
@@ -25,45 +28,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Validate params
-    // (Optional: add zod validation here)
+    // 2. Query DB (Cached)
+    safeLog("info", "[API] list-images", { category, bucket, tag, limit, page });
 
-    // 3. Query DB (Cached)
-    safeLog("info", "[API] list-images", { category, bucket, tag, limit });
-
-    // Base fetch (cached) then bucket-filter locally
-    const filteredImages = await getCachedImages(
+    const result = await getCachedImages(
       category !== "all" ? category : undefined,
       tag !== "all" ? tag : undefined,
-      limit
+      limit,
+      offset,
+      bucket as "all" | "products" | "news" | "uncategorized"
     );
 
-    const bucketFiltered = filteredImages.filter((img) => {
-      const cat = img.category || "";
-      if (bucket === "news") return cat === "news";
-      if (bucket === "products") {
-        const matchesCategory = category !== "all" ? cat === category : cat.trim().length > 0;
-        return cat !== "news" && matchesCategory;
-      }
-      if (bucket === "uncategorized") return cat.trim().length === 0;
-      return true; // all
-    });
-
-    const limited = bucketFiltered.slice(0, limit);
-
     safeLog("info", "[API] list-images result", {
-      totalAfterBucket: bucketFiltered.length,
-      returning: limited.length,
+      total: result.total,
+      returning: result.images.length,
     });
 
-    const imageUrls = limited.map((img) => img.url);
+    const imageUrls = result.images.map((img) => img.url);
 
     const response = NextResponse.json({
       images: imageUrls,
-      data: limited, // Include full data for new components
-      total: bucketFiltered.length,
+      data: result.images,
+      total: result.total,
+      page,
+      totalPages: Math.ceil(result.total / limit),
     });
-    addCacheControl(response, 60, 600); // 1m cache with SWR
+    // Disable cache to fix duplicate issue
+    response.headers.set("Cache-Control", "no-store, max-age=0");
     return response;
   } catch (error) {
     safeLog("error", "List images error", { error: (error as Error)?.message });

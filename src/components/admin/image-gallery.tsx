@@ -147,6 +147,11 @@ export function ImageGallery({
     enforcedProductOnly ? initialProductCategory : ""
   );
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+  const [totalItems, setTotalItems] = useState(0);
+
   // Fetch existing images
   const fetchImages = useCallback(async () => {
     try {
@@ -161,13 +166,16 @@ export function ImageGallery({
       ) {
         params.set("category", selectedProductCategory);
       }
-      params.set("limit", "48");
+      params.set("limit", String(pageSize));
+      params.set("page", String(currentPage));
+
       const response = await fetch(`/api/list-images?${params.toString()}`);
 
       if (response.ok) {
         const data = await response.json();
         if (data.data) {
           setImages(data.data);
+          setTotalItems(data.total || 0);
         } else if (data.images) {
           // Backward compatibility
           setImages(
@@ -177,6 +185,7 @@ export function ImageGallery({
               filename: url.split("/").pop() || "image",
             }))
           );
+          setTotalItems(data.images.length);
         }
       }
     } catch (error) {
@@ -185,7 +194,7 @@ export function ImageGallery({
     } finally {
       setLoadingImages(false);
     }
-  }, [selectedFilter, selectedProductCategory, enforcedProductOnly]);
+  }, [selectedFilter, selectedProductCategory, enforcedProductOnly, currentPage, pageSize]);
 
   useEffect(() => {
     fetchImages();
@@ -361,10 +370,6 @@ export function ImageGallery({
     );
   };
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(8);
-
   // Responsive page size
   useEffect(() => {
     const handleResize = () => {
@@ -405,17 +410,10 @@ export function ImageGallery({
     }
   }, [enforcedProductOnly, selectedFilter]);
 
-  const visibleImages = useMemo(() => {
-    const bucket = enforcedProductOnly ? "products" : selectedFilter;
-    if (bucket === "products" && selectedProductCategory && selectedProductCategory !== "all") {
-      return images.filter((img) => img.category === selectedProductCategory);
-    }
-    return images;
-  }, [images, selectedFilter, selectedProductCategory, enforcedProductOnly]);
-
   // Pagination logic
-  const totalPages = Math.ceil(visibleImages.length / pageSize);
-  const paginatedImages = visibleImages.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  // No client-side slicing needed as API returns paginated data
+  const paginatedImages = images;
 
   const getPreviewUrl = (image: ImageRecord) => {
     const url = image.url;

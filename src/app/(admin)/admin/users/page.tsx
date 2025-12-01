@@ -13,12 +13,28 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Number(params?.page) || 1;
   const pageSize = Number(params?.pageSize) || 20;
+
+  const searchParam = params?.search;
+  const search = Array.isArray(searchParam) ? searchParam[0] : searchParam || undefined;
+
+  const roleParam = params?.role;
+  const role = Array.isArray(roleParam) ? roleParam[0] : roleParam || undefined;
+
+  const statusParam = params?.status;
+  const status = Array.isArray(statusParam) ? statusParam[0] : statusParam || undefined;
+
+  const is_banned = status === "banned" ? true : status === "active" ? false : undefined;
+
   const {
     users,
     total,
     page: currentPage,
     pageSize: limit,
-  } = await getPaginatedUsers(page, pageSize);
+  } = await getPaginatedUsers(page, pageSize, {
+    search,
+    role,
+    is_banned,
+  });
 
   return (
     <div>

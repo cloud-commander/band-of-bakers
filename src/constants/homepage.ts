@@ -9,7 +9,7 @@
 
 export const HERO_SECTION = {
   /** Hero background image URL */
-  backgroundImage: "/images/hero/workspace-hero.jpg",
+  backgroundImage: "/images/hero/workspace-hero.webp",
   /** Hero background image alt text */
   backgroundAlt: "Artisan Bakery Workspace",
   /** Hero main heading */

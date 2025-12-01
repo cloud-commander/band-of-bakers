@@ -113,18 +113,52 @@ export class UserRepository extends BaseRepository<typeof users> {
   }
 
   /**
-   * Paginated users list with totals.
+   * Paginated users list with totals and filters.
    */
-  async findPaginated(limit: number, offset: number) {
+  async findPaginated(
+    limit: number,
+    offset: number,
+    filters?: {
+      search?: string;
+      role?: string;
+      is_banned?: boolean;
+    }
+  ) {
     const db = await this.getDatabase();
+
+    // Build where clause
+    const conditions = [];
+
+    if (filters?.search) {
+      const searchLower = `%${filters.search.toLowerCase()}%`;
+      conditions.push(
+        sql`(${users.name} LIKE ${searchLower} OR ${users.email} LIKE ${searchLower} OR ${users.phone} LIKE ${searchLower})`
+      );
+    }
+
+    if (filters?.role && filters.role !== "all") {
+      conditions.push(eq(users.role, filters.role));
+    }
+
+    if (filters?.is_banned !== undefined) {
+      conditions.push(eq(users.is_banned, filters.is_banned));
+    }
+
+    const whereClause = conditions.length > 0 ? sql.join(conditions, sql` AND `) : undefined;
+
     const data = await db
       .select()
       .from(users)
+      .where(whereClause)
       .orderBy(desc(users.created_at))
       .limit(limit)
       .offset(offset);
 
-    const totalResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(whereClause);
+
     return { data, total: Number(totalResult[0]?.count || 0) };
   }
 }

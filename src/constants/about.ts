@@ -37,7 +37,7 @@ export const ABOUT_HERO_SECTION = {
   heading: "Our Story",
   description:
     "Proudly independent artisan baking, serving the community from the heart of Shropshire.",
-  backgroundImage: "/images/hero/about-hero-v2.jpg",
+  backgroundImage: "/images/hero/about-hero-v2.webp",
   backgroundAlt: "Artisan bakery workspace",
 } as const;
 

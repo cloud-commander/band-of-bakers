@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ImageGallery } from "@/components/admin/image-gallery";
 import { getProductById, updateProduct, deleteProduct } from "@/actions/products";
-import type { ProductCategory } from "@/db/schema";
+import type { Product, ProductCategory, ProductVariant } from "@/db/schema";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -60,16 +60,27 @@ type ProductFormData = z.infer<typeof productFormSchema>;
 interface EditProductFormProps {
   productId: string;
   categories: ProductCategory[];
+  initialProduct: Product & { variants: ProductVariant[] };
 }
 
-export default function EditProductForm({ productId, categories }: EditProductFormProps) {
+export default function EditProductForm({
+  productId,
+  categories,
+  initialProduct,
+}: EditProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<string>(initialProduct.image_url || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialProduct.category_id);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Calculate absolute prices for variants
+  const variantsWithPrices = initialProduct.variants.map((v) => ({
+    id: v.id,
+    name: v.name,
+    price: initialProduct.base_price + v.price_adjustment,
+  }));
 
   const {
     register,
@@ -77,13 +88,17 @@ export default function EditProductForm({ productId, categories }: EditProductFo
     handleSubmit,
     setValue,
     watch,
-    reset,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      is_active: true,
-      variants: [],
+      name: initialProduct.name,
+      slug: initialProduct.slug,
+      description: initialProduct.description || "",
+      category_id: initialProduct.category_id,
+      base_price: initialProduct.base_price.toString(),
+      is_active: initialProduct.is_active,
+      variants: variantsWithPrices,
     },
   });
 
@@ -98,55 +113,6 @@ export default function EditProductForm({ productId, categories }: EditProductFo
   // Calculate starting price based on variants
   const startingPrice =
     variants && variants.length > 0 ? Math.min(...variants.map((v) => v.price || 0)) : null;
-
-  // Load product data
-  useEffect(() => {
-    async function loadProduct() {
-      try {
-        const product = await getProductById(productId);
-
-        if (!product) {
-          toast.error("Product not found");
-          router.push("/admin/products");
-          return;
-        }
-
-        // Calculate absolute prices for variants
-        const variantsWithPrices = product.variants.map((v: unknown) => ({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          id: (v as any).id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          name: (v as any).name,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          price: product.base_price + (v as any).price_adjustment,
-        }));
-
-        // Set form values
-        reset({
-          name: product.name,
-          slug: product.slug,
-          description: product.description || "",
-          category_id: product.category_id,
-          base_price: product.base_price.toString(),
-          is_active: product.is_active,
-          variants: variantsWithPrices,
-        });
-
-        // Set image and category
-        if (product.image_url) {
-          setSelectedImage(product.image_url);
-        }
-        setSelectedCategory(product.category_id);
-      } catch (error) {
-        console.error("Failed to load product:", error);
-        toast.error("Failed to load product");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadProduct();
-  }, [productId, reset, router]);
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,17 +193,6 @@ export default function EditProductForm({ productId, categories }: EditProductFo
       setIsDeleting(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading product...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>

@@ -151,6 +151,14 @@ export const orders = sqliteTable(
     bake_sale_id: text("bake_sale_id")
       .notNull()
       .references(() => bakeSales.id),
+    // Snapshot of bake sale date at time of order (for historical accuracy)
+    bake_sale_date_snapshot: text("bake_sale_date_snapshot"),
+    // Snapshot of location details at time of order (for historical accuracy)
+    collection_location_name_snapshot: text("collection_location_name_snapshot"),
+    collection_location_address_snapshot: text("collection_location_address_snapshot"),
+    collection_location_city_snapshot: text("collection_location_city_snapshot"),
+    collection_location_postcode_snapshot: text("collection_location_postcode_snapshot"),
+    collection_hours_snapshot: text("collection_hours_snapshot"),
     status: text("status").notNull().default("pending"), // pending, processing, ready, fulfilled, cancelled, refunded, action_required
     fulfillment_method: text("fulfillment_method").notNull().default("collection"), // collection, delivery
     payment_method: text("payment_method").notNull().default("payment_on_collection"), // stripe, paypal, bank_transfer, payment_on_collection

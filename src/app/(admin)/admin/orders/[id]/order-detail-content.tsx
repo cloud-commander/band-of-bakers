@@ -24,6 +24,13 @@ interface OrderDetailContentProps {
     payment_method: string;
     user_id: string;
     bake_sale_id?: string | null;
+    // Snapshot fields for historical accuracy
+    bake_sale_date_snapshot?: string | null;
+    collection_location_name_snapshot?: string | null;
+    collection_location_address_snapshot?: string | null;
+    collection_location_city_snapshot?: string | null;
+    collection_location_postcode_snapshot?: string | null;
+    collection_hours_snapshot?: string | null;
     user?: {
       name: string | null;
       email: string;
@@ -579,19 +586,33 @@ export function OrderDetailContent({ order }: OrderDetailContentProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Bake Sale Date</p>
                 <p className="font-medium">
-                  {order.bakeSale
-                    ? new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
-                        weekday: "short",
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "N/A"}
+                  {(() => {
+                    const dateStr = order.bake_sale_date_snapshot || order.bakeSale?.date;
+                    return dateStr
+                      ? new Date(dateStr).toLocaleDateString("en-GB", {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "N/A";
+                  })()}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Location</p>
-                <p className="text-sm">{order.bakeSale?.location?.name || "N/A"}</p>
+                <p className="text-sm">
+                  {order.collection_location_name_snapshot || order.bakeSale?.location?.name || "N/A"}
+                </p>
+                {(order.collection_location_address_snapshot || order.bakeSale?.location?.address_line1) && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {order.collection_location_address_snapshot || order.bakeSale?.location?.address_line1}
+                    {(order.collection_location_city_snapshot || order.bakeSale?.location?.city) &&
+                      `, ${order.collection_location_city_snapshot || order.bakeSale?.location?.city}`}
+                    {(order.collection_location_postcode_snapshot || order.bakeSale?.location?.postcode) &&
+                      ` ${order.collection_location_postcode_snapshot || order.bakeSale?.location?.postcode}`}
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>

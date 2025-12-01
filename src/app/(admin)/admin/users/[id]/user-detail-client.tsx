@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
 
 interface UserDetailClientProps {
   user: User | null;
@@ -31,6 +32,9 @@ export function UserDetailClient({ user }: UserDetailClientProps) {
     role: (user?.role || "customer") as User["role"],
     avatar_url: user?.avatar_url || "",
   });
+
+  // State for the new avatar file (if uploaded)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   if (!user) {
     return (
@@ -49,6 +53,7 @@ export function UserDetailClient({ user }: UserDetailClientProps) {
   }
 
   const handleSave = () => {
+    // TODO: Implement actual save logic, including avatar upload if avatarFile is present
     toast.success(`User ${editForm.name} updated successfully`, {
       description: "Changes will be saved to the database",
     });
@@ -84,6 +89,16 @@ export function UserDetailClient({ user }: UserDetailClientProps) {
               <CardDescription>Update user profile details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex justify-center pb-4">
+                <AvatarUpload
+                  name={editForm.name}
+                  currentAvatarUrl={editForm.avatar_url}
+                  onAvatarChange={(file) => setAvatarFile(file)}
+                  variant="overlay"
+                  size="xl"
+                />
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -133,16 +148,6 @@ export function UserDetailClient({ user }: UserDetailClientProps) {
                     <SelectItem value="owner">Owner</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="avatar">Avatar URL</Label>
-                <Input
-                  id="avatar"
-                  value={editForm.avatar_url || ""}
-                  onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
-                  placeholder="https://example.com/avatar.jpg"
-                />
               </div>
             </CardContent>
           </Card>

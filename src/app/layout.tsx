@@ -124,7 +124,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="manifest" href="/manifest.json" />
+        {/* PWA manifest removed (not in use) */}
         {enablePartytown && <Partytown debug={false} forward={["dataLayer.push"]} />}
         <StructuredData />
       </head>

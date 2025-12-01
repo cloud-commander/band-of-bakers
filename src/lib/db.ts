@@ -10,28 +10,24 @@ interface CloudflareEnv {
   KV: KVNamespace;
 }
 
-export async function getDb() {
-  console.log("[DB] Connecting to database...");
+import { cache } from "react";
 
+export const getDb = cache(async () => {
   let env: CloudflareEnv | undefined;
   try {
     const context = await getCloudflareContext({ async: true });
     env = context.env as CloudflareEnv;
-  } catch (e) {
-    console.warn("[DB] Failed to get Cloudflare context (expected in local scripts/dev):", e);
+  } catch {
+    // console.warn("[DB] Failed to get Cloudflare context (expected in local scripts/dev):", e);
   }
 
   if (env?.DB) {
-    console.log("[DB] env.DB found.");
     return drizzle(env.DB, { schema });
   }
 
-  // Dev-only fallback (do not import in Edge)
-  // We explicitly check that we are NOT in the Edge runtime before loading better-sqlite3
-  if (
-    (process.env.NODE_ENV === "development" || !process.env.NODE_ENV) &&
-    process.env.NEXT_RUNTIME !== "edge"
-  ) {
+  // Dev/Build fallback (do not import in Edge)
+  // If env.DB is missing, we assume we are in a local environment (dev or build)
+  if (process.env.NEXT_RUNTIME !== "edge") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalForDb = globalThis as unknown as { __localDb?: any };
     if (globalForDb.__localDb) {
@@ -55,4 +51,4 @@ export async function getDb() {
   }
 
   throw new Error("Database binding not found");
-}
+});

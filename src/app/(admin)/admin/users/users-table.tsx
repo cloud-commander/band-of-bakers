@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,15 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
 import { PAGINATION_CONFIG } from "@/lib/constants/pagination";
 import type { User } from "@/lib/repositories/user.repository";
+import { updateUser } from "@/actions/users";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
 
 const ITEMS_PER_PAGE = PAGINATION_CONFIG.ADMIN_USERS_ITEMS_PER_PAGE;
 
 type SortField = "name" | "email" | "created_at" | "phone";
 type SortDirection = "asc" | "desc";
 type BanFilter = "all" | "active" | "banned";
+type RoleFilter = "all" | "customer" | "staff" | "manager" | "owner";
 
 interface AdminUsersTableProps {
   initialUsers: User[];
@@ -47,13 +50,35 @@ export function AdminUsersTable({
   currentPage,
   pageSize = ITEMS_PER_PAGE,
 }: AdminUsersTableProps) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [pageState, setPageState] = useState(currentPage);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Initialize state from URL params
+  const [searchTerm, setSearchTerm] = useState(searchParams?.get("search") || "");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [banFilter, setBanFilter] = useState<BanFilter>(
+    (searchParams?.get("status") as BanFilter) || "all"
+  );
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>(
+    (searchParams?.get("role") as RoleFilter) || "all"
+  );
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [banFilter, setBanFilter] = useState<BanFilter>("all");
+  // const [pageState, setPageState] = useState(currentPage); // Removed as we rely on URL param
+
+  // Sync debounced search with URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    if (debouncedSearchTerm) {
+      params.set("search", debouncedSearchTerm);
+    } else {
+      params.delete("search");
+    }
+    params.set("page", "1"); // Reset to page 1 on search
+    router.push(`${pathname}?${params.toString()}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, router, pathname]);
 
   // Dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -64,85 +89,28 @@ export function AdminUsersTable({
     name: "",
     phone: "",
     role: "customer" as User["role"],
-    avatar_url: "",
+    avatar_url: "" as string | null,
+    avatarFile: null as File | null,
   });
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // Update URL when filters change
+  const updateFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    if (value && value !== "all") {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    params.set("page", "1");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
-  useEffect(() => {
-    setUsers(initialUsers);
-  }, [initialUsers]);
-
-  useEffect(() => {
-    setPageState(currentPage);
-  }, [currentPage]);
-
-  const filteredAndSortedUsers = useMemo(() => {
-    const filtered = users.filter((user) => {
-      const searchLower = debouncedSearchTerm.toLowerCase();
-      const matchesSearch =
-        user.name.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower) ||
-        (user.phone && user.phone.toLowerCase().includes(searchLower));
-
-      const matchesBanFilter =
-        banFilter === "all" ||
-        (banFilter === "active" && !user.is_banned) ||
-        (banFilter === "banned" && user.is_banned);
-
-      return matchesSearch && matchesBanFilter;
-    });
-
-    return filtered.sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
-
-      switch (sortField) {
-        case "name":
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case "email":
-          aValue = a.email.toLowerCase();
-          bValue = b.email.toLowerCase();
-          break;
-        case "phone":
-          aValue = a.phone || "";
-          bValue = b.phone || "";
-          break;
-        case "created_at":
-        default:
-          aValue = new Date(a.created_at).getTime();
-          bValue = new Date(b.created_at).getTime();
-          break;
-      }
-
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [debouncedSearchTerm, sortField, sortDirection, banFilter, users]);
-
-  const hasClientFilters = Boolean(debouncedSearchTerm || banFilter !== "all");
-  const totalPages = hasClientFilters
-    ? Math.max(1, Math.ceil(filteredAndSortedUsers.length / pageSize))
-    : Math.max(1, Math.ceil(totalCount / pageSize));
-
-  const startIndex = hasClientFilters ? (pageState - 1) * pageSize : 0;
-  const endIndex = hasClientFilters ? startIndex + pageSize : filteredAndSortedUsers.length;
-  const paginatedUsers = hasClientFilters
-    ? filteredAndSortedUsers.slice(startIndex, endIndex)
-    : filteredAndSortedUsers;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("page", String(page));
-    params.set("pageSize", String(pageSize));
     router.push(`${pathname}?${params.toString()}`);
-    setPageState(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSort = (field: SortField) => {
@@ -152,12 +120,12 @@ export function AdminUsersTable({
       setSortField(field);
       setSortDirection("asc");
     }
-    setPageState(1);
+    // setPageState(1); // Removed
   };
 
   const clearSearch = () => {
     setSearchTerm("");
-    setPageState(1);
+    // URL update handled by useEffect
   };
 
   const getSortIcon = (field: SortField) => {
@@ -175,14 +143,30 @@ export function AdminUsersTable({
   };
 
   // Edit user handlers
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!selectedUser) return;
-    // Placeholder: integrate server action later
-    toast.success(`User ${editForm.name} updated successfully`, {
-      description: "Changes will be reflected in the database",
-    });
-    setEditDialogOpen(false);
-    setSelectedUser(null);
+
+    try {
+      const result = await updateUser(selectedUser.id, {
+        name: editForm.name,
+        phone: editForm.phone,
+        role: editForm.role as "customer" | "staff" | "manager" | "owner",
+        avatar: editForm.avatarFile !== null ? editForm.avatarFile : editForm.avatar_url,
+      });
+
+      if (result.success) {
+        toast.success(`User ${editForm.name} updated successfully`);
+        setEditDialogOpen(false);
+        setSelectedUser(null);
+        // Refresh the page to show updated data
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to update user");
+      }
+    } catch (error) {
+      console.error("Update user error:", error);
+      toast.error("An unexpected error occurred");
+    }
   };
 
   return (
@@ -196,7 +180,6 @@ export function AdminUsersTable({
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              setPageState(1);
             }}
             className="pl-9 pr-9 w-full"
           />
@@ -211,12 +194,12 @@ export function AdminUsersTable({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Select
             value={banFilter}
             onValueChange={(value) => {
               setBanFilter(value as BanFilter);
-              setPageState(1);
+              updateFilter("status", value);
             }}
           >
             <SelectTrigger className="w-full">
@@ -230,10 +213,29 @@ export function AdminUsersTable({
           </Select>
 
           <Select
+            value={roleFilter}
+            onValueChange={(value) => {
+              setRoleFilter(value as RoleFilter);
+              updateFilter("role", value);
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All roles</SelectItem>
+              <SelectItem value="customer">Customer</SelectItem>
+              <SelectItem value="staff">Staff</SelectItem>
+              <SelectItem value="manager">Manager</SelectItem>
+              <SelectItem value="owner">Owner</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
             value={sortField}
             onValueChange={(value) => {
               setSortField(value as SortField);
-              setPageState(1);
+              // setPageState(1); // Removed
             }}
           >
             <SelectTrigger className="w-full">
@@ -251,15 +253,11 @@ export function AdminUsersTable({
 
       {/* Pagination Info */}
       <div className="mb-4">
-        <PaginationInfo
-          currentPage={pageState}
-          pageSize={pageSize}
-          totalItems={hasClientFilters ? filteredAndSortedUsers.length : totalCount}
-        />
+        <PaginationInfo currentPage={currentPage} pageSize={pageSize} totalItems={totalCount} />
       </div>
 
-      {/* Users Table */}
-      <div className="overflow-x-auto border rounded-lg shadow-sm bg-white">
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto border rounded-lg shadow-sm bg-white">
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
@@ -287,7 +285,7 @@ export function AdminUsersTable({
             </tr>
           </thead>
           <tbody>
-            {paginatedUsers.map((user) => (
+            {initialUsers.map((user) => (
               <tr key={user.id} className="border-t hover:bg-muted/30 transition-colors">
                 <td className="p-4">
                   <div className="flex flex-col">
@@ -325,7 +323,8 @@ export function AdminUsersTable({
                         name: user.name,
                         phone: user.phone || "",
                         role: user.role,
-                        avatar_url: user.avatar_url || "",
+                        avatar_url: user.avatar_url || null,
+                        avatarFile: null,
                       });
                       setEditDialogOpen(true);
                     }}
@@ -340,9 +339,76 @@ export function AdminUsersTable({
         </table>
       </div>
 
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {initialUsers.map((user) => (
+          <div key={user.id} className="border rounded-lg p-4 bg-white shadow-sm space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-medium text-foreground">{user.name}</h3>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
+              </div>
+              {user.is_banned ? (
+                <Badge variant="destructive">Banned</Badge>
+              ) : (
+                <Badge className="bg-green-100 text-green-700">Active</Badge>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground">Role</p>
+                <Badge variant="secondary" className="mt-1">
+                  {user.role}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Joined</p>
+                <p>
+                  {new Date(user.created_at).toLocaleDateString("en-GB", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p>{user.phone || "—"}</p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedUser(user);
+                  setEditForm({
+                    name: user.name,
+                    phone: user.phone || "",
+                    role: user.role,
+                    avatar_url: user.avatar_url || null,
+                    avatarFile: null,
+                  });
+                  setEditDialogOpen(true);
+                }}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit User
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Pagination */}
       <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <Pagination currentPage={pageState} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       {/* Edit Dialog */}
@@ -353,6 +419,22 @@ export function AdminUsersTable({
             <DialogDescription>Update user details below.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div className="flex justify-center pb-4">
+              <AvatarUpload
+                name={editForm.name}
+                currentAvatarUrl={editForm.avatar_url}
+                onAvatarChange={(file) => {
+                  if (file) {
+                    setEditForm({ ...editForm, avatarFile: file });
+                  } else {
+                    // If file is null, it means remove avatar
+                    setEditForm({ ...editForm, avatarFile: null, avatar_url: null });
+                  }
+                }}
+                variant="overlay"
+                size="xl"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
@@ -385,14 +467,6 @@ export function AdminUsersTable({
                   <SelectItem value="owner">Owner</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="avatar_url">Avatar URL</Label>
-              <Input
-                id="avatar_url"
-                value={editForm.avatar_url}
-                onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
-              />
             </div>
           </div>
           <DialogFooter>

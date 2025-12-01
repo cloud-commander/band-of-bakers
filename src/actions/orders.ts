@@ -263,11 +263,43 @@ export async function createOrder(
       bakeSaleId = upcomingSales[0]?.id;
     }
 
+    // 3.5 Fetch bake sale and location data for snapshot
+    let bakeSaleDateSnapshot = null;
+    let locationNameSnapshot = null;
+    let locationAddressSnapshot = null;
+    let locationCitySnapshot = null;
+    let locationPostcodeSnapshot = null;
+    let collectionHoursSnapshot = null;
+
+    if (bakeSaleId) {
+      const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
+      const bakeSale = await bakeSaleRepository.findByIdWithLocation(bakeSaleId);
+
+      if (bakeSale) {
+        bakeSaleDateSnapshot = bakeSale.date;
+
+        if (bakeSale.location) {
+          locationNameSnapshot = bakeSale.location.name;
+          locationAddressSnapshot = bakeSale.location.address_line1;
+          locationCitySnapshot = bakeSale.location.city;
+          locationPostcodeSnapshot = bakeSale.location.postcode;
+          collectionHoursSnapshot = bakeSale.location.collection_hours;
+        }
+      }
+    }
+
     const order = await orderRepository.createWithItems(
       {
         id: nanoid(),
         user_id: userId,
         bake_sale_id: bakeSaleId,
+        // Snapshot fields for historical accuracy
+        bake_sale_date_snapshot: bakeSaleDateSnapshot,
+        collection_location_name_snapshot: locationNameSnapshot,
+        collection_location_address_snapshot: locationAddressSnapshot,
+        collection_location_city_snapshot: locationCitySnapshot,
+        collection_location_postcode_snapshot: locationPostcodeSnapshot,
+        collection_hours_snapshot: collectionHoursSnapshot,
         status: "pending",
         fulfillment_method,
         payment_method: validated.data.payment_method,
@@ -445,14 +477,22 @@ export async function updateOrderStatus(
 
     // Trigger notifications
     if (order.user?.email) {
-      if (nextStatus === "ready" && order.bakeSale?.location) {
-        void sendEmail(order.user.email, "order_ready_for_collection", {
-          customer_name: order.user.name || "Customer",
-          order_id: formatOrderReference(order.id, order.order_number),
-          location_name: order.bakeSale.location.name,
-          location_address: `${order.bakeSale.location.address_line1}, ${order.bakeSale.location.postcode}`,
-          collection_time: order.bakeSale.location.collection_hours || "10am - 2pm",
-        });
+      if (nextStatus === "ready") {
+        // Use snapshot data for historical accuracy, fallback to live data
+        const locationName = order.collection_location_name_snapshot || order.bakeSale?.location?.name;
+        const locationAddress = order.collection_location_address_snapshot || order.bakeSale?.location?.address_line1;
+        const locationPostcode = order.collection_location_postcode_snapshot || order.bakeSale?.location?.postcode;
+        const collectionHours = order.collection_hours_snapshot || order.bakeSale?.location?.collection_hours || "10am - 2pm";
+
+        if (locationName && locationAddress && locationPostcode) {
+          void sendEmail(order.user.email, "order_ready_for_collection", {
+            customer_name: order.user.name || "Customer",
+            order_id: formatOrderReference(order.id, order.order_number),
+            location_name: locationName,
+            location_address: `${locationAddress}, ${locationPostcode}`,
+            collection_time: collectionHours,
+          });
+        }
       } else if (nextStatus === "fulfilled") {
         void sendEmail(order.user.email, "order_completed", {
           customer_name: order.user.name || "Customer",

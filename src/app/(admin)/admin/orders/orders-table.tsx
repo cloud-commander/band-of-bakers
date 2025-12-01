@@ -46,6 +46,9 @@ interface OrderWithRelations {
   user_id: string;
   bake_sale_id?: string | null;
   item_count?: number;
+  // Snapshot fields for historical accuracy
+  bake_sale_date_snapshot?: string | null;
+  collection_location_name_snapshot?: string | null;
   user?: {
     name: string | null;
     email: string;
@@ -109,9 +112,10 @@ export function OrdersTable({
     return bakeSaleFilter;
   }, [bakeSaleFilter]);
 
-  // Helper function to get bake sale date
+  // Helper function to get bake sale date (uses snapshot for historical accuracy)
   const getBakeSaleDate = (order: OrderWithRelations) => {
-    return order.bakeSale ? new Date(order.bakeSale.date) : null;
+    const dateStr = order.bake_sale_date_snapshot || order.bakeSale?.date;
+    return dateStr ? new Date(dateStr) : null;
   };
 
   // Helper function to get customer name
@@ -507,13 +511,16 @@ export function OrdersTable({
                   })}
                 </td>
                 <td className="p-4 text-sm text-muted-foreground">
-                  {order.bakeSale
-                    ? new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "N/A"}
+                  {(() => {
+                    const bakeSaleDate = getBakeSaleDate(order);
+                    return bakeSaleDate
+                      ? bakeSaleDate.toLocaleDateString("en-GB", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "N/A";
+                  })()}
                 </td>
                 <td className="p-4 text-sm font-medium">{getCustomerName(order)}</td>
                 <td className="p-4">
@@ -632,12 +639,15 @@ export function OrdersTable({
                 <div>
                   <p className="text-xs text-muted-foreground">Bake Sale</p>
                   <p className="font-medium">
-                    {order.bakeSale
-                      ? new Date(order.bakeSale.date).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                        })
-                      : "N/A"}
+                    {(() => {
+                      const bakeSaleDate = getBakeSaleDate(order);
+                      return bakeSaleDate
+                        ? bakeSaleDate.toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                          })
+                        : "N/A";
+                    })()}
                   </p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,12 +8,11 @@ import { PageHeader } from "@/components/state/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
-import { Star, Pencil, Trash2, Upload, Quote } from "lucide-react";
+import { Star, Pencil, Trash2, Quote } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { updateProfile } from "@/actions/profile";
@@ -68,8 +67,6 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
     email_verified: user?.emailVerified || false,
   };
 
-  const [avatarPreview, setAvatarPreview] = useState(profile.image || "");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const {
@@ -96,7 +93,6 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
         phone: profile.phone || "",
         avatar: profile.image || "",
       });
-      setAvatarPreview(profile.image || "");
     }
   }, [profile.id, profile.name, profile.email, profile.phone, profile.image, reset]);
 
@@ -135,40 +131,7 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
       phone: profile.phone || "",
       avatar: profile.image || "",
     });
-    setAvatarPreview(profile.image || "");
     setSelectedFile(null);
-  };
-
-  const handleAvatarClick = () => {
-    if (isEditing) {
-      fileInputRef.current?.click();
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        toast.error("File too large. Max size is 5MB.");
-        return;
-      }
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
@@ -193,29 +156,13 @@ export function ProfileClient({ initialReviews, initialTestimonials }: ProfileCl
             <div className="border rounded-lg p-6 bg-white">
               <div className="flex items-center gap-6 mb-8">
                 <div className="relative group">
-                  <Avatar className="h-24 w-24 border-2 border-stone-100">
-                    <AvatarImage src={avatarPreview} className="object-cover" />
-                    <AvatarFallback
-                      className={`${DESIGN_TOKENS.typography.h2.size}`}
-                      style={{ color: DESIGN_TOKENS.colors.text.main }}
-                    >
-                      {getInitials(profile.name || "User")}
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <div
-                      className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                      onClick={handleAvatarClick}
-                    >
-                      <Upload className="w-6 h-6 text-white" />
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleFileChange}
+                  <AvatarUpload
+                    name={profile.name || "User"}
+                    currentAvatarUrl={profile.image}
+                    onAvatarChange={setSelectedFile}
+                    variant="overlay"
+                    size="lg"
+                    className={!isEditing ? "pointer-events-none" : ""}
                   />
                 </div>
                 <div>

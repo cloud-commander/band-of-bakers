@@ -6,7 +6,6 @@ import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { CheckCircle } from "lucide-react";
 import { formatOrderReference } from "@/lib/utils/order";
 import { getPaginatedUserOrders } from "@/actions/orders";
-import { auth } from "@/auth";
 import { useEffect, useState } from "react";
 
 export const dynamic = "force-dynamic";
@@ -30,10 +29,8 @@ export default function CheckoutSuccessPage() {
   useEffect(() => {
     async function fetchOrderData() {
       try {
-        const session = await auth();
-        const order = session?.user?.id
-          ? ((await getPaginatedUserOrders(1, 1)).orders[0] ?? null)
-          : null;
+        const response = await getPaginatedUserOrders(1, 1);
+        const order = response.orders[0] ?? null;
         setLatestOrder(order);
       } catch (error) {
         console.error("Failed to fetch order data:", error);
