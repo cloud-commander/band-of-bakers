@@ -96,6 +96,23 @@ export class BakeSaleRepository extends BaseRepository<typeof bakeSales> {
       location: loc,
     };
   }
+
+  /**
+   * Find the most recently scheduled bake sale (by date desc)
+   */
+  async findMostRecent(): Promise<BakeSaleWithLocation | null> {
+    const db = await this.getDatabase();
+    const results = await db
+      .select()
+      .from(bakeSales)
+      .innerJoin(locations, eq(bakeSales.location_id, locations.id))
+      .orderBy(desc(bakeSales.date))
+      .limit(1);
+
+    if (results.length === 0) return null;
+    const { bake_sales, locations: loc } = results[0];
+    return { ...bake_sales, location: loc };
+  }
 }
 
 export const bakeSaleRepository = new BakeSaleRepository();

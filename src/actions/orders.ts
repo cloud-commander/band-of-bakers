@@ -59,6 +59,8 @@ export async function createOrder(
   const { orderRepository } = await import("@/lib/repositories/order.repository");
   const { userRepository } = await import("@/lib/repositories/user.repository");
   const { productRepository } = await import("@/lib/repositories/product.repository");
+  const { productAvailabilityRepository } =
+    await import("@/lib/repositories/product-availability.repository");
   const { voucherRepository } = await import("@/lib/repositories/voucher.repository");
 
   try {
@@ -86,6 +88,7 @@ export async function createOrder(
       city,
       postcode,
       fulfillment_method,
+      bake_sale_id: initialBakeSaleId,
       items,
       voucherCode,
       turnstileToken,
@@ -133,6 +136,7 @@ export async function createOrder(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const productCache = new Map<string, any>();
     const stockRequirements = new Map<string, number>();
+    let bakeSaleId = initialBakeSaleId;
 
     // Prefetch variants for all products to avoid N+1
     const productIds = Array.from(new Set(items.map((item) => item.productId)));
@@ -147,6 +151,13 @@ export async function createOrder(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((p: any) => [p!.id, p!])
     );
+    let availabilityByProduct = new Map<string, boolean>();
+    if (bakeSaleId && productIds.length > 0) {
+      availabilityByProduct = await productAvailabilityRepository.getAvailabilityForBakeSale(
+        bakeSaleId,
+        productIds
+      );
+    }
 
     for (const item of items) {
       const cachedProduct = productCache.get(item.productId);
@@ -157,6 +168,12 @@ export async function createOrder(
       }
       if (!product.is_active) {
         return { success: false, error: `Product is unavailable: ${product.name}` };
+      }
+      if (bakeSaleId && availabilityByProduct.get(product.id) === false) {
+        return {
+          success: false,
+          error: `${product.name} is unavailable for the selected collection date`,
+        };
       }
 
       productCache.set(product.id, product);
@@ -255,8 +272,6 @@ export async function createOrder(
     const total = Math.max(0, orderTotalBeforeDiscount - voucherDiscount);
 
     // 3. Create Order
-    let bakeSaleId = validated.data.bake_sale_id;
-
     if (!bakeSaleId) {
       const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
       const upcomingSales = await bakeSaleRepository.findUpcoming();
@@ -479,10 +494,16 @@ export async function updateOrderStatus(
     if (order.user?.email) {
       if (nextStatus === "ready") {
         // Use snapshot data for historical accuracy, fallback to live data
-        const locationName = order.collection_location_name_snapshot || order.bakeSale?.location?.name;
-        const locationAddress = order.collection_location_address_snapshot || order.bakeSale?.location?.address_line1;
-        const locationPostcode = order.collection_location_postcode_snapshot || order.bakeSale?.location?.postcode;
-        const collectionHours = order.collection_hours_snapshot || order.bakeSale?.location?.collection_hours || "10am - 2pm";
+        const locationName =
+          order.collection_location_name_snapshot || order.bakeSale?.location?.name;
+        const locationAddress =
+          order.collection_location_address_snapshot || order.bakeSale?.location?.address_line1;
+        const locationPostcode =
+          order.collection_location_postcode_snapshot || order.bakeSale?.location?.postcode;
+        const collectionHours =
+          order.collection_hours_snapshot ||
+          order.bakeSale?.location?.collection_hours ||
+          "10am - 2pm";
 
         if (locationName && locationAddress && locationPostcode) {
           void sendEmail(order.user.email, "order_ready_for_collection", {

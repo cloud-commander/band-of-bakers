@@ -5,14 +5,23 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import Link from "next/link";
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
+  getPageUrl?: (page: number) => string;
   className?: string;
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange, className }: PaginationProps) {
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  getPageUrl,
+  className,
+}: PaginationProps) {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -67,21 +76,86 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
   const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
 
+  const renderPageButton = (
+    page: number,
+    isActive: boolean,
+    label: string,
+    icon?: React.ReactNode
+  ) => {
+    if (getPageUrl) {
+      return (
+        <Button
+          key={page}
+          variant={isActive ? "default" : "outline"}
+          size="sm"
+          asChild
+          aria-label={label}
+          aria-current={isActive ? "page" : undefined}
+        >
+          <Link href={getPageUrl(page)}>{icon || page}</Link>
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        key={page}
+        type="button"
+        variant={isActive ? "default" : "outline"}
+        size="sm"
+        onClick={() => onPageChange?.(page)}
+        aria-label={label}
+        aria-current={isActive ? "page" : undefined}
+      >
+        {icon || page}
+      </Button>
+    );
+  };
+
+  const renderNavButton = (direction: "prev" | "next", disabled: boolean, targetPage: number) => {
+    const icon =
+      direction === "prev" ? (
+        <ChevronLeft className="h-4 w-4" />
+      ) : (
+        <ChevronRight className="h-4 w-4" />
+      );
+    const label = direction === "prev" ? "Go to previous page" : "Go to next page";
+
+    if (disabled) {
+      return (
+        <Button variant="outline" size="sm" disabled aria-label={label}>
+          {icon}
+        </Button>
+      );
+    }
+
+    if (getPageUrl) {
+      return (
+        <Button variant="outline" size="sm" asChild aria-label={label}>
+          <Link href={getPageUrl(targetPage)}>{icon}</Link>
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange?.(targetPage)}
+        aria-label={label}
+      >
+        {icon}
+      </Button>
+    );
+  };
+
   return (
     <nav
       className={cn("flex items-center justify-center gap-1", className)}
       aria-label="Pagination"
     >
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={!canGoPrevious}
-        aria-label="Go to previous page"
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
+      {renderNavButton("prev", !canGoPrevious, currentPage - 1)}
 
       <div className="flex items-center gap-1">
         {pages.map((page, index) => {
@@ -96,32 +170,11 @@ export function Pagination({ currentPage, totalPages, onPageChange, className }:
           const pageNum = page as number;
           const isActive = pageNum === currentPage;
 
-          return (
-            <Button
-              key={pageNum}
-              type="button"
-              variant={isActive ? "default" : "outline"}
-              size="sm"
-              onClick={() => onPageChange(pageNum)}
-              aria-label={`Go to page ${pageNum}`}
-              aria-current={isActive ? "page" : undefined}
-            >
-              {pageNum}
-            </Button>
-          );
+          return renderPageButton(pageNum, isActive, `Go to page ${pageNum}`);
         })}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={!canGoNext}
-        aria-label="Go to next page"
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
+      {renderNavButton("next", !canGoNext, currentPage + 1)}
     </nav>
   );
 }

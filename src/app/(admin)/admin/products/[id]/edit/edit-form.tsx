@@ -32,9 +32,11 @@ import {
 import { ImageGallery } from "@/components/admin/image-gallery";
 import { updateProduct, deleteProduct } from "@/actions/products";
 import type { Product, ProductCategory, ProductVariant } from "@/db/schema";
+import type { BakeSaleWithLocation } from "@/lib/repositories";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Validation schema
 const productFormSchema = z.object({
@@ -61,12 +63,16 @@ interface EditProductFormProps {
   productId: string;
   categories: ProductCategory[];
   initialProduct: Product & { variants: ProductVariant[] };
+  latestBakeSale?: BakeSaleWithLocation | null;
+  initialAvailability?: boolean;
 }
 
 export default function EditProductForm({
   productId,
   categories,
   initialProduct,
+  latestBakeSale = null,
+  initialAvailability = true,
 }: EditProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,6 +80,7 @@ export default function EditProductForm({
   const [selectedImage, setSelectedImage] = useState<string>(initialProduct.image_url || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(initialProduct.category_id);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isAvailableForBakeSale, setIsAvailableForBakeSale] = useState(initialAvailability);
 
   // Calculate absolute prices for variants
   const variantsWithPrices = initialProduct.variants.map((v) => ({
@@ -113,6 +120,14 @@ export default function EditProductForm({
   // Calculate starting price based on variants
   const startingPrice =
     variants && variants.length > 0 ? Math.min(...variants.map((v) => v.price || 0)) : null;
+  const latestBakeSaleLabel = latestBakeSale
+    ? new Date(latestBakeSale.date).toLocaleDateString("en-GB", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +169,11 @@ export default function EditProductForm({
           // If it's a path from the gallery, send it as image_url
           formData.append("image_url", selectedImage);
         }
+      }
+
+      if (latestBakeSale) {
+        formData.append("bake_sale_id", latestBakeSale.id);
+        formData.append("is_available_for_bake_sale", String(isAvailableForBakeSale));
       }
 
       const result = await updateProduct(productId, formData);
@@ -334,6 +354,32 @@ export default function EditProductForm({
             <Label htmlFor="is_active" className="cursor-pointer">
               Active (visible to customers)
             </Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Availability for bake sale</Label>
+            {latestBakeSale ? (
+              <div className="flex items-start gap-3 border rounded-lg p-3 bg-muted/40">
+                <Checkbox
+                  id="bake-sale-availability"
+                  checked={isAvailableForBakeSale}
+                  onCheckedChange={(checked) => setIsAvailableForBakeSale(checked === true)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="bake-sale-availability" className="cursor-pointer">
+                    {latestBakeSaleLabel} at {latestBakeSale.location.name}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Uncheck to mark this product unavailable for this collection date. New bake sale
+                    dates will inherit this setting.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No upcoming bake sale date configured yet.
+              </p>
+            )}
           </div>
         </div>
 

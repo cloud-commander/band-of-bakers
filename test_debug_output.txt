@@ -1,0 +1,531 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2[39m
+
+[90mstdout[2m | src/actions/__tests__/orders.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/db.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/context/__tests__/cart-context.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/button.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/navbar/__tests__/index.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/loading-skeletons.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/dropdown-menu.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/utils/__tests__/voucher.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/sanitize.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/utils/__tests__/voucher.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould execute proxy callback logic
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+ [32m✓[39m src/context/__tests__/cart-context.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould execute proxy callback logic
+[22m[39m[DEBUG] Database constructor: [Function: Mock] {
+  _isMockFunction: [33mtrue[39m,
+  getMockImplementation: [36m[Function (anonymous)][39m,
+  mock: {
+    calls: [],
+    contexts: [],
+    instances: [],
+    invocationCallOrder: [],
+    settledResults: [],
+    results: [],
+    lastCall: [36m[Getter][39m
+  },
+  mockImplementation: [36m[Function: mockImplementation][39m,
+  mockImplementationOnce: [36m[Function: mockImplementationOnce][39m,
+  withImplementation: [36m[Function: withImplementation][39m,
+  mockReturnThis: [36m[Function: mockReturnThis][39m,
+  mockReturnValue: [36m[Function: mockReturnValue][39m,
+  mockReturnValueOnce: [36m[Function: mockReturnValueOnce][39m,
+  mockResolvedValue: [36m[Function: mockResolvedValue][39m,
+  mockResolvedValueOnce: [36m[Function: mockResolvedValueOnce][39m,
+  mockRejectedValue: [36m[Function: mockRejectedValue][39m,
+  mockRejectedValueOnce: [36m[Function: mockRejectedValueOnce][39m,
+  mockClear: [36m[Function: mockClear][39m,
+  mockReset: [36m[Function: mockReset][39m,
+  mockRestore: [36m[Function: mockRestore][39m,
+  mockName: [36m[Function: mockName][39m,
+  getMockName: [36m[Function: getMockName][39m,
+  [[32mSymbol(nodejs.dispose)[39m]: [36m[Function (anonymous)][39m
+}
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould execute proxy callback logic
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:14:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:71:5
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+ [32m✓[39m src/lib/__tests__/sanitize.test.ts [2m([22m[2m41 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error on edge runtime if env.DB is missing
+[22m[39m[DB] env.DB is undefined or context failed.
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould use local fallback in development if env.DB is missing
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstdout[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould use local fallback in development if env.DB is missing
+[22m[39m[DEBUG] Database constructor: [Function: Mock] {
+  _isMockFunction: [33mtrue[39m,
+  getMockImplementation: [36m[Function (anonymous)][39m,
+  mock: {
+    calls: [],
+    contexts: [],
+    instances: [],
+    invocationCallOrder: [],
+    settledResults: [],
+    results: [],
+    lastCall: [36m[Getter][39m
+  },
+  mockImplementation: [36m[Function: mockImplementation][39m,
+  mockImplementationOnce: [36m[Function: mockImplementationOnce][39m,
+  withImplementation: [36m[Function: withImplementation][39m,
+  mockReturnThis: [36m[Function: mockReturnThis][39m,
+  mockReturnValue: [36m[Function: mockReturnValue][39m,
+  mockReturnValueOnce: [36m[Function: mockReturnValueOnce][39m,
+  mockResolvedValue: [36m[Function: mockResolvedValue][39m,
+  mockResolvedValueOnce: [36m[Function: mockResolvedValueOnce][39m,
+  mockRejectedValue: [36m[Function: mockRejectedValue][39m,
+  mockRejectedValueOnce: [36m[Function: mockRejectedValueOnce][39m,
+  mockClear: [36m[Function: mockClear][39m,
+  mockReset: [36m[Function: mockReset][39m,
+  mockRestore: [36m[Function: mockRestore][39m,
+  mockName: [36m[Function: mockName][39m,
+  getMockName: [36m[Function: getMockName][39m,
+  [[32mSymbol(nodejs.dispose)[39m]: [36m[Function (anonymous)][39m
+}
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould use local fallback in development if env.DB is missing
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:14:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:120:16
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould reuse cached local connection
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstdout[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould reuse cached local connection
+[22m[39m[DEBUG] Database constructor: [Function: Mock] {
+  _isMockFunction: [33mtrue[39m,
+  getMockImplementation: [36m[Function (anonymous)][39m,
+  mock: {
+    calls: [],
+    contexts: [],
+    instances: [],
+    invocationCallOrder: [],
+    settledResults: [],
+    results: [],
+    lastCall: [36m[Getter][39m
+  },
+  mockImplementation: [36m[Function: mockImplementation][39m,
+  mockImplementationOnce: [36m[Function: mockImplementationOnce][39m,
+  withImplementation: [36m[Function: withImplementation][39m,
+  mockReturnThis: [36m[Function: mockReturnThis][39m,
+  mockReturnValue: [36m[Function: mockReturnValue][39m,
+  mockReturnValueOnce: [36m[Function: mockReturnValueOnce][39m,
+  mockResolvedValue: [36m[Function: mockResolvedValue][39m,
+  mockResolvedValueOnce: [36m[Function: mockResolvedValueOnce][39m,
+  mockRejectedValue: [36m[Function: mockRejectedValue][39m,
+  mockRejectedValueOnce: [36m[Function: mockRejectedValueOnce][39m,
+  mockClear: [36m[Function: mockClear][39m,
+  mockReset: [36m[Function: mockReset][39m,
+  mockRestore: [36m[Function: mockRestore][39m,
+  mockName: [36m[Function: mockName][39m,
+  getMockName: [36m[Function: getMockName][39m,
+  [[32mSymbol(nodejs.dispose)[39m]: [36m[Function (anonymous)][39m
+}
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould reuse cached local connection
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:14:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:132:17
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error if neither D1 nor local fallback works
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstdout[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error if neither D1 nor local fallback works
+[22m[39m[DEBUG] Database constructor: [Function: Mock] {
+  _isMockFunction: [33mtrue[39m,
+  getMockImplementation: [36m[Function (anonymous)][39m,
+  mock: {
+    calls: [],
+    contexts: [],
+    instances: [],
+    invocationCallOrder: [],
+    settledResults: [],
+    results: [],
+    lastCall: [36m[Getter][39m
+  },
+  mockImplementation: [36m[Function: mockImplementation][39m,
+  mockImplementationOnce: [36m[Function: mockImplementationOnce][39m,
+  withImplementation: [36m[Function: withImplementation][39m,
+  mockReturnThis: [36m[Function: mockReturnThis][39m,
+  mockReturnValue: [36m[Function: mockReturnValue][39m,
+  mockReturnValueOnce: [36m[Function: mockReturnValueOnce][39m,
+  mockResolvedValue: [36m[Function: mockResolvedValue][39m,
+  mockResolvedValueOnce: [36m[Function: mockResolvedValueOnce][39m,
+  mockRejectedValue: [36m[Function: mockRejectedValue][39m,
+  mockRejectedValueOnce: [36m[Function: mockRejectedValueOnce][39m,
+  mockClear: [36m[Function: mockClear][39m,
+  mockReset: [36m[Function: mockReset][39m,
+  mockRestore: [36m[Function: mockRestore][39m,
+  mockName: [36m[Function: mockName][39m,
+  getMockName: [36m[Function: getMockName][39m,
+  [[32mSymbol(nodejs.dispose)[39m]: [36m[Function (anonymous)][39m
+}
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error if neither D1 nor local fallback works
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:14:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:150:5
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+ [31m❯[39m src/lib/__tests__/db.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 33[2mms[22m[39m
+[31m     [31m×[31m should execute proxy callback logic[39m[32m 24[2mms[22m[39m
+     [32m✓[39m should return D1 database if env.DB is present[32m 1[2mms[22m[39m
+     [32m✓[39m should throw error on edge runtime if env.DB is missing[32m 1[2mms[22m[39m
+[31m     [31m×[31m should use local fallback in development if env.DB is missing[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m should reuse cached local connection[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m should throw error if neither D1 nor local fallback works[39m[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/loading-skeletons.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/button.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 302[2mms[22m[39m
+[90mstderr[2m | src/actions/__tests__/orders.test.ts[2m > [22m[2mcreateOrder[2m > [22m[2mcreates an order successfully for a guest user
+[22m[39m[DEBUG] createOrder failed: TypeError: bakeSaleRepository.findByIdWithLocation is not a function
+    at Module.createOrder [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/orders.ts:291:49[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/orders.test.ts:78:20
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/orders.test.ts[2m > [22m[2mcreateOrder[2m > [22m[2muses existing user if found by email
+[22m[39m[DEBUG] createOrder failed: TypeError: bakeSaleRepository.findByIdWithLocation is not a function
+    at Module.createOrder [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/orders.ts:291:49[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/orders.test.ts:148:20
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/orders.test.ts[2m > [22m[2mcreateOrder[2m > [22m[2muses logged in user
+[22m[39m[DEBUG] createOrder failed: TypeError: bakeSaleRepository.findByIdWithLocation is not a function
+    at Module.createOrder [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/orders.ts:291:49[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/orders.test.ts:161:20
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/orders.test.ts[2m > [22m[2mcreateOrder[2m > [22m[2mhandles product variants
+[22m[39m[DEBUG] createOrder failed: TypeError: bakeSaleRepository.findByIdWithLocation is not a function
+    at Module.createOrder [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/orders.ts:291:49[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/orders.test.ts:194:20
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/orders.test.ts[2m > [22m[2mcreateOrder[2m > [22m[2mrolls back stock reservation on error
+[22m[39m[DEBUG] createOrder failed: TypeError: bakeSaleRepository.findByIdWithLocation is not a function
+    at Module.createOrder [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/orders.ts:291:49[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/orders.test.ts:225:20
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/orders.test.ts[2m > [22m[2mcreateOrder[2m > [22m[2madds delivery fee
+[22m[39m[DEBUG] createOrder failed: TypeError: bakeSaleRepository.findByIdWithLocation is not a function
+    at Module.createOrder [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/orders.ts:291:49[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/orders.test.ts:252:20
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+ [31m❯[39m src/actions/__tests__/orders.test.ts [2m([22m[2m22 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 35[2mms[22m[39m
+[31m     [31m×[31m creates an order successfully for a guest user[39m[32m 19[2mms[22m[39m
+     [32m✓[39m validates input data[32m 1[2mms[22m[39m
+     [32m✓[39m checks product availability[32m 1[2mms[22m[39m
+     [32m✓[39m checks stock availability[32m 1[2mms[22m[39m
+     [32m✓[39m handles turnstile failure[32m 0[2mms[22m[39m
+[31m     [31m×[31m uses existing user if found by email[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m uses logged in user[39m[32m 1[2mms[22m[39m
+     [32m✓[39m blocks ordering when product is unavailable for the selected bake sale[32m 0[2mms[22m[39m
+[31m     [31m×[31m handles product variants[39m[32m 2[2mms[22m[39m
+     [32m✓[39m fails if variant invalid[32m 1[2mms[22m[39m
+     [32m✓[39m rolls back stock reservation on error[32m 1[2mms[22m[39m
+     [32m✓[39m checks voucher usage limit[32m 1[2mms[22m[39m
+[31m     [31m×[31m adds delivery fee[39m[32m 1[2mms[22m[39m
+     [32m✓[39m getOrders returns all orders[32m 0[2mms[22m[39m
+     [32m✓[39m getOrderById returns order[32m 0[2mms[22m[39m
+     [32m✓[39m getUserOrders returns user orders[32m 0[2mms[22m[39m
+     [32m✓[39m getPaginatedOrders returns paginated result[32m 0[2mms[22m[39m
+     [32m✓[39m getPaginatedUserOrders returns paginated result[32m 0[2mms[22m[39m
+     [32m✓[39m updates status successfully[32m 1[2mms[22m[39m
+     [32m✓[39m fails if unauthorized[32m 0[2mms[22m[39m
+     [32m✓[39m fails if invalid transition[32m 0[2mms[22m[39m
+     [32m✓[39m sends email on status change[32m 0[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/user.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/bake-sale-management.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/input.test.tsx
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/user.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/bake-sale.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/order.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/components/ui/__tests__/dropdown-menu.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 785[2mms[22m[39m
+     [33m[2m✓[22m[39m renders trigger and opens content on click [33m 363[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/input.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/bake-sale-management.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/bake-sale.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/order.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/components/navbar/__tests__/index.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 637[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/voucher.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/order.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/voucher.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/repositories/__tests__/order.repository.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/auth.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/dashboard.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/auth.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/review.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/base.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/user.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/product.repository.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/repositories/__tests__/base.repository.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/dashboard.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/review.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/csrf.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/user.repository.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/__tests__/csrf.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/news.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/admin/__tests__/orders.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/news.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/actions/admin/__tests__/orders.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/product.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/utils/__tests__/validation.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/product.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+[90mstdout[2m | src/db/__tests__/schema.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/design-tokens.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/design-tokens.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/lib/utils/__tests__/validation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+[90mstdout[2m | src/actions/__tests__/faqs.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/db/__tests__/schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+[90mstdout[2m | src/lib/utils/__tests__/order.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/utils/__tests__/order.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/faqs.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 9 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mcreates an order successfully for a guest user
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m80:28[22m[39m
+    [90m 78| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(validOrderData)[33m;[39m
+    [90m 79| [39m
+    [90m 80| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 81| [39m    [35mif[39m (result[33m.[39msuccess) {
+    [90m 82| [39m      [34mexpect[39m(result[33m.[39mdata[33m.[39mid)[33m.[39m[34mtoBe[39m([32m"order-1"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22muses existing user if found by email
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m150:28[22m[39m
+    [90m148| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(validOrderData)[33m;[39m
+    [90m149| [39m
+    [90m150| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m151| [39m    [34mexpect[39m(userRepository[33m.[39mcreate)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m152| [39m    [34mexpect[39m(orderRepository[33m.[39mcreateWithItems)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22muses logged in user
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m163:28[22m[39m
+    [90m161| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(validOrderData)[33m;[39m
+    [90m162| [39m
+    [90m163| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m164| [39m    [34mexpect[39m(orderRepository[33m.[39mcreateWithItems)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m165| [39m      expect[33m.[39m[34mobjectContaining[39m({ user_id[33m:[39m [32m"logged-in-user"[39m })[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mhandles product variants
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m196:28[22m[39m
+    [90m194| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(variantOrderData)[33m;[39m
+    [90m195| [39m
+    [90m196| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m197| [39m    [90m// Base 1000 + Adjustment 500 = 1500[39m
+    [90m198| [39m    [34mexpect[39m(orderRepository[33m.[39mcreateWithItems)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22madds delivery fee
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m254:28[22m[39m
+    [90m252| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(deliveryOrder)[33m;[39m
+    [90m253| [39m
+    [90m254| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m255| [39m    // 2 * 1000 = 2000 subtotal. Delivery fee is constant (mocked or i…
+    [90m256| [39m    [90m// We check that delivery_fee is > 0 in the call[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould execute proxy callback logic
+[31m[1mTypeError[22m: sqlite.pragma is not a function[39m
+[36m [2m❯[22m getLocalDb src/lib/db-local.ts:[2m14:10[22m[39m
+    [90m 12| [39m  console[33m.[39m[34mlog[39m([32m"[DEBUG] Database constructor:"[39m[33m,[39m [33mDatabase[39m)[33m;[39m
+    [90m 13| [39m  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s t…
+    [90m 14| [39m  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging f…
+    [90m   | [39m         [31m^[39m
+    [90m 15| [39m
+    [90m 16| [39m  [35mconst[39m db [33m=[39m [34mdrizzleProxy[39m(
+[90m [2m❯[22m src/lib/db.ts:[2m39:18[22m[39m
+[90m [2m❯[22m src/lib/__tests__/db.test.ts:[2m71:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould use local fallback in development if env.DB is missing
+[31m[1mTypeError[22m: sqlite.pragma is not a function[39m
+[36m [2m❯[22m getLocalDb src/lib/db-local.ts:[2m14:10[22m[39m
+    [90m 12| [39m  console[33m.[39m[34mlog[39m([32m"[DEBUG] Database constructor:"[39m[33m,[39m [33mDatabase[39m)[33m;[39m
+    [90m 13| [39m  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s t…
+    [90m 14| [39m  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging f…
+    [90m   | [39m         [31m^[39m
+    [90m 15| [39m
+    [90m 16| [39m  [35mconst[39m db [33m=[39m [34mdrizzleProxy[39m(
+[90m [2m❯[22m src/lib/db.ts:[2m39:18[22m[39m
+[90m [2m❯[22m src/lib/__tests__/db.test.ts:[2m120:16[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould reuse cached local connection
+[31m[1mTypeError[22m: sqlite.pragma is not a function[39m
+[36m [2m❯[22m getLocalDb src/lib/db-local.ts:[2m14:10[22m[39m
+    [90m 12| [39m  console[33m.[39m[34mlog[39m([32m"[DEBUG] Database constructor:"[39m[33m,[39m [33mDatabase[39m)[33m;[39m
+    [90m 13| [39m  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s t…
+    [90m 14| [39m  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging f…
+    [90m   | [39m         [31m^[39m
+    [90m 15| [39m
+    [90m 16| [39m  [35mconst[39m db [33m=[39m [34mdrizzleProxy[39m(
+[90m [2m❯[22m src/lib/db.ts:[2m39:18[22m[39m
+[90m [2m❯[22m src/lib/__tests__/db.test.ts:[2m132:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould throw error if neither D1 nor local fallback works
+[31m[1mAssertionError[22m: expected [Function] to throw error including 'Database binding not found' but got 'sqlite.pragma is not a function'[39m
+
+Expected: [32m"Database binding not found"[39m
+Received: [31m"sqlite.pragma is not a function"[39m
+
+[36m [2m❯[22m src/lib/__tests__/db.test.ts:[2m150:5[22m[39m
+    [90m148| [39m    [35mdelete[39m process[33m.[39menv[33m.[39m[33mNEXT_RUNTIME[39m[33m;[39m [90m// Not edge[39m
+    [90m149| [39m
+    [90m150| [39m    await expect(getDb()).rejects.toThrow("Database binding not found"…
+    [90m   | [39m    [31m^[39m
+    [90m151| [39m  })[33m;[39m
+    [90m152| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m29 passed[39m[22m[90m (31)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m368 passed[39m[22m[90m (377)[39m
+[2m   Start at [22m 08:26:40
+[2m   Duration [22m 3.20s[2m (transform 1.36s, setup 4.95s, import 3.09s, tests 2.18s, environment 11.92s)[22m
+

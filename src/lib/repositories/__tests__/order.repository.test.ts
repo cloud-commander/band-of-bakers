@@ -45,6 +45,9 @@ const mocks = vi.hoisted(() => {
     insert,
     update,
     delete: _delete,
+    batch: vi.fn(async (statements) => {
+      return statements.map(() => []);
+    }),
     query: {
       orders: {
         findFirst,
@@ -135,7 +138,8 @@ describe("OrderRepository", () => {
   describe("createWithItems", () => {
     it("creates order and items", async () => {
       const newOrder = { id: "1" };
-      mocks.mockQueryBuilder.returning.mockResolvedValue([newOrder]);
+      // Override batch to return the expected structure: [[newOrder], [items...]]
+      mocks.mockDb.batch.mockResolvedValue([[newOrder], []]);
 
       const result = await repository.createWithItems(
         { id: "1" } as any,
@@ -143,7 +147,7 @@ describe("OrderRepository", () => {
       );
 
       expect(result).toEqual(newOrder);
-      expect(mocks.mocks.insert).toHaveBeenCalledTimes(2);
+      expect(mocks.mockDb.batch).toHaveBeenCalled();
     });
   });
 

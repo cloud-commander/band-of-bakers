@@ -1,0 +1,1170 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2[39m
+
+[90mstdout[2m | src/actions/__tests__/bake-sale-management.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/navbar/__tests__/index.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/dashboard.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/db.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/base.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/order.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/faqs.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/orders.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/admin/__tests__/orders.test.ts
+[22m[39m✅ Test environment initialized
+
+ [31m❯[39m src/lib/repositories/__tests__/base.repository.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 8[2mms[22m[39m
+       [32m✓[39m should return record if found[32m 2[2mms[22m[39m
+       [32m✓[39m should return null if not found[32m 0[2mms[22m[39m
+       [32m✓[39m should return all records[32m 0[2mms[22m[39m
+       [32m✓[39m should create and return record[32m 0[2mms[22m[39m
+       [32m✓[39m should update and return record[32m 1[2mms[22m[39m
+       [32m✓[39m should return null if record not found[32m 0[2mms[22m[39m
+       [32m✓[39m should delete record[32m 0[2mms[22m[39m
+[31m       [31m×[31m should return count of records[39m[32m 3[2mms[22m[39m
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould execute proxy callback logic
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstderr[2m | src/lib/repositories/__tests__/order.repository.test.ts[2m > [22m[2mOrderRepository[2m > [22m[2mcreateWithItems[2m > [22m[2mcreates order and items
+[22m[39mError creating order with items: TypeError: db.batch is not a function
+    at OrderRepository.createWithItems [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/order.repository.ts:45:36[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/repositories/__tests__/order.repository.test.ts:140:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+ [31m❯[39m src/actions/__tests__/dashboard.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 4[2mms[22m[39m
+[31m     [31m×[31m returns overdue counts for processing and ready orders[39m[32m 3[2mms[22m[39m
+ [31m❯[39m src/lib/repositories/__tests__/order.repository.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 13[2mms[22m[39m
+       [32m✓[39m returns next order number[32m 1[2mms[22m[39m
+       [32m✓[39m returns 1 if no orders exist[32m 0[2mms[22m[39m
+[31m       [31m×[31m creates order and items[39m[32m 5[2mms[22m[39m
+       [32m✓[39m finds orders by user id[32m 1[2mms[22m[39m
+       [32m✓[39m finds order by id[32m 0[2mms[22m[39m
+       [32m✓[39m counts orders[32m 0[2mms[22m[39m
+       [32m✓[39m calculates total revenue[32m 0[2mms[22m[39m
+       [32m✓[39m returns paginated orders[32m 0[2mms[22m[39m
+       [32m✓[39m counts voucher uses[32m 1[2mms[22m[39m
+       [32m✓[39m calculates revenue for last N days[32m 1[2mms[22m[39m
+       [32m✓[39m counts orders by status[32m 0[2mms[22m[39m
+       [32m✓[39m gets top products[32m 0[2mms[22m[39m
+       [32m✓[39m returns paginated orders for user[32m 0[2mms[22m[39m
+       [32m✓[39m returns recent orders[32m 0[2mms[22m[39m
+       [32m✓[39m returns all orders[32m 0[2mms[22m[39m
+       [32m✓[39m countSince returns count[32m 0[2mms[22m[39m
+       [32m✓[39m countBetween returns count[32m 0[2mms[22m[39m
+       [32m✓[39m sumTotalSince returns total[32m 0[2mms[22m[39m
+       [32m✓[39m sumTotalBetween returns total[32m 0[2mms[22m[39m
+[90mstderr[2m | src/actions/__tests__/faqs.test.ts[2m > [22m[2mFAQ Actions[2m > [22m[2mshould create an FAQ
+[22m[39mError creating FAQ: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:63:33[90m)[39m
+    at headers [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/request/headers.js:134:67[90m)[39m
+    at validateCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:43:29[90m)[39m
+    at requireCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:90:25[90m)[39m
+    at Module.createFaq [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/faqs.ts:39:13[90m)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/faqs.test.ts:52:26
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:145:11
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:26
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:1244:20
+    at new Promise (<anonymous>)
+
+ [31m❯[39m src/actions/__tests__/faqs.test.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+[31m     [31m×[31m should create an FAQ[39m[32m 6[2mms[22m[39m
+ [31m❯[39m src/actions/admin/__tests__/orders.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+     [32m✓[39m should return unauthorized if user is not admin/staff[32m 1[2mms[22m[39m
+[31m     [31m×[31m should return error if order not found[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m should update status to ready and send email[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m should update status to completed and send email[39m[32m 0[2mms[22m[39m
+     [32m✓[39m should update item quantities and recalculate total[32m 2[2mms[22m[39m
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould execute proxy callback logic
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:13:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:71:5
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error on edge runtime if env.DB is missing
+[22m[39m[DB] env.DB is undefined or context failed.
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould use local fallback in development if env.DB is missing
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould use local fallback in development if env.DB is missing
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:13:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:120:16
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould reuse cached local connection
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould reuse cached local connection
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:13:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:132:17
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/bake-sale-management.test.ts[2m > [22m[2mbake-sale-management actions[2m > [22m[2mresolveOrderIssue[2m > [22m[2mshould cancel order and restore voucher
+[22m[39mResolve issue error: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:63:33[90m)[39m
+    at headers [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/request/headers.js:134:67[90m)[39m
+    at validateCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:43:29[90m)[39m
+    at requireCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:90:25[90m)[39m
+    at Module.resolveOrderIssue [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/bake-sale-management.ts:229:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/bake-sale-management.test.ts:217:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error if neither D1 nor local fallback works
+[22m[39m[DB] Using dev fallback SQLite via db-local (not for Edge)
+
+[90mstderr[2m | src/lib/__tests__/db.test.ts[2m > [22m[2mgetDb[2m > [22m[2mshould throw error if neither D1 nor local fallback works
+[22m[39m[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`. TypeError: sqlite.pragma is not a function
+    at getLocalDb [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db-local.ts:13:10[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/db.ts:39:18
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/__tests__/db.test.ts:150:5
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/bake-sale-management.test.ts[2m > [22m[2mbake-sale-management actions[2m > [22m[2mresolveOrderIssue[2m > [22m[2mshould transfer order successfully
+[22m[39mResolve issue error: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:63:33[90m)[39m
+    at headers [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/request/headers.js:134:67[90m)[39m
+    at validateCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:43:29[90m)[39m
+    at requireCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:90:25[90m)[39m
+    at Module.resolveOrderIssue [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/bake-sale-management.ts:229:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/bake-sale-management.test.ts:236:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/bake-sale-management.test.ts[2m > [22m[2mbake-sale-management actions[2m > [22m[2mresolveOrderIssue[2m > [22m[2mshould fail transfer if stock insufficient
+[22m[39mResolve issue error: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:63:33[90m)[39m
+    at headers [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/request/headers.js:134:67[90m)[39m
+    at validateCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:43:29[90m)[39m
+    at requireCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:90:25[90m)[39m
+    at Module.resolveOrderIssue [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/bake-sale-management.ts:229:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/bake-sale-management.test.ts:253:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+[90mstderr[2m | src/actions/__tests__/bake-sale-management.test.ts[2m > [22m[2mbake-sale-management actions[2m > [22m[2mresolveOrderIssue[2m > [22m[2mshould fail transfer if new bake sale id missing
+[22m[39mResolve issue error: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at throwForMissingRequestStore [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:63:33[90m)[39m
+    at headers [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4mnext[24m/dist/server/request/headers.js:134:67[90m)[39m
+    at validateCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:43:29[90m)[39m
+    at requireCsrf [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/lib/csrf.ts:90:25[90m)[39m
+    at Module.resolveOrderIssue [90m(/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/bake-sale-management.ts:229:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at [90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39msrc/actions/__tests__/bake-sale-management.test.ts:266:22
+    at [90mfile:///Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:919:20
+
+ [31m❯[39m src/lib/__tests__/db.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 34[2mms[22m[39m
+[31m     [31m×[31m should execute proxy callback logic[39m[32m 26[2mms[22m[39m
+     [32m✓[39m should return D1 database if env.DB is present[32m 1[2mms[22m[39m
+     [32m✓[39m should throw error on edge runtime if env.DB is missing[32m 1[2mms[22m[39m
+[31m     [31m×[31m should use local fallback in development if env.DB is missing[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m should reuse cached local connection[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m should throw error if neither D1 nor local fallback works[39m[32m 4[2mms[22m[39m
+ [31m❯[39m src/actions/__tests__/bake-sale-management.test.ts [2m([22m[2m13 tests[22m[2m | [22m[31m10 failed[39m[2m)[22m[32m 16[2mms[22m[39m
+       [32m✓[39m should return unauthorized if user is not admin[32m 1[2mms[22m[39m
+[31m       [31m×[31m should return error if bake sale not found[39m[32m 5[2mms[22m[39m
+[31m       [31m×[31m should cancel bake sale and refund orders if no alternatives[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m should mark orders as action required if alternatives exist[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should restore voucher usage when cancelling[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should send admin warning if no future sales remain[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should return unauthorized if user is not admin[32m 0[2mms[22m[39m
+[31m       [31m×[31m should reschedule and notify users[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should return unauthorized if not logged in[32m 0[2mms[22m[39m
+[31m       [31m×[31m should cancel order and restore voucher[39m[32m 3[2mms[22m[39m
+[31m       [31m×[31m should transfer order successfully[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m should fail transfer if stock insufficient[39m[32m 2[2mms[22m[39m
+[31m       [31m×[31m should fail transfer if new bake sale id missing[39m[32m 1[2mms[22m[39m
+ [31m❯[39m src/actions/__tests__/orders.test.ts [2m([22m[2m22 tests[22m[2m | [22m[31m12 failed[39m[2m)[22m[32m 18[2mms[22m[39m
+[31m     [31m×[31m creates an order successfully for a guest user[39m[32m 7[2mms[22m[39m
+     [32m✓[39m validates input data[32m 1[2mms[22m[39m
+[31m     [31m×[31m checks product availability[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m checks stock availability[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m handles turnstile failure[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m uses existing user if found by email[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m uses logged in user[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m blocks ordering when product is unavailable for the selected bake sale[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m handles product variants[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m fails if variant invalid[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m rolls back stock reservation on error[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m checks voucher usage limit[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m adds delivery fee[39m[32m 0[2mms[22m[39m
+     [32m✓[39m getOrders returns all orders[32m 0[2mms[22m[39m
+     [32m✓[39m getOrderById returns order[32m 0[2mms[22m[39m
+     [32m✓[39m getUserOrders returns user orders[32m 0[2mms[22m[39m
+     [32m✓[39m getPaginatedOrders returns paginated result[32m 0[2mms[22m[39m
+     [32m✓[39m getPaginatedUserOrders returns paginated result[32m 0[2mms[22m[39m
+     [32m✓[39m updates status successfully[32m 0[2mms[22m[39m
+     [32m✓[39m fails if unauthorized[32m 0[2mms[22m[39m
+     [32m✓[39m fails if invalid transition[32m 0[2mms[22m[39m
+     [32m✓[39m sends email on status change[32m 0[2mms[22m[39m
+[90mstdout[2m | src/components/ui/__tests__/dropdown-menu.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/button.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/sanitize.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/loading-skeletons.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/context/__tests__/cart-context.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/voucher.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/input.test.tsx
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/sanitize.test.ts [2m([22m[2m41 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/voucher.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/loading-skeletons.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 57[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/input.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/context/__tests__/cart-context.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 84[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/button.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 234[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/review.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/review.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [31m❯[39m src/components/navbar/__tests__/index.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 999[2mms[22m[39m
+     [32m✓[39m renders logo[32m 267[2mms[22m[39m
+     [32m✓[39m renders desktop navigation links[32m 206[2mms[22m[39m
+[31m     [31m×[31m renders login button when unauthenticated[39m[33m 338[2mms[22m[39m
+     [32m✓[39m renders user menu when authenticated[32m 76[2mms[22m[39m
+     [32m✓[39m renders admin link when user is admin[32m 53[2mms[22m[39m
+     [32m✓[39m does not render admin link when user is customer[32m 59[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/dropdown-menu.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 721[2mms[22m[39m
+     [33m[2m✓[22m[39m renders trigger and opens content on click [33m 312[2mms[22m[39m
+[90mstdout[2m | src/lib/utils/__tests__/voucher.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/utils/__tests__/voucher.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/order.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/user.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/utils/__tests__/validation.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/product.repository.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/order.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/utils/__tests__/validation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/user.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/bake-sale.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/bake-sale.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/auth.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/auth.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/csrf.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/csrf.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/lib/repositories/__tests__/user.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/user.repository.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/design-tokens.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/design-tokens.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/news.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/product.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/utils/__tests__/order.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/db/__tests__/schema.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/news.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/utils/__tests__/order.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/product.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/db/__tests__/schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 34 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mcancelBakeSale[2m > [22mshould return error if bake sale not found
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.cancelBakeSale src/actions/bake-sale-management.ts:[2m27:11[22m[39m
+[90m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m75:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mcancelBakeSale[2m > [22mshould cancel bake sale and refund orders if no alternatives
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.cancelBakeSale src/actions/bake-sale-management.ts:[2m27:11[22m[39m
+[90m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m95:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mcancelBakeSale[2m > [22mshould mark orders as action required if alternatives exist
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.cancelBakeSale src/actions/bake-sale-management.ts:[2m27:11[22m[39m
+[90m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m121:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mcancelBakeSale[2m > [22mshould restore voucher usage when cancelling
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.cancelBakeSale src/actions/bake-sale-management.ts:[2m27:11[22m[39m
+[90m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m146:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mcancelBakeSale[2m > [22mshould send admin warning if no future sales remain
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.cancelBakeSale src/actions/bake-sale-management.ts:[2m27:11[22m[39m
+[90m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m164:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mrescheduleBakeSale[2m > [22mshould reschedule and notify users
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.rescheduleBakeSale src/actions/bake-sale-management.ts:[2m155:11[22m[39m
+[90m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m188:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mresolveOrderIssue[2m > [22mshould cancel order and restore voucher
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m219:30[22m[39m
+    [90m217| [39m      [35mconst[39m result [33m=[39m [35mawait[39m [34mresolveOrderIssue[39m([32m"o1"[39m[33m,[39m [32m"cancel"[39m)[33m;[39m
+    [90m218| [39m
+    [90m219| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m220| [39m      [34mexpect[39m(mockDb[33m.[39mupdate)[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m221| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mresolveOrderIssue[2m > [22mshould transfer order successfully
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m238:30[22m[39m
+    [90m236| [39m      [35mconst[39m result [33m=[39m [35mawait[39m [34mresolveOrderIssue[39m([32m"o1"[39m[33m,[39m [32m"transfer"[39m[33m,[39m [32m"bs2"[39m)[33m;[39m
+    [90m237| [39m
+    [90m238| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m239| [39m      [34mexpect[39m(mockDb[33m.[39mupdate)[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m240| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mresolveOrderIssue[2m > [22mshould fail transfer if stock insufficient
+[31m[1mAssertionError[22m: expected 'Failed to resolve order issue' to contain 'Not enough stock'[39m
+
+Expected: [32m"Not enough stock"[39m
+Received: [31m"Failed to resolve order issue"[39m
+
+[36m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m256:67[22m[39m
+    [90m254| [39m
+    [90m255| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m256| [39m      expect((result as { success: false; error: string }).error).toCo…
+    [90m   | [39m                                                                  [31m^[39m
+    [90m257| [39m    })[33m;[39m
+    [90m258| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/bake-sale-management.test.ts[2m > [22mbake-sale-management actions[2m > [22mresolveOrderIssue[2m > [22mshould fail transfer if new bake sale id missing
+[31m[1mAssertionError[22m: expected 'Failed to resolve order issue' to be 'New bake sale ID required' // Object.is equality[39m
+
+Expected: [32m"New bake sale ID required"[39m
+Received: [31m"Failed to resolve order issue"[39m
+
+[36m [2m❯[22m src/actions/__tests__/bake-sale-management.test.ts:[2m269:67[22m[39m
+    [90m267| [39m
+    [90m268| [39m      [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m269| [39m      expect((result as { success: false; error: string }).error).toBe…
+    [90m   | [39m                                                                  [31m^[39m
+    [90m270| [39m    })[33m;[39m
+    [90m271| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/dashboard.test.ts[2m > [22mgetDashboardStats[2m > [22mreturns overdue counts for processing and ready orders
+[31m[1mError[22m: Invariant: incrementalCache missing in unstable_cache async () => {
+      try {
+        const { orderRepository } = await __vite_ssr_dynamic_import__("/src/lib/repositories/order.repository.ts");
+        const { productRepository } = await __vite_ssr_dynamic_import__("/src/lib/repositories/product.repository.ts");
+        const { userRepository } = await __vite_ssr_dynamic_import__("/src/lib/repositories/user.repository.ts");
+        const { bakeSaleRepository } = await __vite_ssr_dynamic_import__("/src/lib/repositories/bake-sale.repository.ts");
+        const [
+          totalOrders,
+          totalRevenue,
+          totalProducts,
+          totalUsers,
+          recentOrders,
+          upcomingBakeSales,
+          revenueSeries,
+          statusCounts,
+          topProducts
+        ] = await Promise.all([
+          orderRepository.count(),
+          orderRepository.sumTotal(),
+          productRepository.countActive(),
+          userRepository.countCustomers(),
+          orderRepository.findRecent(5),
+          bakeSaleRepository.findUpcoming(),
+          orderRepository.revenueLastNDays(30),
+          orderRepository.statusCounts(),
+          orderRepository.topProducts(5)
+        ]);
+        const todayIso = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+        const overdue = await orderRepository.overdueCountsByStatus(
+          ["processing", "ready"],
+          todayIso
+        );
+        const today = /* @__PURE__ */ new Date();
+        const revenueMap = new Map(
+          revenueSeries.map((r) => [
+            r.day,
+            Number(r.revenue || 0)
+          ])
+        );
+        const filledRevenueSeries = [];
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(today);
+          d.setDate(d.getDate() - i);
+          const key = d.toISOString().slice(0, 10);
+          filledRevenueSeries.push({ date: key, revenue: revenueMap.get(key) ?? 0 });
+        };
+        const currentWindowStart = daysAgo(30);
+        const previousWindowStart = daysAgo(60);
+        const previousWindowEnd = daysAgo(30);
+        const [ordersCurrent, ordersPrevious, revenueCurrent, revenuePrevious] = await Promise.all([
+          orderRepository.countSince(currentWindowStart),
+          orderRepository.countBetween(previousWindowStart, previousWindowEnd),
+          orderRepository.sumTotalSince(currentWindowStart),
+          orderRepository.sumTotalBetween(previousWindowStart, previousWindowEnd)
+        ]);
+        const pctChange = (current, prev) => {
+          if (prev === 0) return current === 0 ? 0 : 100;
+          return (current - prev) / prev * 100;
+        };
+        const trends = {
+          orders: pctChange(ordersCurrent, ordersPrevious),
+          revenue: pctChange(revenueCurrent, revenuePrevious),
+          products: 0,
+          customers: 0
+        };
+        return {
+          totalOrders,
+          totalRevenue,
+          totalProducts,
+          totalUsers,
+          recentOrders,
+          upcomingBakeSalesCount: upcomingBakeSales.length,
+          nextBakeSale: upcomingBakeSales[0] || null,
+          revenueSeries: filledRevenueSeries,
+          statusCounts,
+          topProducts,
+          trends,
+          overdue
+        };
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+        return {
+          totalOrders: 0,
+          totalRevenue: 0,
+          totalProducts: 0,
+          totalUsers: 0,
+          recentOrders: [],
+          upcomingBakeSalesCount: 0,
+          nextBakeSale: null,
+          revenueSeries: [],
+          statusCounts: [],
+          topProducts: [],
+          trends: {
+            orders: 0,
+            revenue: 0,
+            products: 0,
+            customers: 0
+          }
+        };
+      }
+    }[39m
+[90m [2m❯[22m cachedCb node_modules/next/dist/server/web/spec-extension/unstable-cache.js:[2m62:41[22m[39m
+[36m [2m❯[22m Module.getDashboardStats src/actions/dashboard.ts:[2m133:3[22m[39m
+    [90m131| [39m      tags: [CACHE_TAGS.dashboard, CACHE_TAGS.orders, CACHE_TAGS.produ…
+    [90m132| [39m    }
+    [90m133| [39m  )()[33m;[39m
+    [90m   | [39m  [31m^[39m
+    [90m134| [39m}
+    [90m135| [39m
+[90m [2m❯[22m src/actions/__tests__/dashboard.test.ts:[2m47:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/faqs.test.ts[2m > [22mFAQ Actions[2m > [22mshould create an FAQ
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/faqs.test.ts:[2m53:28[22m[39m
+    [90m 51| [39m
+    [90m 52| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateFaq[39m({ question[33m:[39m [32m"Q?"[39m[33m,[39m answer[33m:[39m [32m"A."[39m })[33m;[39m
+    [90m 53| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 54| [39m    [35mif[39m (result[33m.[39msuccess) {
+    [90m 55| [39m      [34mexpect[39m(result[33m.[39mdata)[33m.[39m[34mtoEqual[39m(mockFaq)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mcreates an order successfully for a guest user
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m76:28[22m[39m
+    [90m 74| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(validOrderData)[33m;[39m
+    [90m 75| [39m
+    [90m 76| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m 77| [39m    [35mif[39m (result[33m.[39msuccess) {
+    [90m 78| [39m      [34mexpect[39m(result[33m.[39mdata[33m.[39mid)[33m.[39m[34mtoBe[39m([32m"order-1"[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mchecks product availability
+[31m[1mAssertionError[22m: expected 'Failed to create order' to contain 'Product not found'[39m
+
+Expected: [32m"Product not found"[39m
+Received: [31m"Failed to create order"[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m107:28[22m[39m
+    [90m105| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m106| [39m    [35mif[39m ([33m![39mresult[33m.[39msuccess) {
+    [90m107| [39m      [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoContain[39m([32m"Product not found"[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m108| [39m    }
+    [90m109| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mchecks stock availability
+[31m[1mAssertionError[22m: expected 'Failed to create order' to contain 'Insufficient stock'[39m
+
+Expected: [32m"Insufficient stock"[39m
+Received: [31m"Failed to create order"[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m124:28[22m[39m
+    [90m122| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m123| [39m    [35mif[39m ([33m![39mresult[33m.[39msuccess) {
+    [90m124| [39m      [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoContain[39m([32m"Insufficient stock"[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m125| [39m    }
+    [90m126| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mhandles turnstile failure
+[31m[1mAssertionError[22m: expected 'Failed to create order' to be 'Invalid token' // Object.is equality[39m
+
+Expected: [32m"Invalid token"[39m
+Received: [31m"Failed to create order"[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m136:28[22m[39m
+    [90m134| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m135| [39m    [35mif[39m ([33m![39mresult[33m.[39msuccess) {
+    [90m136| [39m      [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoBe[39m([32m"Invalid token"[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m137| [39m    }
+    [90m138| [39m    [35mdelete[39m process[33m.[39menv[33m.[39m[33mBANDOFBAKERS_TURNSTILE_SECRET_KEY[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22muses existing user if found by email
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m146:28[22m[39m
+    [90m144| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(validOrderData)[33m;[39m
+    [90m145| [39m
+    [90m146| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m147| [39m    [34mexpect[39m(userRepository[33m.[39mcreate)[33m.[39mnot[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m148| [39m    [34mexpect[39m(orderRepository[33m.[39mcreateWithItems)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22muses logged in user
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m159:28[22m[39m
+    [90m157| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(validOrderData)[33m;[39m
+    [90m158| [39m
+    [90m159| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m160| [39m    [34mexpect[39m(orderRepository[33m.[39mcreateWithItems)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m161| [39m      expect[33m.[39m[34mobjectContaining[39m({ user_id[33m:[39m [32m"logged-in-user"[39m })[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mblocks ordering when product is unavailable for the selected bake sale
+[31m[1mAssertionError[22m: expected 'Failed to create order' to contain 'unavailable for the selected collecti…'[39m
+
+Expected: [32m"unavailable for the selected collection date"[39m
+Received: [31m"Failed to create order"[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m176:28[22m[39m
+    [90m174| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m175| [39m    [35mif[39m ([33m![39mresult[33m.[39msuccess) {
+    [90m176| [39m      expect(result.error).toContain("unavailable for the selected col…
+    [90m   | [39m                           [31m^[39m
+    [90m177| [39m    }
+    [90m178| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mhandles product variants
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m192:28[22m[39m
+    [90m190| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(variantOrderData)[33m;[39m
+    [90m191| [39m
+    [90m192| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m193| [39m    [90m// Base 1000 + Adjustment 500 = 1500[39m
+    [90m194| [39m    [34mexpect[39m(orderRepository[33m.[39mcreateWithItems)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mfails if variant invalid
+[31m[1mAssertionError[22m: expected 'Failed to create order' to contain 'Variant not available'[39m
+
+Expected: [32m"Variant not available"[39m
+Received: [31m"Failed to create order"[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m214:28[22m[39m
+    [90m212| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m213| [39m    [35mif[39m ([33m![39mresult[33m.[39msuccess) {
+    [90m214| [39m      [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoContain[39m([32m"Variant not available"[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m215| [39m    }
+    [90m216| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mrolls back stock reservation on error
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ 'prod-1', 2 ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m224:46[22m[39m
+    [90m222| [39m
+    [90m223| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m224| [39m    expect(productRepository.incrementStock).toHaveBeenCalledWith("pro…
+    [90m   | [39m                                             [31m^[39m
+    [90m225| [39m  })[33m;[39m
+    [90m226| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22mchecks voucher usage limit
+[31m[1mAssertionError[22m: expected 'Failed to create order' to contain 'usage limit'[39m
+
+Expected: [32m"usage limit"[39m
+Received: [31m"Failed to create order"[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m241:28[22m[39m
+    [90m239| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m240| [39m    [35mif[39m ([33m![39mresult[33m.[39msuccess) {
+    [90m241| [39m      [34mexpect[39m(result[33m.[39merror)[33m.[39m[34mtoContain[39m([32m"usage limit"[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m242| [39m    }
+    [90m243| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/__tests__/orders.test.ts[2m > [22mcreateOrder[2m > [22madds delivery fee
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/actions/__tests__/orders.test.ts:[2m250:28[22m[39m
+    [90m248| [39m    [35mconst[39m result [33m=[39m [35mawait[39m [34mcreateOrder[39m(deliveryOrder)[33m;[39m
+    [90m249| [39m
+    [90m250| [39m    [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m251| [39m    // 2 * 1000 = 2000 subtotal. Delivery fee is constant (mocked or i…
+    [90m252| [39m    [90m// We check that delivery_fee is > 0 in the call[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould execute proxy callback logic
+[31m[1mTypeError[22m: sqlite.pragma is not a function[39m
+[36m [2m❯[22m getLocalDb src/lib/db-local.ts:[2m13:10[22m[39m
+    [90m 11| [39m  [35mconst[39m localDbPath [33m=[39m path[33m.[39m[34mjoin[39m(process[33m.[39m[34mcwd[39m()[33m,[39m [32m"local.db"[39m)[33m;[39m
+    [90m 12| [39m  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s t…
+    [90m 13| [39m  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging f…
+    [90m   | [39m         [31m^[39m
+    [90m 14| [39m
+    [90m 15| [39m  [35mconst[39m db [33m=[39m [34mdrizzleProxy[39m(
+[90m [2m❯[22m src/lib/db.ts:[2m39:18[22m[39m
+[90m [2m❯[22m src/lib/__tests__/db.test.ts:[2m71:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould use local fallback in development if env.DB is missing
+[31m[1mTypeError[22m: sqlite.pragma is not a function[39m
+[36m [2m❯[22m getLocalDb src/lib/db-local.ts:[2m13:10[22m[39m
+    [90m 11| [39m  [35mconst[39m localDbPath [33m=[39m path[33m.[39m[34mjoin[39m(process[33m.[39m[34mcwd[39m()[33m,[39m [32m"local.db"[39m)[33m;[39m
+    [90m 12| [39m  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s t…
+    [90m 13| [39m  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging f…
+    [90m   | [39m         [31m^[39m
+    [90m 14| [39m
+    [90m 15| [39m  [35mconst[39m db [33m=[39m [34mdrizzleProxy[39m(
+[90m [2m❯[22m src/lib/db.ts:[2m39:18[22m[39m
+[90m [2m❯[22m src/lib/__tests__/db.test.ts:[2m120:16[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould reuse cached local connection
+[31m[1mTypeError[22m: sqlite.pragma is not a function[39m
+[36m [2m❯[22m getLocalDb src/lib/db-local.ts:[2m13:10[22m[39m
+    [90m 11| [39m  [35mconst[39m localDbPath [33m=[39m path[33m.[39m[34mjoin[39m(process[33m.[39m[34mcwd[39m()[33m,[39m [32m"local.db"[39m)[33m;[39m
+    [90m 12| [39m  const sqlite = new Database(localDbPath, { timeout: 5000 }); // 5s t…
+    [90m 13| [39m  sqlite.pragma("journal_mode = WAL"); // Enable Write-Ahead Logging f…
+    [90m   | [39m         [31m^[39m
+    [90m 14| [39m
+    [90m 15| [39m  [35mconst[39m db [33m=[39m [34mdrizzleProxy[39m(
+[90m [2m❯[22m src/lib/db.ts:[2m39:18[22m[39m
+[90m [2m❯[22m src/lib/__tests__/db.test.ts:[2m132:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/__tests__/db.test.ts[2m > [22mgetDb[2m > [22mshould throw error if neither D1 nor local fallback works
+[31m[1mAssertionError[22m: expected [Function] to throw error including 'Database binding not found' but got 'sqlite.pragma is not a function'[39m
+
+Expected: [32m"Database binding not found"[39m
+Received: [31m"sqlite.pragma is not a function"[39m
+
+[36m [2m❯[22m src/lib/__tests__/db.test.ts:[2m150:5[22m[39m
+    [90m148| [39m    [35mdelete[39m process[33m.[39menv[33m.[39m[33mNEXT_RUNTIME[39m[33m;[39m [90m// Not edge[39m
+    [90m149| [39m
+    [90m150| [39m    await expect(getDb()).rejects.toThrow("Database binding not found"…
+    [90m   | [39m    [31m^[39m
+    [90m151| [39m  })[33m;[39m
+    [90m152| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/admin/__tests__/orders.test.ts[2m > [22mupdateOrderStatus[2m > [22mshould return error if order not found
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m Module.updateOrderStatus src/actions/admin/orders.ts:[2m29:11[22m[39m
+[90m [2m❯[22m src/actions/admin/__tests__/orders.test.ts:[2m66:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/admin/__tests__/orders.test.ts[2m > [22mupdateOrderStatus[2m > [22mshould update status to ready and send email
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m updateOrderStatus src/actions/admin/orders.ts:[2m29:11[22m[39m
+[90m [2m❯[22m src/actions/admin/__tests__/orders.test.ts:[2m88:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/actions/admin/__tests__/orders.test.ts[2m > [22mupdateOrderStatus[2m > [22mshould update status to completed and send email
+[31m[1mError[22m: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context[39m
+[90m [2m❯[22m throwForMissingRequestStore node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:[2m63:33[22m[39m
+[90m [2m❯[22m headers node_modules/next/dist/server/request/headers.js:[2m134:67[22m[39m
+[36m [2m❯[22m validateCsrf src/lib/csrf.ts:[2m43:29[22m[39m
+    [90m 41| [39m */[39m
+    [90m 42| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mvalidateCsrf[39m()[33m:[39m [33mPromise[39m[33m<[39mboolean[33m>[39m {
+    [90m 43| [39m  [35mconst[39m headersList [33m=[39m [35mawait[39m [34mheaders[39m()[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 44| [39m  [35mconst[39m origin [33m=[39m headersList[33m.[39m[35mget[39m([32m"origin"[39m)[33m;[39m
+    [90m 45| [39m  [35mconst[39m referer [33m=[39m headersList[33m.[39m[35mget[39m([32m"referer"[39m)[33m;[39m
+[90m [2m❯[22m requireCsrf src/lib/csrf.ts:[2m90:25[22m[39m
+[90m [2m❯[22m updateOrderStatus src/actions/admin/orders.ts:[2m29:11[22m[39m
+[90m [2m❯[22m src/actions/admin/__tests__/orders.test.ts:[2m113:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/navbar/__tests__/index.test.tsx[2m > [22mNavbar[2m > [22mrenders login button when unauthenticated
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an accessible element with the role "link" and name `/login/i`
+
+Here are the accessible roles:
+
+  navigation:
+
+  Name "":
+  [36m<nav[39m
+    [33mclass[39m=[32m"sticky top-0 z-50 w-full transition-all duration-300 border-b shadow-sm lg:shadow bg-white"[39m
+    [33mstyle[39m=[32m"background-color: rgb(255, 255, 255); border-color: rgba(44, 40, 37, 0.2);"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  link:
+
+  Name "Band of Bakers":
+  [36m<a[39m
+    [33mclass[39m=[32m"flex items-center gap-2 sm:gap-3 hover:bg-red-50 hover:text-red-700 px-2 sm:px-3 py-2 rounded-md transition-colors"[39m
+    [33mhref[39m=[32m"/"[39m
+  [36m/>[39m
+
+  Name "Home":
+  [36m<a[39m
+    [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 text-bakery-amber-800 bg-bakery-amber-50"[39m
+    [33mhref[39m=[32m"/"[39m
+  [36m/>[39m
+
+  Name "Shop":
+  [36m<a[39m
+    [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 "[39m
+    [33mhref[39m=[32m"/menu"[39m
+  [36m/>[39m
+
+  Name "About":
+  [36m<a[39m
+    [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 "[39m
+    [33mhref[39m=[32m"/about"[39m
+  [36m/>[39m
+
+  Name "News":
+  [36m<a[39m
+    [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 "[39m
+    [33mhref[39m=[32m"/news"[39m
+  [36m/>[39m
+
+  Name "FAQ":
+  [36m<a[39m
+    [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 "[39m
+    [33mhref[39m=[32m"/faq"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Login":
+  [36m<button[39m
+    [33mclass[39m=[32m"justify-center whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-8 text-sm font-medium flex items-center gap-2 hover:bg-red-50 hover:text-red-700 px-3 py-2 rounded-md transition-colors"[39m
+    [33mstyle[39m=[32m"font-family: var(--font-geist-sans);"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<nav[39m
+      [33mclass[39m=[32m"sticky top-0 z-50 w-full transition-all duration-300 border-b shadow-sm lg:shadow bg-white"[39m
+      [33mstyle[39m=[32m"background-color: rgb(255, 255, 255); border-color: rgba(44, 40, 37, 0.2);"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center justify-between h-14 lg:h-16 relative"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-shrink-0"[39m
+          [36m>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"flex items-center gap-2 sm:gap-3 hover:bg-red-50 hover:text-red-700 px-2 sm:px-3 py-2 rounded-md transition-colors"[39m
+              [33mhref[39m=[32m"/"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-lg sm:text-xl font-bold"[39m
+                [33mstyle[39m=[32m"font-family: var(--font-dm-serif); color: var(--text-main);"[39m
+              [36m>[39m
+                [0mBand of Bakers[0m
+              [36m</span>[39m
+            [36m</a>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"hidden lg:flex items-center gap-4"[39m
+          [36m>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 text-bakery-amber-800 bg-bakery-amber-50"[39m
+              [33mhref[39m=[32m"/"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center justify-center rounded-full duration-500 ease-out bg-gradient-to-br from-stone-50 to-stone-100 border-2 border-stone-200 shadow-[0_2px_8px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.08)] hover:scale-110 hover:-rotate-2 hover:shadow-[0_4px_16px_rgba(251,191,36,0.15)] w-8 h-8 group-hover:scale-110 transition-transform"[39m
+                  [33mstyle[39m=[32m"background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.015) 2px, rgba(0, 0, 0, 0.015) 4px);"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-house text-bakery-amber-800 w-4 h-4"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</div>[39m
+                [0mHome[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"block h-0.5 w-full bg-bakery-amber-600 transition-all duration-200 rounded-full"[39m
+              [36m/>[39m
+            [36m</a>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 "[39m
+              [33mhref[39m=[32m"/menu"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"flex items-center gap-2"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center justify-center rounded-full duration-500 ease-out bg-gradient-to-br from-stone-50 to-stone-100 border-2 border-stone-200 shadow-[0_2px_8px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.08)] hover:scale-110 hover:-rotate-2 hover:shadow-[0_4px_16px_rgba(251,191,36,0.15)] w-8 h-8 group-hover:scale-110 transition-transform"[39m
+                  [33mstyle[39m=[32m"background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.015) 2px, rgba(0, 0, 0, 0.015) 4px);"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-shopping-bag text-bakery-amber-700 w-4 h-4"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M16 10a4 4 0 0 1-8 0"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3.103 6.034h17.794"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</div>[39m
+                [0mShop[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"block h-0.5 w-0 group-hover:w-full bg-bakery-amber-600 transition-all duration-200 rounded-full"[39m
+              [36m/>[39m
+            [36m</a>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focu...
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/components/navbar/__tests__/index.test.tsx:[2m54:19[22m[39m
+    [90m 52| [39m    mockUseSession.mockReturnValue({ data: null, status: "unauthentica…
+    [90m 53| [39m    [34mrender[39m([33m<[39m[33mNavbar[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m 54| [39m    expect(screen.getByRole("link", { name: /login/i })).toBeInTheDocu…
+    [90m   | [39m                  [31m^[39m
+    [90m 55| [39m    expect(screen.queryByRole("button", { name: /profile/i })).not.toB…
+    [90m 56| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/base.repository.test.ts[2m > [22mBaseRepository[2m > [22mcount[2m > [22mshould return count of records
+[31m[1mAssertionError[22m: expected +0 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m src/lib/repositories/__tests__/base.repository.test.ts:[2m146:22[22m[39m
+    [90m144| [39m
+    [90m145| [39m      [35mconst[39m result [33m=[39m [35mawait[39m repository[33m.[39m[34mcount[39m()[33m;[39m
+    [90m146| [39m      [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m147| [39m      [34mexpect[39m(mocks[33m.[39mmockDb[33m.[39mselect)[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m148| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/34]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/lib/repositories/__tests__/order.repository.test.ts[2m > [22mOrderRepository[2m > [22mcreateWithItems[2m > [22mcreates order and items
+[31m[1mTypeError[22m: db.batch is not a function[39m
+[36m [2m❯[22m OrderRepository.createWithItems src/lib/repositories/order.repository.ts:[2m45:36[22m[39m
+    [90m 43| [39m
+    [90m 44| [39m      [90m// Create batch operations[39m
+    [90m 45| [39m      [35mconst[39m batchResult [33m=[39m [35mawait[39m db[33m.[39m[34mbatch[39m([
+    [90m   | [39m                                   [31m^[39m
+    [90m 46| [39m        [90m// 1. Insert Order with atomic order_number calculation[39m
+    [90m 47| [39m        db
+[90m [2m❯[22m src/lib/repositories/__tests__/order.repository.test.ts:[2m140:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/34]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (31)[39m
+[2m      Tests [22m [1m[31m34 failed[39m[22m[2m | [22m[1m[32m343 passed[39m[22m[90m (377)[39m
+[2m   Start at [22m 08:20:43
+[2m   Duration [22m 3.08s[2m (transform 1.33s, setup 4.77s, import 2.95s, tests 2.40s, environment 11.90s)[22m
+

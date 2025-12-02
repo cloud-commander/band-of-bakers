@@ -1,11 +1,12 @@
 import { PageHeader } from "@/components/state/page-header";
-import { getProductBySlug } from "@/actions/products";
+import { getProductAvailabilityForBakeSales, getProductBySlug } from "@/actions/products";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ProductDetailForm } from "@/components/product/product-detail-form";
 import { ReviewSection } from "@/components/reviews/review-section";
 import type { Metadata } from "next";
+import { ProductSchema } from "@/components/seo/product-schema";
 
 interface ProductPageProps {
   params: Promise<{
@@ -34,6 +35,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title: `${product.name} | Band of Bakers`,
     description: description.slice(0, 160), // SEO best practice: 150-160 chars
+    alternates: {
+      canonical: `/menu/${product.slug}`,
+    },
     openGraph: {
       title: product.name,
       description,
@@ -62,8 +66,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const availabilityMap =
+    product && upcomingBakeSales.length
+      ? await getProductAvailabilityForBakeSales(
+          product.id,
+          upcomingBakeSales.map((bs) => bs.id)
+        )
+      : {};
+  const availableBakeSales = upcomingBakeSales.filter((bs) => availabilityMap[bs.id] !== false);
+
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <ProductSchema product={product} />
       <div className="max-w-6xl mx-auto">
         <PageHeader
           title={product.name}
@@ -93,7 +107,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Product Details */}
-          <ProductDetailForm product={product} upcomingBakeSales={upcomingBakeSales} />
+          <ProductDetailForm product={product} upcomingBakeSales={availableBakeSales} />
         </div>
 
         <ReviewSection productId={product.id} />

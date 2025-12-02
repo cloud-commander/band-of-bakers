@@ -13,6 +13,7 @@ import { AnimatedButton } from "@/components/ui/animated-button";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
+import { ShareButton } from "@/components/product/share-button";
 
 interface ProductDetailFormProps {
   product: Product & { variants?: ProductVariant[] };
@@ -24,15 +25,18 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     product.variants?.[0]?.id || "base"
   );
-  const [selectedBakeSaleId, setSelectedBakeSaleId] = useState<string>("");
+  const [selectedBakeSaleId, setSelectedBakeSaleId] = useState<string>(
+    upcomingBakeSales.length > 0 ? upcomingBakeSales[0].id : ""
+  );
   const [quantity, setQuantity] = useState<string>("1");
+  const hasBakeSales = upcomingBakeSales.length > 0;
 
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId);
   const currentPrice = selectedVariant
     ? product.base_price + selectedVariant.price_adjustment
     : product.base_price;
 
-  const isOutOfStock = product.stock_quantity === 0;
+  const isOutOfStock = product.stock_quantity !== null && product.stock_quantity <= 0;
   const isLowStock =
     product.stock_quantity !== null &&
     product.stock_quantity !== undefined &&
@@ -40,6 +44,10 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
     product.stock_quantity < 5;
 
   const handleAddToCart = () => {
+    if (!hasBakeSales) {
+      toast.error("No upcoming collection dates available for this product");
+      return;
+    }
     if (!selectedBakeSaleId) {
       toast.error("Please select a collection date");
       return;
@@ -62,12 +70,15 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
   return (
     <div className="space-y-6">
       <div>
-        <h1
-          className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} mb-2 text-stone-900`}
-          style={{ fontFamily: DESIGN_TOKENS.typography.h1.family, letterSpacing: "-0.01em" }}
-        >
-          {product.name}
-        </h1>
+        <div className="flex justify-between items-start gap-4">
+          <h1
+            className={`${DESIGN_TOKENS.typography.h1.size} ${DESIGN_TOKENS.typography.h1.weight} mb-2 text-stone-900`}
+            style={{ fontFamily: DESIGN_TOKENS.typography.h1.family, letterSpacing: "-0.01em" }}
+          >
+            {product.name}
+          </h1>
+          <ShareButton title={product.name} />
+        </div>
         <div className="flex items-center gap-4">
           <p
             className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight} text-bakery-amber-800`}
@@ -139,7 +150,11 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
         >
           Select Collection Date
         </label>
-        <Select value={selectedBakeSaleId} onValueChange={setSelectedBakeSaleId}>
+        <Select
+          value={selectedBakeSaleId}
+          onValueChange={setSelectedBakeSaleId}
+          disabled={!hasBakeSales}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Choose a bake sale date" />
           </SelectTrigger>
@@ -164,7 +179,9 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
           className={`${DESIGN_TOKENS.typography.body.sm.size} mt-2`}
           style={{ color: DESIGN_TOKENS.colors.text.muted }}
         >
-          Orders must be placed before the cutoff date
+          {hasBakeSales
+            ? "Orders must be placed before the cutoff date"
+            : "This product is not available for any upcoming collection dates."}
         </p>
       </div>
 
@@ -194,10 +211,10 @@ export function ProductDetailForm({ product, upcomingBakeSales }: ProductDetailF
         <AnimatedButton
           size="lg"
           className="w-full md:w-auto px-12"
-          disabled={isOutOfStock}
+          disabled={isOutOfStock || !hasBakeSales}
           onClick={handleAddToCart}
         >
-          {isOutOfStock ? "Sold Out" : "Add to Cart"}
+          {isOutOfStock ? "Sold Out" : hasBakeSales ? "Add to Cart" : "Unavailable"}
         </AnimatedButton>
       </div>
     </div>

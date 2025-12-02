@@ -51,7 +51,7 @@ describe("Navbar", () => {
   it("renders login button when unauthenticated", () => {
     mockUseSession.mockReturnValue({ data: null, status: "unauthenticated" });
     render(<Navbar />);
-    expect(screen.getByRole("link", { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /login/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /profile/i })).not.toBeInTheDocument();
   });
 
@@ -64,7 +64,7 @@ describe("Navbar", () => {
     // UserMenu renders a button with a user icon, but maybe no text?
     // It's a dropdown trigger.
     // Let's check that the login button is GONE.
-    expect(screen.queryByRole("link", { name: /login/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /login/i })).not.toBeInTheDocument();
     // And check for the user menu trigger (it has a User icon)
     // We can look for the button that opens the menu
     const userButton = screen.getByRole("button", { name: /user menu/i });

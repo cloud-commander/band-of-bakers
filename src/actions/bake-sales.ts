@@ -16,6 +16,13 @@ const bakeSaleSchema = z.object({
   notes: z.string().optional(),
 });
 
+const updateBakeSaleSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  location_id: z.string().min(1, "Location is required"),
+  cutoff_datetime: z.string().min(1, "Cutoff time is required"),
+  is_active: z.boolean(),
+});
+
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
 /**
@@ -127,6 +134,7 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<{
     // 4. Create record
     const id = crypto.randomUUID();
     const { bakeSaleRepository } = await import("@/lib/repositories/bake-sale.repository");
+    const previousBakeSale = await bakeSaleRepository.findMostRecent();
     const bakeSale = await bakeSaleRepository.create({
       id,
       date: validated.data.date,
@@ -134,6 +142,18 @@ export async function createBakeSale(formData: FormData): Promise<ActionResult<{
       cutoff_datetime: validated.data.cutoff_datetime,
       is_active: validated.data.is_active,
     });
+
+    // Carry over any explicit unavailability from the last configured bake sale
+    try {
+      if (previousBakeSale) {
+        const { productAvailabilityRepository } = await import(
+          "@/lib/repositories/product-availability.repository"
+        );
+        await productAvailabilityRepository.copyUnavailability(previousBakeSale.id, bakeSale.id);
+      }
+    } catch (availabilityError) {
+      console.error("Failed to copy product availability to new bake sale:", availabilityError);
+    }
 
     // 5. Revalidate
     revalidatePath("/admin/bake-sales");
@@ -171,13 +191,13 @@ export async function updateBakeSale(
 
     // 2. Validation
     const rawData = {
-      date: formData.get("date"),
-      location_id: formData.get("location_id"),
-      cutoff_datetime: formData.get("cutoff_datetime"),
+      date: formData.get("date") as string,
+      location_id: formData.get("location_id") as string,
+      cutoff_datetime: formData.get("cutoff_datetime") as string,
       is_active: formData.get("is_active") === "true",
     };
 
-    const validated = bakeSaleSchema.safeParse(rawData);
+    const validated = updateBakeSaleSchema.safeParse(rawData);
     if (!validated.success) {
       return { success: false, error: validated.error.issues[0].message };
     }

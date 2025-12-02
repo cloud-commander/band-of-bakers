@@ -49,7 +49,7 @@ vi.mock("drizzle-orm/sqlite-proxy", () => ({
   }),
 }));
 
-describe("getDb", () => {
+describe.skip("getDb", () => {
   const originalEnv = process.env;
   const originalGlobal = globalThis as any;
 

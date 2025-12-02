@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { PageHeader } from "@/components/state/page-header";
 import { DESIGN_TOKENS } from "@/lib/design-tokens";
 import { MESSAGES } from "@/lib/constants/frontend";
@@ -42,27 +41,46 @@ interface MenuContentProps {
 
 export function MenuContent({ initialProducts, categories, upcomingBakeSales }: MenuContentProps) {
   const { addItem } = useCart();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const searchQuery = searchParams.get("search") || "";
-  const bakeSaleParam = searchParams.get("bakeSale");
-  const categoryParam = searchParams.get("category");
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => {
-    if (categoryParam) {
-      const category = categories.find((c) => c.slug === categoryParam);
-      return category ? category.id : null;
-    }
-    return null;
-  });
+  // Get state from URL
+  const searchQuery = searchParams.get("search") || "";
+  const categoryParam = searchParams.get("category");
+  const bakeSaleParam = searchParams.get("bakeSale");
+  const pageParam = searchParams.get("page");
+  const sortParam = searchParams.get("sort");
+
+  const currentPage = Number(pageParam) || 1;
+  const selectedCategory = categoryParam
+    ? categories.find((c) => c.slug === categoryParam)?.id || null
+    : null;
 
   // Initialize with URL param or first available bake sale
-  const [selectedBakeSale, setSelectedBakeSale] = useState<string>(
-    bakeSaleParam && upcomingBakeSales.find((bs) => bs.id === bakeSaleParam)
-      ? bakeSaleParam
-      : upcomingBakeSales[0]?.id || ""
-  );
-  const [sortBy, setSortBy] = useState<SortOption>("name");
+  // For bake sale, we default to the first one if not specified, but we don't necessarily need to put it in URL immediately unless changed
+  const selectedBakeSale = bakeSaleParam
+    ? upcomingBakeSales.find((bs) => bs.id === bakeSaleParam)?.id || upcomingBakeSales[0]?.id || ""
+    : upcomingBakeSales[0]?.id || "";
+
+  const sortBy = (sortParam as SortOption) || "name";
+
+  // Helper to create URL with updated params
+  const createQueryString = (name: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === null) {
+      params.delete(name);
+    } else {
+      params.set(name, value);
+    }
+
+    // Reset page to 1 when filters change (except when changing page itself)
+    if (name !== "page") {
+      params.delete("page");
+    }
+
+    return params.toString();
+  };
 
   // Filter products by category and search query
   let products = selectedCategory
@@ -102,52 +120,29 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filters change using useMemo
-  const validCurrentPage = useMemo(() => {
-    // When filters change, we want to be on page 1
-    // This is derived state, not side effect
-    if (currentPage > totalPages && totalPages > 0) {
-      return totalPages;
-    }
-    if (currentPage > totalPages) {
-      return 1;
-    }
-    return currentPage;
-  }, [currentPage, totalPages]);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [searchQuery, sortBy, selectedCategory, selectedBakeSale]);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  // Handlers
+  const handleCategoryChange = (value: string) => {
+    const categorySlug =
+      value === "all" ? null : categories.find((c) => c.id === value)?.slug || null;
+    router.push(pathname + "?" + createQueryString("category", categorySlug));
   };
 
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value === "all" ? null : value);
+  const handleBakeSaleChange = (value: string) => {
+    router.push(pathname + "?" + createQueryString("bakeSale", value));
+  };
+
+  const handleSortChange = (value: string) => {
+    router.push(pathname + "?" + createQueryString("sort", value));
   };
 
   const handleClearFilters = () => {
-    setSelectedCategory(null);
-    // Reset to first bake sale instead of null
-    setSelectedBakeSale(upcomingBakeSales[0]?.id || "");
+    router.push(pathname);
   };
 
-  const hasActiveFilters = selectedCategory !== null || searchQuery !== "";
+  const hasActiveFilters = categoryParam !== null || searchQuery !== "";
 
   // Helper to get bake sale location name
   const getBakeSaleLabel = (bs: BakeSaleWithLocation) => {
-    // We need location name. BakeSale type has location_id.
-    // The prop upcomingBakeSales should ideally include location.
-    // For now, we might need to fetch location or assume it's joined.
-    // Wait, getUpcomingBakeSales returns BakeSale[], which is the schema type.
-    // It doesn't include location relation by default unless we use a join or custom type.
-    // In mock data it was `mockBakeSalesWithLocation`.
-    // I should update `getUpcomingBakeSales` to return location data.
-    // Or I can just show date for now.
-    // Let's assume for now we just show date.
     return new Date(bs.date).toLocaleDateString("en-GB", {
       weekday: "short",
       month: "short",
@@ -209,7 +204,7 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
               <Calendar className="inline h-4 w-4 mr-1" />
               Collection Date
             </label>
-            <Select value={selectedBakeSale} onValueChange={setSelectedBakeSale}>
+            <Select value={selectedBakeSale} onValueChange={handleBakeSaleChange}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -252,7 +247,7 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
             >
               Sort By
             </label>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+            <Select value={sortBy} onValueChange={handleSortChange}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -286,7 +281,7 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
               <Badge variant="secondary" className="gap-1">
                 {categories.find((c) => c.id === selectedCategory)?.name}
                 <button
-                  onClick={() => setSelectedCategory(null)}
+                  onClick={() => handleCategoryChange("all")}
                   className="ml-1 hover:text-destructive"
                 >
                   <X className="h-3 w-3" />
@@ -307,7 +302,7 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
         {/* Pagination Info */}
         <div className="mb-6">
           <PaginationInfo
-            currentPage={validCurrentPage}
+            currentPage={currentPage}
             pageSize={ITEMS_PER_PAGE}
             totalItems={sortedProducts.length}
           />
@@ -423,9 +418,9 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
         {totalPages > 1 && (
           <div className="mt-12 flex flex-col items-center gap-6">
             <Pagination
-              currentPage={validCurrentPage}
+              currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={handlePageChange}
+              getPageUrl={(page) => pathname + "?" + createQueryString("page", page.toString())}
             />
           </div>
         )}

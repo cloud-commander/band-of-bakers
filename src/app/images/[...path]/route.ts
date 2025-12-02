@@ -10,10 +10,15 @@ export async function GET(
   const { path } = await params;
   const objectKey = path.join("/");
 
+  const startTimer = (label: string) => {
+    const start = performance.now();
+    return () => console.log(`${label}: ${(performance.now() - start).toFixed(3)}ms`);
+  };
+
   try {
-    console.time("getCloudflareContext");
+    const endCloudflareTimer = startTimer("getCloudflareContext");
     const { env } = await getCloudflareContext({ async: true });
-    console.timeEnd("getCloudflareContext");
+    endCloudflareTimer();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r2 = (env as any).R2;
@@ -25,16 +30,16 @@ export async function GET(
 
     // Try with "images/" prefix first as that's the standard structure
     let r2Key = `images/${objectKey}`;
-    console.time("r2.get");
+    let endR2Timer = startTimer("r2.get");
     let object = await r2.get(r2Key);
-    console.timeEnd("r2.get");
+    endR2Timer();
 
     // Fallback for legacy paths without prefix
     if (!object) {
       r2Key = objectKey;
-      console.time("r2.get-fallback");
+      endR2Timer = startTimer("r2.get-fallback");
       object = await r2.get(r2Key);
-      console.timeEnd("r2.get-fallback");
+      endR2Timer();
     }
 
     if (!object) {
@@ -65,9 +70,9 @@ export async function GET(
     // In development, Miniflare/Next.js has issues serializing the R2 ReadableStream
     // So we fallback to ArrayBuffer in dev, but use streaming in production for performance
     if (process.env.NODE_ENV === "development") {
-      console.time("arrayBuffer");
+      const endArrayBufferTimer = startTimer("arrayBuffer");
       const body = await object.arrayBuffer();
-      console.timeEnd("arrayBuffer");
+      endArrayBufferTimer();
       return new NextResponse(body, { headers });
     }
 

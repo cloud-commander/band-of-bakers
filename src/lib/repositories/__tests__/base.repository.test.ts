@@ -139,7 +139,7 @@ describe("BaseRepository", () => {
 
   describe("count", () => {
     it("should return count of records", async () => {
-      const mockRecords = [{ id: "1" }, { id: "2" }];
+      const mockRecords = [{ count: 2 }];
       mocks.mockQueryBuilder.then.mockImplementation((resolve: any) => resolve(mockRecords));
 
       const result = await repository.count();

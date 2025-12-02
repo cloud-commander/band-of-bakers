@@ -34,10 +34,18 @@ export const getDb = cache(async () => {
       return globalForDb.__localDb;
     }
     console.warn("[DB] Using dev fallback SQLite via db-local (not for Edge)");
-    const { getLocalDb } = await import("./db-local");
-    const db = await getLocalDb();
-    globalForDb.__localDb = db;
-    return db;
+    try {
+      const { getLocalDb } = await import("./db-local");
+      const db = await getLocalDb();
+      globalForDb.__localDb = db;
+      return db;
+    } catch (error) {
+      console.error(
+        "[DB] Failed to initialize local SQLite fallback. Try reinstalling dependencies or running `npm rebuild better-sqlite3`.",
+        error
+      );
+      throw error;
+    }
   }
 
   console.warn("[DB] env.DB is undefined or context failed.");

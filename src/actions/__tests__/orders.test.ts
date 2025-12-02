@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { orderRepository } from "@/lib/repositories/order.repository";
 import { userRepository } from "@/lib/repositories/user.repository";
 import { productRepository } from "@/lib/repositories/product.repository";
+import { productAvailabilityRepository } from "@/lib/repositories/product-availability.repository";
 import { voucherRepository } from "@/lib/repositories/voucher.repository";
 import { validateVoucher } from "@/lib/utils/voucher";
 import { verifyTurnstileToken } from "@/lib/actions/verify-turnstile";
@@ -15,14 +16,30 @@ vi.mock("@/auth", () => ({
 vi.mock("@/lib/repositories/order.repository");
 vi.mock("@/lib/repositories/user.repository");
 vi.mock("@/lib/repositories/product.repository");
+vi.mock("@/lib/repositories/product-availability.repository");
 vi.mock("@/lib/repositories/voucher.repository");
 vi.mock("@/lib/utils/voucher");
 vi.mock("@/lib/email/service");
 vi.mock("@/lib/actions/verify-turnstile");
 vi.mock("next/cache");
+vi.mock("@/lib/csrf", () => ({
+  requireCsrf: vi.fn().mockResolvedValue(true),
+  CsrfError: class extends Error {},
+}));
 vi.mock("@/lib/repositories/bake-sale.repository", () => ({
   bakeSaleRepository: {
     findUpcoming: vi.fn().mockResolvedValue([{ id: "sale-1" }]),
+    findByIdWithLocation: vi.fn().mockResolvedValue({
+      id: "sale-1",
+      date: "2023-12-25",
+      location: {
+        name: "Test Location",
+        address_line1: "123 Test St",
+        city: "Test City",
+        postcode: "TE1 1ST",
+        collection_hours: "10am - 2pm",
+      },
+    }),
   },
 }));
 
@@ -63,6 +80,7 @@ describe("createOrder", () => {
     (productRepository.decrementStock as any).mockResolvedValue(true);
     (productRepository.incrementStock as any).mockResolvedValue(true);
     (productRepository.getActiveVariantsForProducts as any).mockResolvedValue(new Map());
+    (productAvailabilityRepository.getAvailabilityForBakeSale as any).mockResolvedValue(new Map());
     (orderRepository.createWithItems as any).mockResolvedValue({ id: "order-1" });
     (verifyTurnstileToken as any).mockResolvedValue({ success: true });
   });
@@ -158,6 +176,20 @@ describe("createOrder", () => {
       expect.objectContaining({ user_id: "logged-in-user" }),
       expect.any(Array)
     );
+  });
+
+  it("blocks ordering when product is unavailable for the selected bake sale", async () => {
+    const unavailableMap = new Map([["prod-1", false]]);
+    (productAvailabilityRepository.getAvailabilityForBakeSale as any).mockResolvedValue(
+      unavailableMap
+    );
+
+    const result = await createOrder({ ...validOrderData, bake_sale_id: "sale-1" });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain("unavailable for the selected collection date");
+    }
   });
 
   it("handles product variants", async () => {

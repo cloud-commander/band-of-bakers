@@ -1,4 +1,12 @@
-import { sqliteTable, text, integer, real, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  real,
+  index,
+  uniqueIndex,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 import { sql, relations } from "drizzle-orm";
 
 // Helper for timestamps
@@ -133,6 +141,28 @@ export const bakeSales = sqliteTable(
   },
   (table) => ({
     locationIdIdx: index("idx_bake_sales_location_id").on(table.location_id),
+  })
+);
+
+// ============================================================================
+// PRODUCT BAKE SALE AVAILABILITY
+// ============================================================================
+
+export const productBakeSaleAvailability = sqliteTable(
+  "product_bake_sale_availability",
+  {
+    product_id: text("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    bake_sale_id: text("bake_sale_id")
+      .notNull()
+      .references(() => bakeSales.id, { onDelete: "cascade" }),
+    is_available: integer("is_available", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.product_id, table.bake_sale_id] }),
+    bakeSaleIdx: index("idx_pbsa_bake_sale_id").on(table.bake_sale_id),
   })
 );
 
@@ -407,6 +437,9 @@ export type InsertProduct = typeof products.$inferInsert;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type InsertProductVariant = typeof productVariants.$inferInsert;
 
+export type ProductBakeSaleAvailability = typeof productBakeSaleAvailability.$inferSelect;
+export type InsertProductBakeSaleAvailability = typeof productBakeSaleAvailability.$inferInsert;
+
 export type Location = typeof locations.$inferSelect;
 export type InsertLocation = typeof locations.$inferInsert;
 
@@ -474,11 +507,12 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   }),
 }));
 
-export const bakeSalesRelations = relations(bakeSales, ({ one }) => ({
+export const bakeSalesRelations = relations(bakeSales, ({ one, many }) => ({
   location: one(locations, {
     fields: [bakeSales.location_id],
     references: [locations.id],
   }),
+  productAvailability: many(productBakeSaleAvailability),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -499,6 +533,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
   variants: many(productVariants),
   reviews: many(reviews),
+  bakeSaleAvailability: many(productBakeSaleAvailability),
 }));
 
 export const productCategoriesRelations = relations(productCategories, ({ many }) => ({
@@ -511,3 +546,17 @@ export const productVariantsRelations = relations(productVariants, ({ one }) => 
     references: [products.id],
   }),
 }));
+
+export const productBakeSaleAvailabilityRelations = relations(
+  productBakeSaleAvailability,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [productBakeSaleAvailability.product_id],
+      references: [products.id],
+    }),
+    bakeSale: one(bakeSales, {
+      fields: [productBakeSaleAvailability.bake_sale_id],
+      references: [bakeSales.id],
+    }),
+  })
+);

@@ -6,6 +6,10 @@
 export { BaseRepository } from "./base.repository";
 export { UserRepository, userRepository } from "./user.repository";
 export { ProductRepository, productRepository } from "./product.repository";
+export {
+  ProductAvailabilityRepository,
+  productAvailabilityRepository,
+} from "./product-availability.repository";
 export { CategoryRepository, categoryRepository } from "./category.repository";
 export { BakeSaleRepository, bakeSaleRepository } from "./bake-sale.repository";
 export { VoucherRepository, voucherRepository } from "./voucher.repository";
@@ -17,6 +21,7 @@ export type {
   ProductVariant,
   InsertProductVariant,
 } from "./product.repository";
+export type { ProductBakeSaleAvailabilityRow } from "./product-availability.repository";
 export type { ProductCategory, InsertProductCategory } from "./category.repository";
 export type { BakeSaleWithLocation } from "./bake-sale.repository";
 export type { BakeSale } from "@/db/schema";

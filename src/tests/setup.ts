@@ -38,6 +38,51 @@ vi.mock("next/image", () => ({
   default: vi.fn(),
 }));
 
+// Mock Next.js headers
+vi.mock("next/headers", () => ({
+  headers: () => ({
+    get: vi.fn((key) => {
+      if (key === "origin") return "http://localhost:3000";
+      if (key === "referer") return "http://localhost:3000/some-page";
+      return null;
+    }),
+  }),
+  cookies: () => ({
+    get: vi.fn(),
+    getAll: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
+  }),
+}));
+
+// Mock Next.js cache
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn, // Return the function as is, bypassing cache logic
+}));
+
+// Mock better-sqlite3 to avoid "sqlite.pragma is not a function"
+vi.mock("better-sqlite3", () => {
+  const MockDatabase = function () {
+    return {
+      pragma: vi.fn(),
+      prepare: vi.fn(() => ({
+        get: vi.fn(),
+        all: vi.fn(),
+        run: vi.fn(),
+        iterate: vi.fn(),
+      })),
+      exec: vi.fn(),
+      transaction: (fn: (...args: unknown[]) => unknown) => fn,
+    };
+  };
+  return {
+    default: MockDatabase,
+    Database: MockDatabase,
+  };
+});
+
 // Extend Vitest's expect with custom matchers if needed
 // expect.extend({ ... });
 

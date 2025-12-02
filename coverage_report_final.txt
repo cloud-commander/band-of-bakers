@@ -1,0 +1,225 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/Users/georgediavatis/Storage/Web-Development/NextJS/bandofbakers-v2[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/context/__tests__/cart-context.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/button.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/orders.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/loading-skeletons.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/input.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/sanitize.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/ui/__tests__/dropdown-menu.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/components/navbar/__tests__/index.test.tsx
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/bake-sale-management.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/components/ui/__tests__/input.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/lib/__tests__/sanitize.test.ts [2m([22m[2m41 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+ [32m✓[39m src/context/__tests__/cart-context.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 64[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/loading-skeletons.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/bake-sale-management.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/button.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 262[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/orders.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+[90mstdout[2m | src/lib/utils/__tests__/voucher.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/faqs.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/bake-sale.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/utils/__tests__/validation.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/__tests__/dashboard.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/utils/__tests__/voucher.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/lib/utils/__tests__/validation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/bake-sale.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/components/ui/__tests__/dropdown-menu.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 881[2mms[22m[39m
+     [33m[2m✓[22m[39m renders trigger and opens content on click [33m 334[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/dashboard.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/actions/__tests__/faqs.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/voucher.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/voucher.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/components/navbar/__tests__/index.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 993[2mms[22m[39m
+     [33m[2m✓[22m[39m renders logo [33m 311[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/auth.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/auth.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/review.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/news.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/product.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/actions/admin/__tests__/orders.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/repositories/__tests__/order.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/review.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/news.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/actions/admin/__tests__/orders.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/lib/repositories/__tests__/base.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/product.repository.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/lib/repositories/__tests__/order.repository.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/repositories/__tests__/base.repository.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/order.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/logger/__tests__/logger.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/validators/__tests__/order.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/logger/__tests__/logger.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | src/lib/repositories/__tests__/product-availability.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/product-availability.repository.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/lib/repositories/__tests__/user.repository.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/validators/__tests__/user.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/csrf.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/__tests__/cache.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/csrf.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/lib/validators/__tests__/product.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/repositories/__tests__/user.repository.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/user.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/cache.test.ts[2m > [22m[2mgetCachedImages[2m > [22m[2mshould fetch images with default parameters
+[22m[39m[getCachedImages] Query took 0.19ms
+
+[90mstdout[2m | src/lib/__tests__/cache.test.ts[2m > [22m[2mgetCachedImages[2m > [22m[2mshould apply category filter
+[22m[39m[getCachedImages] Query took 0.14ms
+
+[90mstdout[2m | src/lib/__tests__/cache.test.ts[2m > [22m[2mgetCachedImages[2m > [22m[2mshould apply bucket filter
+[22m[39m[getCachedImages] Query took 0.04ms
+
+[90mstdout[2m | src/lib/__tests__/cache.test.ts[2m > [22m[2mgetCachedImages[2m > [22m[2mshould apply tag filter
+[22m[39m[getCachedImages] Query took 0.04ms
+
+[90mstdout[2m | src/db/__tests__/schema.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/cache.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/lib/validators/__tests__/product.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/db/__tests__/schema.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/design-tokens.test.ts
+[22m[39m✅ Test environment initialized
+
+[90mstdout[2m | src/lib/utils/__tests__/order.test.ts
+[22m[39m✅ Test environment initialized
+
+ [32m✓[39m src/lib/__tests__/design-tokens.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/lib/utils/__tests__/order.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+[90mstdout[2m | src/lib/__tests__/db.test.ts
+[22m[39m✅ Test environment initialized
+
+ [2m[90m↓[39m[22m src/lib/__tests__/db.test.ts [2m([22m[2m6 tests[22m[2m | [22m[33m6 skipped[39m[2m)[22m
+
+[2m Test Files [22m [1m[32m33 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (34)[39m
+[2m      Tests [22m [1m[32m405 passed[39m[22m[2m | [22m[33m6 skipped[39m[90m (411)[39m
+[2m   Start at [22m 08:39:17
+[2m   Duration [22m 4.00s[2m (transform 1.54s, setup 6.24s, import 3.35s, tests 2.57s, environment 14.12s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   83.39 |    70.07 |   78.16 |    84.2 |                   
+ actions           |   82.33 |    63.47 |   93.33 |   82.71 |                   
+  ...management.ts |   80.76 |    71.42 |      80 |   82.97 | ...31-234,304-305 
+  dashboard.ts     |   88.57 |       60 |      80 |   87.87 | 55,82,107-108     
+  faqs.ts          |   81.25 |        0 |     100 |   81.25 | ...01-104,123-126 
+  orders.ts        |    82.4 |    64.13 |     100 |   82.24 | ...09-533,547-552 
+ actions/admin     |    83.6 |    62.85 |     100 |   87.27 |                   
+  orders.ts        |    83.6 |    62.85 |     100 |   87.27 | ...,73-74,180-181 
+ components/navbar |   86.36 |       95 |   66.66 |      90 |                   
+  desktop-nav.tsx  |     100 |    91.66 |     100 |     100 | 62                
+  index.tsx        |     100 |      100 |     100 |     100 |                   
+  logo.tsx         |     100 |      100 |     100 |     100 |                   
+  user-menu.tsx    |    62.5 |      100 |      25 |   71.42 | 29,71             
+ components/ui     |   95.55 |    70.83 |   89.47 |   95.55 |                   
+  avatar.tsx       |     100 |      100 |     100 |     100 |                   
+  button.tsx       |     100 |      100 |     100 |     100 |                   
+  card.tsx         |   83.33 |      100 |      50 |   83.33 | 36,48,68          
+  ...down-menu.tsx |   96.96 |    57.14 |   88.88 |   96.96 | 175               
+  flour-icon.tsx   |     100 |    55.55 |     100 |     100 | 25-54             
+  input.tsx        |     100 |      100 |     100 |     100 |                   
+  ...skeletons.tsx |     100 |      100 |     100 |     100 |                   
+  skeleton.tsx     |     100 |      100 |     100 |     100 |                   
+ context           |      80 |    70.96 |   94.44 |   80.39 |                   
+  cart-context.tsx |      80 |    70.96 |   94.44 |   80.39 | ...22,134,138,172 
+ db                |   58.06 |      100 |   27.77 |   65.45 |                   
+  schema.ts        |   58.06 |      100 |   27.77 |   65.45 | ...35,364,389,552 
+ lib               |      75 |    76.74 |   93.75 |   74.59 |                   
+  cache.ts         |    91.3 |    90.47 |     100 |    91.3 | 55,64             
+  csrf.ts          |   90.62 |    85.71 |     100 |      90 | 55,69,79          
+  db.ts            |    4.54 |        0 |       0 |    4.54 | 17-61             
+  design-tokens.ts |     100 |      100 |     100 |     100 |                   
+  sanitize.ts      |   88.37 |    85.29 |     100 |   88.37 | ...66,169,172,215 
+  utils.ts         |     100 |      100 |     100 |     100 |                   
+ lib/constants     |     100 |      100 |     100 |     100 |                   
+  app.ts           |     100 |      100 |     100 |     100 |                   
+  frontend.ts      |     100 |      100 |     100 |     100 |                   
+ lib/logger        |   71.42 |     70.9 |   45.71 |   71.01 |                   
+  index.ts         |   61.53 |       50 |   16.66 |   61.53 | 24,48-57          
+  safe-log.ts      |   92.85 |    83.33 |     100 |    92.3 | 27                
+  server-logger.ts |   71.42 |       70 |      60 |   71.42 | 52-53,63,71       
+  ...er-rollbar.ts |   65.51 |    76.19 |      50 |   65.51 | ...62,68-69,79,84 
+ lib/repositories  |   83.95 |    60.97 |   93.15 |   84.52 |                   
+  ...repository.ts |     100 |    83.33 |     100 |     100 | 80                
+  ...repository.ts |   91.02 |       50 |    92.3 |   91.78 | 65-66,136,397-409 
+  ...repository.ts |     100 |      100 |     100 |     100 |                   
+  ...repository.ts |   66.66 |    60.46 |   85.71 |   67.41 | ...81,264,338-339 
+  ...repository.ts |   89.18 |    54.54 |     100 |   89.18 | 133-134,140,144   
+ lib/utils         |     100 |      100 |     100 |     100 |                   
+  order.ts         |     100 |      100 |     100 |     100 |                   
+  validation.ts    |     100 |      100 |     100 |     100 |                   
+  voucher.ts       |     100 |      100 |     100 |     100 |                   
+ lib/validators    |   96.25 |    82.14 |      90 |   96.25 |                   
+  auth.ts          |     100 |      100 |     100 |     100 |                   
+  bake-sale.ts     |     100 |      100 |     100 |     100 |                   
+  news.ts          |     100 |      100 |     100 |     100 |                   
+  order.ts         |   83.33 |       50 |      50 |   83.33 | 76-83             
+  product.ts       |     100 |      100 |     100 |     100 |                   
+  review.ts        |     100 |      100 |     100 |     100 |                   
+  user.ts          |     100 |      100 |     100 |     100 |                   
+  voucher.ts       |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------

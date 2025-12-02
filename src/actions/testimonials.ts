@@ -39,7 +39,12 @@ async function checkAdminRole() {
  * Get active testimonials (public)
  */
 export async function getActiveTestimonials(): Promise<Testimonial[]> {
-  return await testimonialRepository.getActive();
+  try {
+    return await testimonialRepository.getActive();
+  } catch (error) {
+    console.error("Failed to fetch active testimonials:", error);
+    return [];
+  }
 }
 
 /**

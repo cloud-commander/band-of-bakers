@@ -252,6 +252,10 @@ export async function updateProduct(
       is_active: formData.get("is_active") === "true",
       variants: formData.get("variants") ? JSON.parse(formData.get("variants") as string) : [],
     };
+    const bakeSaleId = (formData.get("bake_sale_id") as string) || null;
+    const isAvailableForBakeSaleRaw = formData.get("is_available_for_bake_sale");
+    const isAvailableForBakeSale =
+      typeof isAvailableForBakeSaleRaw === "string" ? isAvailableForBakeSaleRaw === "true" : null;
 
     const validated = productSchema.safeParse(rawData);
     if (!validated.success) {
@@ -346,6 +350,17 @@ export async function updateProduct(
 
     if (!product) {
       return { success: false, error: "Failed to update product" };
+    }
+
+    // 6b. Persist bake sale availability toggle if provided
+    if (bakeSaleId && isAvailableForBakeSale !== null) {
+      try {
+        const { productAvailabilityRepository } =
+          await import("@/lib/repositories/product-availability.repository");
+        await productAvailabilityRepository.setAvailability(id, bakeSaleId, isAvailableForBakeSale);
+      } catch (availabilityError) {
+        console.error("Failed to update bake sale availability:", availabilityError);
+      }
     }
 
     // 7. Revalidate relevant pages and cache tags
@@ -535,6 +550,47 @@ export async function getProductById(id: string) {
   } catch (error) {
     console.error("Get product error:", error);
     return null;
+  }
+}
+
+/**
+ * Get product availability for a specific bake sale (defaults to true if not set)
+ */
+export async function getProductAvailabilityForBakeSale(productId: string, bakeSaleId: string) {
+  try {
+    const { productAvailabilityRepository } =
+      await import("@/lib/repositories/product-availability.repository");
+    const availability = await productAvailabilityRepository.get(productId, bakeSaleId);
+    return availability?.is_available ?? true;
+  } catch (error) {
+    console.error("Failed to fetch product availability:", error);
+    return true;
+  }
+}
+
+/**
+ * Get product availability flags for multiple bake sales
+ */
+export async function getProductAvailabilityForBakeSales(
+  productId: string,
+  bakeSaleIds: string[]
+): Promise<Record<string, boolean>> {
+  try {
+    if (bakeSaleIds.length === 0) return {};
+    const { productAvailabilityRepository } =
+      await import("@/lib/repositories/product-availability.repository");
+    const availabilityMap = await productAvailabilityRepository.getAvailabilityForBakeSales(
+      productId,
+      bakeSaleIds
+    );
+    const result: Record<string, boolean> = {};
+    for (const [id, isAvailable] of availabilityMap.entries()) {
+      result[id] = isAvailable;
+    }
+    return result;
+  } catch (error) {
+    console.error("Failed to fetch product availability map:", error);
+    return {};
   }
 }
 
