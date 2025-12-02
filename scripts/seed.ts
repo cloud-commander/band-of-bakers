@@ -63,9 +63,8 @@ const TEMP_DIR = path.join(process.cwd(), "temp_seed");
 const isProdInit = args.includes("--prod-init");
 const isAdminOnly = args.includes("--admin-only") || isProdInit;
 const skipR2 = args.includes("--skip-r2");
-// Use real products if specified in args OR if configured for the environment
-const useRealProducts =
-  args.includes("--real-products") || isProdInit || seedConfig[env]?.useRealProducts === true;
+// Always use real products only - no mock products
+const useRealProducts = true;
 const imagesOnly = args.includes("--images-only"); // Full reset mode with only images focus
 const r2Target = args.includes("--r2-remote") || env !== "development" ? "remote" : "local";
 const r2Flag = r2Target === "remote" ? "--remote" : "--local";
@@ -401,20 +400,11 @@ async function main() {
       for (const prod of products) {
         let imageUrl = "NULL";
 
-        if (!skipR2 && prod.image_url) {
-          if (useRealProducts) {
-            // For real products, use category subdirectory structure
-            const category = productCategories.find((c) => c.id === prod.category_id);
-            const categorySlug = category?.slug || "uncategorized";
-            // Use R2 URL if not skipping R2
-            imageUrl = publicUrlForR2Path(`images/products/${categorySlug}/${prod.slug}-card.webp`);
-          } else {
-            // For mock products, use old structure
-            // Use R2 URL if not skipping R2
-            imageUrl = publicUrlForR2Path(`images/products/${prod.category_id}/${prod.slug}.jpg`);
-          }
-        } else if (skipR2) {
-          imageUrl = prod.image_url || "NULL";
+        // Use image_url from product data as-is (works across all environments)
+        // The /images/[...path] route handler serves from R2 for production/staging
+        // and from public/ for development
+        if (prod.image_url) {
+          imageUrl = prod.image_url;
         }
 
         const imageVal = imageUrl === "NULL" ? "NULL" : `'${imageUrl}'`;
@@ -989,83 +979,50 @@ async function main() {
         console.log("   ⚠️  Skipping image upload for mock products (no local images available)");
       }
 
-      // Site/brand assets (hero, logos, team, categories)
+      // Site/brand assets (hero and team WEBP only - skip logos and category mock images)
       const siteImages: Array<{
         local: string;
         r2Path: string;
         category: string;
         tags?: string[];
       }> = [
-        // Hero / marketing
-        { local: "site/hero/workspace-hero.webp", r2Path: "images/hero/workspace-hero.webp", category: "hero", tags: ["hero"] },
-        { local: "site/hero/bakery-workspace.webp", r2Path: "images/hero/bakery-workspace.webp", category: "hero", tags: ["hero"] },
-        { local: "site/hero/about-hero-v2.webp", r2Path: "images/hero/about-hero-v2.webp", category: "hero", tags: ["hero"] },
-        { local: "site/hero/artisan-bread.webp", r2Path: "images/hero/artisan-bread.webp", category: "hero", tags: ["hero"] },
-        // Logos
+        // Hero / marketing (webp only)
         {
-          local: "site/logos/logo-transparent-256.png",
-          r2Path: "images/logos/logo-transparent-256.png",
-          category: "logo",
-          tags: ["logo", "transparent", "256"],
+          local: "site/hero/workspace-hero.webp",
+          r2Path: "images/hero/workspace-hero.webp",
+          category: "hero",
+          tags: ["hero"],
         },
         {
-          local: "site/logos/bandofbakers-256.png",
-          r2Path: "images/logos/bandofbakers-256.png",
-          category: "logo",
-          tags: ["logo", "256"],
+          local: "site/hero/bakery-workspace.webp",
+          r2Path: "images/hero/bakery-workspace.webp",
+          category: "hero",
+          tags: ["hero"],
         },
         {
-          local: "site/logos/logo-transparent-512.png",
-          r2Path: "images/logos/logo-transparent-512.png",
-          category: "logo",
-          tags: ["logo", "transparent", "512"],
+          local: "site/hero/about-hero-v2.webp",
+          r2Path: "images/hero/about-hero-v2.webp",
+          category: "hero",
+          tags: ["hero"],
         },
         {
-          local: "site/logos/logo-transparent-1200.png",
-          r2Path: "images/logos/logo-transparent-1200.png",
-          category: "logo",
-          tags: ["logo", "transparent", "1200"],
+          local: "site/hero/artisan-bread.webp",
+          r2Path: "images/hero/artisan-bread.webp",
+          category: "hero",
+          tags: ["hero"],
         },
-        // Team
-        { local: "site/team/jon.webp", r2Path: "images/team/jon.webp", category: "team", tags: ["team", "jon"] },
-        { local: "site/team/mike.webp", r2Path: "images/team/mike.webp", category: "team", tags: ["team", "mike"] },
-        // Category hero images (share product assets but exposed under categories/)
-        { local: "foccacia-detail.webp", r2Path: "images/categories/foccacia-detail.webp", category: "category", tags: ["category", "breads-loaves"] },
+        // Team (webp only)
         {
-          local: "cinnamon_knots-detail.webp",
-          r2Path: "images/categories/cinnamon_knots-detail.webp",
-          category: "category",
-          tags: ["category", "pastries"],
+          local: "site/team/jon.webp",
+          r2Path: "images/team/jon.webp",
+          category: "team",
+          tags: ["team", "jon"],
         },
         {
-          local: "large_apple_pie-detail.webp",
-          r2Path: "images/categories/large_apple_pie-detail.webp",
-          category: "category",
-          tags: ["category", "pies-tarts"],
-        },
-        {
-          local: "frangipane_slice-detail.webp",
-          r2Path: "images/categories/frangipane_slice-detail.webp",
-          category: "category",
-          tags: ["category", "cakes-slices"],
-        },
-        {
-          local: "pesto_swirl-detail.webp",
-          r2Path: "images/categories/pesto_swirl-detail.webp",
-          category: "category",
-          tags: ["category", "savory"],
-        },
-        {
-          local: "tiffin_cake_slice-detail.webp",
-          r2Path: "images/categories/tiffin_cake_slice-detail.webp",
-          category: "category",
-          tags: ["category", "biscuits-bars"],
-        },
-        {
-          local: "small_appleblackberry_pies-detail.webp",
-          r2Path: "images/categories/small_appleblackberry_pies-detail.webp",
-          category: "category",
-          tags: ["category", "pies-tarts"],
+          local: "site/team/mike.webp",
+          r2Path: "images/team/mike.webp",
+          category: "team",
+          tags: ["team", "mike"],
         },
       ];
 

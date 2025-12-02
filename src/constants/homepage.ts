@@ -18,7 +18,7 @@ export const HERO_SECTION = {
   description:
     "Small-batch artisan bread free from additives. The way bread was meant to be eaten.",
   /** Hero CTA button text */
-  ctaText: "Pre-Order Now ",
+  ctaText: "See Our Bakes",
   /** Hero CTA button link */
   ctaLink: "#bakes",
 } as const;

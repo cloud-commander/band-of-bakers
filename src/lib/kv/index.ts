@@ -11,6 +11,7 @@
  */
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { KVNamespace } from "@cloudflare/workers-types";
 
 // Type definitions
 export interface SessionData {

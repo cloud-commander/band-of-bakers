@@ -37,6 +37,10 @@ declare module "next-auth/jwt" {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  // Trust host header for callback URL detection in Cloudflare Workers
+  // This allows the auth flow to work correctly across different environments
+  // (localhost, staging, production) without requiring explicit NEXTAUTH_URL
+  trustHost: true,
   providers: [
     Cognito({
       clientId: process.env.AUTH_COGNITO_ID,
