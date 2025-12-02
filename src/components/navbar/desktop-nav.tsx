@@ -34,7 +34,7 @@ export const DesktopNav = memo(function DesktopNav({ session }: DesktopNavProps)
         <Link
           key={link.href}
           href={link.href}
-          className={`group font-sans text-sm font-medium transition-all px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 ${
+          className={`group font-sans text-sm font-medium transition-all duration-150 ease-out px-2 py-1 rounded-md hover:text-bakery-amber-700 hover:bg-bakery-amber-50 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bakery-amber-400 focus-visible:outline-offset-2 ${
             isActive(link.href) ? "text-bakery-amber-800 bg-bakery-amber-50" : ""
           }`}
         >
@@ -58,7 +58,7 @@ export const DesktopNav = memo(function DesktopNav({ session }: DesktopNavProps)
       {isAdmin && (
         <Link
           href="/admin"
-          className={`group font-sans text-sm font-semibold px-2 py-1 rounded-md flex items-center gap-2 text-red-700 hover:bg-red-50 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-300 focus-visible:outline-offset-2 ${
+          className={`group font-sans text-sm font-semibold px-2 py-1 rounded-md flex items-center gap-2 text-red-700 hover:bg-red-50 transition-all duration-150 ease-out hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-300 focus-visible:outline-offset-2 ${
             pathname?.startsWith("/admin") ? "bg-red-50" : ""
           }`}
         >
