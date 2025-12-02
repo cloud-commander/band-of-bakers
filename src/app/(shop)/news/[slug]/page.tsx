@@ -1,6 +1,5 @@
 import { newsRepository } from "@/lib/repositories/news.repository";
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/components/state/page-header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -58,12 +57,6 @@ export default async function NewsPostPage({ params }: NewsPostPageProps) {
                 year: "numeric",
               })}
             </time>
-            {post.category && (
-              <>
-                <span>•</span>
-                <span className="font-medium text-bakery-amber-700">{post.category}</span>
-              </>
-            )}
           </div>
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-stone-900 mb-4">
             {post.title}
