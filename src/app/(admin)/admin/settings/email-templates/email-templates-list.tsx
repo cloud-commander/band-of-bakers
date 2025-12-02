@@ -7,20 +7,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Editor } from "@tinymce/tinymce-react";
-import { updateEmailTemplate } from "@/actions/email-templates";
+import { sendTestEmail, updateEmailTemplate } from "@/actions/email-templates";
 import { toast } from "sonner";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Mail, Save } from "lucide-react";
 
 interface EmailTemplatesListProps {
   initialTemplates: EmailTemplate[];
+  defaultTestEmail?: string | null;
 }
 
-export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps) {
+export function EmailTemplatesList({ initialTemplates, defaultTestEmail }: EmailTemplatesListProps) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     initialTemplates[0]?.id || null
   );
   const [templates, setTemplates] = useState(initialTemplates);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testEmail, setTestEmail] = useState(defaultTestEmail || "");
+  const [showTestOptions, setShowTestOptions] = useState(false);
 
   // Form state
   const [subject, setSubject] = useState("");
@@ -72,6 +76,34 @@ export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps
     }
   };
 
+  const handleSendTest = async () => {
+    if (!selectedTemplate) return;
+    if (!testEmail) {
+      toast.error("Enter a recipient email for the test.");
+      return;
+    }
+    setIsSendingTest(true);
+    try {
+      const result = await sendTestEmail(
+        selectedTemplate.id,
+        testEmail,
+        subject,
+        content,
+        selectedTemplate.variables || []
+      );
+      if (result.success) {
+        toast.success("Test email sent");
+      } else {
+        toast.error(result.error || "Failed to send test email");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Sidebar List */}
@@ -95,20 +127,51 @@ export function EmailTemplatesList({ initialTemplates }: EmailTemplatesListProps
       <div className="lg:col-span-9">
         {selectedTemplate ? (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-lg font-medium">
-                Edit Template: {selectedTemplate.name}
-              </CardTitle>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                Save Changes
-              </Button>
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0 pb-4">
+              <CardTitle className="text-lg font-medium">Edit Template: {selectedTemplate.name}</CardTitle>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                <Button
+                  onClick={() => {
+                    if (!showTestOptions) {
+                      setShowTestOptions(true);
+                      return;
+                    }
+                    handleSendTest();
+                  }}
+                  variant="outline"
+                  disabled={isSendingTest}
+                >
+                  {isSendingTest ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Mail className="w-4 h-4 mr-2" />
+                  )}
+                  Send Test
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Save Changes
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {showTestOptions && (
+                <div className="space-y-2">
+                  <Label htmlFor="test-email">Send test to</Label>
+                  <Input
+                    id="test-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject Line</Label>
                 <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} />

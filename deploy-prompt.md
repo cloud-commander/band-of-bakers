@@ -9,6 +9,7 @@
 3.  **Deployment Orchestration**: A custom `scripts/deploy.ts` that handles building, migrating, backing up, and uploading with safety gates.
 4.  **Secret Management**: Only non-Git secrets (API tokens, database credentials) sync to Cloudflare; requires explicit `--confirm` flag before upsert.
 5.  **Safety & Auditability**: Backups before migrations, rollback support, branch-protection gates, and audit logs for all deployments.
+6.  **Workers Paid Plan Required**: Next.js 15 bundles exceed the 3 MiB free-tier limit (~3.5 MiB gzipped typical). The Workers Paid plan ($5/month) provides a 10 MiB limit. The setup script must validate that the Cloudflare account is on a paid plan before proceeding.
 
 **Scope of Work:**
 
@@ -45,6 +46,7 @@ Create a robust deployment script with the following stages that start with vali
 
 **Stage 0: Configuration Validation**
 
+- **Account Plan Check**: Before any deployment, verify the Cloudflare account is on the Workers Paid plan by running `wrangler whoami` and checking account type; fail with a clear error if on the free plan (Next.js 15 bundles typically exceed the 3 MiB free-tier limit at ~3.5 MiB gzipped). Provide upgrade instructions: "Upgrade at dash.cloudflare.com → Workers & Pages → Plans".
 - Verify Wrangler is installed and meets the minimum version (e.g., `>=3.8`) by running `wrangler --version`; fail fast if the version is too old or missing.
 - Verify Node version matches `.nvmrc` (if present) or meets `engines` in `package.json`; fail if mismatch.
 - Verify `pnpm` version and that lock file is up-to-date (`pnpm install --frozen-lockfile` in dry-run mode to check).
@@ -90,6 +92,7 @@ Create a robust deployment script with the following stages that start with vali
 **Stage 5: Deploy**
 
 - If `--build-local` is not provided, build the Next.js app: `pnpm build`. If `--build-local` is provided, verify that the `.next/` folder exists and contains recent artifacts (check `.next/` mtime is within 1 hour of the deploy start); fail if missing or stale.
+- **Bundle Size Check**: After build, run `wrangler deploy --dry-run` and parse the output for "Total Upload: X KiB / gzip: Y KiB". Fail if gzipped size exceeds 10 MiB (paid plan limit) or warn if approaching 8 MiB. Log the bundle size in the deployment summary.
 - Validate build artifact cache freshness: ensure `node_modules/` and `.next/` cache were generated within the last 24 hours; warn if older and offer to rebuild.
 - Deploy worker: `wrangler deploy --env <env>`.
 - **Health checks (post-deploy):** After deployment, poll the target worker endpoint (e.g., `GET https://<env>.example.com/api/health`) for up to 60 seconds; check for 200 status and response time <2s. If health checks fail, automatically trigger rollback (`pnpm deploy:rollback --env=<env> --auto`).
@@ -178,6 +181,7 @@ Before running the scripts, provide:
 4. **Current `package.json` scripts** — Show existing build/deploy scripts (if any) to avoid conflicts.
 5. **GitHub Actions Setup** — Confirm if any CI/CD workflow already exists.
 6. **Cloudflare Account Setup** — Confirm:
+   - **Workers Paid Plan** — Required for Next.js 15 deployments (bundle exceeds 3 MiB free-tier limit). Upgrade at dash.cloudflare.com → Workers & Pages → Plans ($5/month).
    - D1 database name and current IDs (if already created).
    - R2 bucket for backups (name, region).
    - KV namespace naming convention.
@@ -212,6 +216,9 @@ The generated runbook must include the following sections:
    - "Worker deployed but DB didn't migrate" → state of the system, recovery options.
 5. **Rollback Procedures** — How to manually invoke `pnpm deploy:rollback --timestamp=<ts>` with examples.
 6. **Resource Limits & Cost** — Backup size thresholds, R2 retention policy, estimated monthly costs.
+   - **Workers Plan**: Requires Workers Paid ($5/month) due to Next.js 15 bundle size (~3.5 MiB gzipped, exceeds 3 MiB free limit).
+   - **Bundle Size Limits**: Free tier = 3 MiB, Paid tier = 10 MiB (gzipped). Current app uses ~3.5 MiB.
+   - **Bundle Size Monitoring**: Track bundle size trends across deployments; alert if size increases by >10% between releases.
 7. **On-Call Escalation** — Who to contact if deploy fails (console log for team, optional Slack/email forwarding).
 8. **Logging & Debugging** — Where to find logs (Logflare, Rollbar), how to access raw deployment artifacts (R2 backups), how to read `deploy-state.json`.
 9. **Canary/Shadow Deploys** — How to use staging environment as a pre-prod test before pushing to production.

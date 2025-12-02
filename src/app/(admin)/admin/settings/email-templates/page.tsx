@@ -2,8 +2,10 @@ import { getEmailTemplates } from "@/actions/email-templates";
 import { EmailTemplatesList } from "./email-templates-list";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
+import { auth } from "@/auth";
 
 export default async function EmailTemplatesPage() {
+  const session = await auth();
   const templates = await getEmailTemplates();
 
   return (
@@ -13,7 +15,7 @@ export default async function EmailTemplatesPage() {
         <p className="text-muted-foreground">Manage automated email notifications.</p>
       </div>
       <Separator />
-      <EmailTemplatesList initialTemplates={templates} />
+      <EmailTemplatesList initialTemplates={templates} defaultTestEmail={session?.user?.email} />
     </div>
   );
 }

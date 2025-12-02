@@ -25,16 +25,56 @@ export interface RateLimitData {
   resetAt: number;
 }
 
+// Simple in-memory KV shim for local dev fallback (no persistence).
+class InMemoryKV {
+  private store = new Map<string, string>();
+
+  async get(key: string, type?: "text" | "json"): Promise<string | null> {
+    const val = this.store.get(key) ?? null;
+    if (val === null) return null;
+    if (type === "json") {
+      try {
+        return JSON.parse(val);
+      } catch {
+        return null;
+      }
+    }
+    return val;
+  }
+
+  async put(key: string, value: string): Promise<void> {
+    this.store.set(key, value);
+  }
+
+  async delete(key: string): Promise<void> {
+    this.store.delete(key);
+  }
+
+  async list({ prefix }: { prefix?: string }): Promise<{ keys: { name: string }[] }> {
+    const keys = Array.from(this.store.keys())
+      .filter((k) => (prefix ? k.startsWith(prefix) : true))
+      .map((name) => ({ name }));
+    return { keys };
+  }
+}
+
+const inMemoryKV = new InMemoryKV();
+
 export class KVService {
   private async getKV() {
     const { env } = await getCloudflareContext({ async: true });
     // Prefer the app data KV binding (NEXT_DATA_KV), but fall back to KV if present.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const binding = (env as any).NEXT_DATA_KV ?? (env as any).KV;
-    if (!binding) {
-      throw new Error("No KV binding found (expected NEXT_DATA_KV or KV)");
+    if (binding) return binding;
+
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[KV] No KV binding found; using in-memory KV (dev only).");
+      // Provide minimal KV-like API for local dev to avoid build/runtime failure.
+      return inMemoryKV as unknown as KVNamespace;
     }
-    return binding;
+
+    throw new Error("No KV binding found (expected NEXT_DATA_KV or KV)");
   }
 
   // ==========================================

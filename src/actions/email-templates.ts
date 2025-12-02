@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { requireCsrf, CsrfError } from "@/lib/csrf";
+import { sendEmailWithContent } from "@/lib/email/service";
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -62,4 +63,60 @@ export async function updateEmailTemplate(
     console.error("Failed to update template:", error);
     return { success: false, error: "Failed to update template" };
   }
+}
+
+function buildSampleVariables(keys: string[] | null | undefined) {
+  const vars: Record<string, string> = {};
+  (keys || []).forEach((key) => {
+    vars[key] = `Sample ${key}`;
+  });
+  return vars;
+}
+
+export async function sendTestEmail(
+  id: string,
+  to: string,
+  subjectOverride?: string,
+  contentOverride?: string,
+  variableKeys?: string[]
+): Promise<ActionResult<void>> {
+  if (!to) return { success: false, error: "Recipient email is required" };
+  if (!(await checkAdmin())) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    await requireCsrf();
+  } catch (e) {
+    if (e instanceof CsrfError) {
+      return { success: false, error: "Request blocked. Please refresh and try again." };
+    }
+    throw e;
+  }
+
+  const db = await getDb();
+  const template = await db.query.emailTemplates.findFirst({
+    where: eq(emailTemplates.id, id),
+  });
+
+  if (!template) return { success: false, error: "Template not found" };
+
+  const subject = subjectOverride || template.subject;
+  const content = contentOverride || template.content;
+  const vars = buildSampleVariables(variableKeys ?? template.variables);
+
+  let renderedSubject = subject;
+  let renderedContent = content;
+
+  for (const [key, value] of Object.entries(vars)) {
+    const regex = new RegExp(`{{${key}}}`, "g");
+    renderedSubject = renderedSubject.replace(regex, value);
+    renderedContent = renderedContent.replace(regex, value);
+  }
+
+  const result = await sendEmailWithContent(to, renderedSubject, renderedContent);
+  if (!result.success) {
+    return { success: false, error: "Failed to send test email" };
+  }
+  return { success: true, data: undefined };
 }
