@@ -14,6 +14,7 @@ const envArg = args.find((arg) => arg.startsWith("--env="))?.split("=")[1];
 const confirm = args.includes("--confirm");
 const dryRun = args.includes("--dry-run");
 const skipSecrets = args.includes("--skip-secrets");
+const skipBackup = args.includes("--skip-backup");
 const backupOnly = args.includes("--backup-only");
 const resume = args.includes("--resume");
 const rollback = args.includes("--rollback");
@@ -33,6 +34,7 @@ if (!envArg || (envArg !== "staging" && envArg !== "production")) {
 }
 
 const ENV = envArg;
+const WRANGLER_ENV = ENV === "staging" ? "preview" : ENV;
 
 // --- Types ---
 interface RunCommandOptions extends ExecSyncOptions {
@@ -98,7 +100,7 @@ async function stage0_ConfigValidation() {
   log("🔍 Stage 0: Configuration Validation");
 
   // Check Wrangler version
-  const wranglerVersion = runCommand("npx wrangler --version");
+  const wranglerVersion = runCommand("pnpm exec wrangler --version");
   log(`   Wrangler version: ${wranglerVersion}`);
   // TODO: Parse and check version >= 3.8
 
@@ -110,13 +112,13 @@ async function stage0_ConfigValidation() {
   runCommand("pnpm --version");
 
   // Check Drizzle Kit
-  runCommand("npx drizzle-kit --version");
+  runCommand("pnpm exec drizzle-kit --version");
 
   // Validate wrangler.jsonc
   const configContent = fs.readFileSync(WRANGLER_CONFIG_PATH, "utf-8");
   // Simple check for env block
-  if (!configContent.includes(`"${ENV}"`)) {
-    throw new Error(`Missing [env.${ENV}] block in wrangler.jsonc`);
+  if (!configContent.includes(`"${WRANGLER_ENV}"`)) {
+    throw new Error(`Missing [env.${WRANGLER_ENV}] block in wrangler.jsonc`);
   }
 
   // Check for IDs placeholders
@@ -201,10 +203,14 @@ async function stage2_SecretSync() {
     // Use spawnSync to avoid exposing secret in command line args if possible,
     // but wrangler secret put reads from stdin
     try {
-      const child = spawnSync("npx", ["wrangler", "secret", "put", key, "--env", ENV], {
-        input: value,
-        encoding: "utf-8",
-      });
+      const child = spawnSync(
+        "pnpm",
+        ["exec", "wrangler", "secret", "put", key, "--env", WRANGLER_ENV],
+        {
+          input: value,
+          encoding: "utf-8",
+        }
+      );
       if (child.status !== 0) {
         console.error(`Failed to sync ${key}: ${child.stderr}`);
       } else {
@@ -217,6 +223,10 @@ async function stage2_SecretSync() {
 }
 
 async function stage3_SafetyBackup() {
+  if (skipBackup) {
+    log("⏭️  Stage 3: Safety Backup (Skipped)");
+    return;
+  }
   log("💾 Stage 3: Safety Backup");
 
   if (!fs.existsSync(BACKUP_DIR)) {
@@ -230,7 +240,9 @@ async function stage3_SafetyBackup() {
   log(`   Backing up ${dbName} to ${backupFile}...`);
 
   try {
-    runCommand(`npx wrangler d1 execute ${dbName} --remote --command ".dump" > ${backupFile}`);
+    runCommand(
+      `pnpm exec wrangler d1 execute ${dbName} --remote --command ".dump" > ${backupFile}`
+    );
 
     const stats = fs.statSync(backupFile);
     const sizeMB = stats.size / (1024 * 1024);
@@ -247,7 +259,9 @@ async function stage3_SafetyBackup() {
     const r2Key = `backups/d1-${ENV}-${timestamp}.sql`;
     // Assuming R2 bucket binding is available or using r2 command
     // Using wrangler r2 object put
-    runCommand(`npx wrangler r2 object put bandofbakers-assets/${r2Key} --file=${backupFile}`);
+    runCommand(
+      `pnpm exec wrangler r2 object put bandofbakers-assets/${r2Key} --file=${backupFile}`
+    );
     log("   ✅ Backup uploaded to R2.");
   } catch (error) {
     console.error("❌ Backup failed.");
@@ -287,7 +301,7 @@ async function stage4_Migration() {
     // Actually, for D1, it's better to use `wrangler d1 migrations apply`.
     // Let's stick to `wrangler d1 migrations apply` as it tracks history in d1_migrations table.
 
-    runCommand(`npx wrangler d1 migrations apply ${dbName} --env ${ENV} --remote`);
+    runCommand(`pnpm exec wrangler d1 migrations apply ${dbName} --env ${WRANGLER_ENV} --remote`);
     log("   ✅ Migrations applied.");
   } catch (error) {
     console.error("❌ Migration failed.");
@@ -300,19 +314,23 @@ async function stage5_Deploy() {
   log("🚀 Stage 5: Deploy");
 
   if (!buildLocal) {
-    log("   Building project...");
-    runCommand("pnpm build");
+    log("   Building project with opennextjs-cloudflare...");
+    runCommand("npx opennextjs-cloudflare build");
+    log("   ✅ Build completed.");
   } else {
-    log("   Using local build artifacts.");
-    if (!fs.existsSync(".next")) {
-      throw new Error("❌ .next folder missing. Run build first or remove --build-local.");
+    log("   Using local build artifacts...");
+    if (!fs.existsSync(".open-next/cloudflare")) {
+      throw new Error(
+        "❌ .open-next/cloudflare folder missing. Run build first or remove --build-local."
+      );
     }
   }
 
   log(`   Deploying to ${ENV}...`);
-  runCommand(
-    `npx wrangler pages deploy .open-next/assets --branch ${ENV === "production" ? "main" : "staging"}`
-  );
+
+  // OpenNext for Cloudflare deploys to Workers, not Pages
+  // Use the opennextjs-cloudflare deploy command
+  runCommand(`npx opennextjs-cloudflare deploy`);
 
   if (noHealthCheck) {
     log("   Health check skipped.");
@@ -383,7 +401,7 @@ async function performRollback() {
     }
     try {
       runCommand(
-        `npx wrangler r2 object get bandofbakers-assets/${r2Key} --file=${localBackupPath}`
+        `pnpm exec wrangler r2 object get bandofbakers-assets/${r2Key} --file=${localBackupPath}`
       );
       log("   ✅ Downloaded backup from R2.");
     } catch {
@@ -402,7 +420,20 @@ async function performRollback() {
 
   log(`   Restoring ${dbName} from ${localBackupPath}...`);
   try {
-    runCommand(`npx wrangler d1 execute ${dbName} --remote --file=${localBackupPath}`);
+    runCommand(`pnpm exec wrangler d1 execute ${dbName} --remote --file=${localBackupPath}`);
+    // Note: Restore might need --env flag if DB binding is env-specific?
+    // Usually d1 execute uses the binding name which is unique per env in our config,
+    // but if we use env-specific bindings, we might need --env.
+    // Let's add it to be safe if it's not production (since prod is default/root usually or named prod)
+    // Actually, we should use WRANGLER_ENV
+    // runCommand(`pnpm exec wrangler d1 execute ${dbName} --env ${WRANGLER_ENV} --remote --file=${localBackupPath}`);
+    // But wait, the original code didn't have --env for execute.
+    // Let's stick to original unless it fails.
+    // Actually, for d1 execute, if the binding is in an env block, we MUST provide --env.
+    // So let's update it.
+    runCommand(
+      `pnpm exec wrangler d1 execute ${dbName} --env ${WRANGLER_ENV} --remote --file=${localBackupPath}`
+    );
     log("   ✅ Database restored successfully.");
   } catch {
     throw new Error("❌ Database restore failed.");

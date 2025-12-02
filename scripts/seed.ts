@@ -1,8 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-import { Readable } from "stream";
-import { finished } from "stream/promises";
+
 import { hashPassword } from "@/lib/crypto";
 
 // Import mock data
@@ -61,15 +60,18 @@ const DB_NAME =
 const R2_BUCKET = "bandofbakers-assets";
 const TEMP_DIR = path.join(process.cwd(), "temp_seed");
 
-const isAdminOnly = args.includes("--admin-only");
+const isProdInit = args.includes("--prod-init");
+const isAdminOnly = args.includes("--admin-only") || isProdInit;
 const skipR2 = args.includes("--skip-r2");
 // Use real products if specified in args OR if configured for the environment
 const useRealProducts =
-  args.includes("--real-products") || seedConfig[env]?.useRealProducts === true;
+  args.includes("--real-products") || isProdInit || seedConfig[env]?.useRealProducts === true;
 const imagesOnly = args.includes("--images-only"); // Full reset mode with only images focus
 const r2Target = args.includes("--r2-remote") || env !== "development" ? "remote" : "local";
 const r2Flag = r2Target === "remote" ? "--remote" : "--local";
+const wranglerEnv = env === "staging" ? "preview" : env;
 const dbFlag = env !== "development" ? `--remote` : "--local"; // Use remote for staging/prod
+const envFlag = env !== "development" ? `--env ${wranglerEnv}` : "";
 
 const normalizeR2Path = (r2Path: string) => (r2Path.startsWith("/") ? r2Path.slice(1) : r2Path);
 const publicUrlForR2Path = (r2Path: string) => `/${normalizeR2Path(r2Path)}`;
@@ -94,18 +96,21 @@ async function main() {
 
   try {
     // 0a. Schema guardrails for older local DBs (add columns used by current app code)
-    const schemaFixes = [
-      "ALTER TABLE testimonials ADD COLUMN status text DEFAULT 'pending' NOT NULL;",
-      "CREATE INDEX IF NOT EXISTS idx_testimonials_status ON testimonials(status);",
-    ];
-    for (const statement of schemaFixes) {
-      try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --command="${statement}"`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
-      } catch {
-        // Ignore if column/index already exists
+    // 0a. Schema guardrails for older local DBs (add columns used by current app code)
+    if (env === "development") {
+      const schemaFixes = [
+        "ALTER TABLE testimonials ADD COLUMN status text DEFAULT 'pending' NOT NULL;",
+        "CREATE INDEX IF NOT EXISTS idx_testimonials_status ON testimonials(status);",
+      ];
+      for (const statement of schemaFixes) {
+        try {
+          execSync(`pnpm exec wrangler d1 execute ${DB_NAME} --local --command="${statement}"`, {
+            stdio: "pipe",
+            encoding: "utf-8",
+          });
+        } catch {
+          // Ignore if column/index already exists
+        }
       }
     }
 
@@ -113,19 +118,25 @@ async function main() {
     if (args.includes("--clear")) {
       console.log("\n🧹 Clearing R2 bucket...");
       try {
-        const listOutput = execSync(`npx wrangler r2 object list ${R2_BUCKET} ${r2Flag}`, {
-          encoding: "utf-8",
-          stdio: ["ignore", "pipe", "ignore"], // Suppress stderr
-        });
+        const listOutput = execSync(
+          `pnpm exec wrangler r2 object list ${R2_BUCKET} ${r2Flag} ${env !== "development" ? `--env ${wranglerEnv}` : ""}`,
+          {
+            encoding: "utf-8",
+            stdio: ["ignore", "pipe", "ignore"], // Suppress stderr
+          }
+        );
 
         const objects = JSON.parse(listOutput);
         if (Array.isArray(objects) && objects.length > 0) {
           console.log(`   Found ${objects.length} objects to delete.`);
           for (const obj of objects) {
             try {
-              execSync(`npx wrangler r2 object delete ${R2_BUCKET}/${obj.key} ${r2Flag}`, {
-                stdio: "ignore",
-              });
+              execSync(
+                `pnpm exec wrangler r2 object delete ${R2_BUCKET}/${obj.key} ${r2Flag} ${env !== "development" ? `--env ${wranglerEnv}` : ""}`,
+                {
+                  stdio: "ignore",
+                }
+              );
               process.stdout.write("."); // Progress indicator
             } catch {
               // Ignore deletion errors
@@ -338,7 +349,7 @@ async function main() {
       );
     }
 
-    if (!isAdminOnly) {
+    if (!isAdminOnly || isProdInit) {
       // Select which product data to use
       const productCategories = useRealProducts ? realProductCategories : mockProductCategories;
       const products = useRealProducts ? realProducts : mockProducts;
@@ -449,9 +460,12 @@ async function main() {
       }
 
       // Bake Sales - use real or mock data based on flag
-      const bakeSalesToSeed = useRealProducts
-        ? [...realPastBakeSales, ...realFutureBakeSales]
-        : [...mockBakeSales, ...mockPastBakeSales];
+      // For prod-init, we skip bake sales unless there are real future ones
+      const bakeSalesToSeed = isProdInit
+        ? []
+        : useRealProducts
+          ? [...realPastBakeSales, ...realFutureBakeSales]
+          : [...mockBakeSales, ...mockPastBakeSales];
 
       for (const sale of bakeSalesToSeed) {
         // Calculate cutoff datetime: Noon the day before the bake sale
@@ -471,7 +485,9 @@ async function main() {
       }
 
       // News Posts (always use mock news posts)
-      for (const post of mockNewsPosts) {
+      // Skip for prod-init
+      const newsPostsToSeed = isProdInit ? [] : mockNewsPosts;
+      for (const post of newsPostsToSeed) {
         const imageUrl = skipR2
           ? post.image_url
           : post.image_url
@@ -492,7 +508,9 @@ async function main() {
       }
 
       // Vouchers (always use mock vouchers)
-      for (const voucher of mockVouchers) {
+      // Skip for prod-init
+      const vouchersToSeed = isProdInit ? [] : mockVouchers;
+      for (const voucher of vouchersToSeed) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO vouchers (id, code, type, value, min_order_value, max_uses, current_uses, max_uses_per_customer, valid_from, valid_until, is_active, created_at, updated_at) VALUES ('${
             voucher.id
@@ -505,8 +523,9 @@ async function main() {
       }
 
       // Orders - use real or mock data based on flag
-      const ordersToSeed = useRealProducts ? realOrders : mockOrders;
-      const orderItemsToSeed = useRealProducts ? realOrderItems : mockOrderItems;
+      // Skip for prod-init
+      const ordersToSeed = isProdInit ? [] : useRealProducts ? realOrders : mockOrders;
+      const orderItemsToSeed = isProdInit ? [] : useRealProducts ? realOrderItems : mockOrderItems;
 
       let orderNumberCounter = 1;
       for (const order of ordersToSeed) {
@@ -557,7 +576,9 @@ async function main() {
       }
 
       // Reviews - use real or empty based on flag (mock reviews don't exist)
-      if (useRealProducts) {
+      // Reviews - use real or empty based on flag (mock reviews don't exist)
+      // Skip for prod-init
+      if (useRealProducts && !isProdInit) {
         for (const review of realReviews) {
           sqlStatements.push(
             `INSERT OR REPLACE INTO reviews (id, product_id, user_id, rating, title, comment, verified_purchase, helpful_count, status, created_at, updated_at) VALUES ('${
@@ -572,7 +593,12 @@ async function main() {
       }
 
       // Testimonials - use real or mock based on flag
-      const testimonialsToSeed = useRealProducts ? realTestimonials : mockTestimonials;
+      // Skip for prod-init
+      const testimonialsToSeed = isProdInit
+        ? []
+        : useRealProducts
+          ? realTestimonials
+          : mockTestimonials;
       for (const testimonial of testimonialsToSeed) {
         sqlStatements.push(
           `INSERT OR REPLACE INTO testimonials (id, name, role, content, rating, avatar_url, user_id, status, created_at, updated_at) VALUES ('${
@@ -638,10 +664,13 @@ async function main() {
 
     if (phase1Statements.length > 0) {
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase1File}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${phase1File}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         console.log("   ✅ Phase 1 complete");
       } catch (e: unknown) {
         console.error("\n❌ Phase 1 failed:");
@@ -673,10 +702,13 @@ async function main() {
 
     if (phase2Statements.length > 0) {
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase2File}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${phase2File}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         console.log("   ✅ Phase 2 complete");
       } catch (e: unknown) {
         console.error("\n❌ Phase 2 failed:");
@@ -702,10 +734,13 @@ async function main() {
 
     if (phase3aStatements.length > 0) {
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3aFile}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${phase3aFile}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         console.log("   ✅ Phase 3a complete");
       } catch (e: unknown) {
         console.error("\n❌ Phase 3a failed:");
@@ -737,10 +772,13 @@ async function main() {
       fs.writeFileSync(batchFile, orderBatches[batchIndex].join("\n"));
 
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${batchFile}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${batchFile}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         process.stdout.write(".");
       } catch (e: unknown) {
         console.error(`\n❌ Phase 3b batch ${batchIndex + 1} failed:`);
@@ -765,10 +803,13 @@ async function main() {
 
     if (phase3cStatements.length > 0) {
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3cFile}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${phase3cFile}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         console.log("   ✅ Phase 3c complete");
       } catch (e: unknown) {
         console.error("\n❌ Phase 3c failed:");
@@ -797,10 +838,13 @@ async function main() {
 
     if (phase3dStatements.length > 0) {
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${phase3dFile}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${phase3dFile}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         console.log("   ✅ Phase 3d complete");
       } catch (e: unknown) {
         console.error("\n❌ Phase 3d failed:");
@@ -818,153 +862,6 @@ async function main() {
     // 3. R2 Population
     if (!skipR2 && !isAdminOnly) {
       console.log("\n☁️  Populating R2 Storage...");
-
-      // Fallback images (generic bakery/bread images + placeholder)
-      const FALLBACK_IMAGES = [
-        "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=800&fit=crop&auto=format", // Generic Bread
-        "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=1200&h=800&fit=crop&auto=format", // Bakery interior
-        "https://placehold.co/800x600/e2e8f0/475569?text=No+Image+Available", // Reliable placeholder
-      ];
-
-      // Helper to download and upload with fallbacks
-      const processImage = async (
-        primaryUrl: string,
-        r2Path: string,
-        category: string,
-        tags: string[] = []
-      ) => {
-        if (!primaryUrl || !primaryUrl.startsWith("http")) return;
-
-        let size = 0;
-        const filename = path.basename(r2Path);
-        const id = `img_${path.basename(r2Path, path.extname(r2Path))}`; // Simple ID generation
-
-        // Check if image already exists in R2 (unless overwriting)
-        const shouldOverwrite = args.includes("--overwrite") || args.includes("--clear");
-
-        if (!shouldOverwrite) {
-          try {
-            const checkResult = execSync(
-              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} ${r2Flag}`,
-              { stdio: "pipe" }
-            );
-            if (checkResult) {
-              console.log(`   ✓ Image already exists in R2: ${r2Path}, skipping upload...`);
-              // Still need to insert into DB if not exists
-              // Since we don't have size easily without downloading, we might skip size or set dummy
-              // But let's try to get size from checkResult if possible, or just default.
-              // For now, let's just insert into DB.
-              imageInsertStatements.push(
-                `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', '${publicUrlForR2Path(
-                  r2Path
-                )}', '${filename}', '${category}', '${JSON.stringify(
-                  tags
-                )}', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
-              );
-              return;
-            }
-          } catch {
-            // Image doesn't exist, continue with upload
-          }
-        }
-
-        // Try primary URL first, then fallbacks
-        // Rotate fallbacks based on filename hash to avoid "same image" everywhere
-        const hash = filename.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const rotatedFallbacks = [
-          ...FALLBACK_IMAGES.slice(hash % FALLBACK_IMAGES.length),
-          ...FALLBACK_IMAGES.slice(0, hash % FALLBACK_IMAGES.length),
-        ];
-
-        const sources = [primaryUrl, ...rotatedFallbacks];
-        let downloaded = false;
-        const tempPath = path.join(TEMP_DIR, path.basename(r2Path));
-
-        for (const url of sources) {
-          try {
-            console.log(
-              `   Downloading ${url === primaryUrl ? "primary" : "fallback"} image: ${url}...`
-            );
-            const res = await fetch(url);
-
-            if (res.status === 404) {
-              console.warn(`   ⚠️  Image not found (404): ${url}`);
-              continue; // Try next source
-            }
-            if (!res.ok) throw new Error(`Status ${res.status}`);
-
-            const fileStream = fs.createWriteStream(tempPath);
-            // @ts-expect-error: Type 'ReadableStream<any>' is not assignable to type 'ReadableStream<Uint8Array>'.
-            await finished(Readable.fromWeb(res.body).pipe(fileStream));
-
-            // Resize image using sharp
-            // We need to import sharp dynamically or use require if it's a CJS script, but this is TSX.
-            // Let's try dynamic import first to avoid top-level import issues if sharp is optional (though it's in deps).
-            // Actually, we can just use standard import at top, but since I'm editing this block, I'll use dynamic import for safety in this context.
-            const sharp = (await import("sharp")).default;
-
-            const buffer = fs.readFileSync(tempPath);
-            const originalSize = buffer.length;
-
-            const resizedBuffer = await sharp(buffer)
-              .resize(1200, 1200, { fit: "inside", withoutEnlargement: true }) // Max 1200x1200, preserve aspect ratio
-              .jpeg({ quality: 80, mozjpeg: true }) // Compress as JPEG
-              .toBuffer();
-
-            fs.writeFileSync(tempPath, resizedBuffer);
-
-            // Get file stats
-            const stats = fs.statSync(tempPath);
-            size = stats.size;
-
-            console.log(
-              `      Resized: ${(originalSize / 1024).toFixed(1)}KB -> ${(size / 1024).toFixed(
-                1
-              )}KB`
-            );
-
-            downloaded = true;
-            break; // Success! Stop trying other sources
-          } catch (error) {
-            console.warn(
-              `   ⚠️  Failed to download ${url}:`,
-              error instanceof Error ? error.message : error
-            );
-            // Continue to next source
-          }
-        }
-
-        if (!downloaded) {
-          console.error(`   ❌ All image sources failed for ${r2Path}. Skipping upload.`);
-          return;
-        }
-
-        try {
-          // Upload
-          console.log(`   Uploading to ${r2Path}...`);
-          execSync(
-            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${tempPath} ${r2Flag}`,
-            {
-              stdio: "ignore",
-            }
-          );
-
-          // Add to SQL
-          imageInsertStatements.push(
-            `INSERT OR REPLACE INTO images (id, url, filename, category, tags, size, created_at, updated_at) VALUES ('${id}', '${publicUrlForR2Path(
-              r2Path
-            )}', '${filename}', '${category}', '${JSON.stringify(
-              tags
-            )}', ${size}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`
-          );
-
-          // Cleanup temp file immediately
-          fs.unlinkSync(tempPath);
-        } catch (uploadError) {
-          console.error(`   ❌ Failed to upload to R2:`, uploadError);
-          if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-        }
-      };
 
       // Helper to process local images from seed-products/ directory
       const processLocalImage = async (
@@ -997,7 +894,7 @@ async function main() {
         if (!shouldOverwrite) {
           try {
             const checkResult = execSync(
-              `npx wrangler r2 object get ${R2_BUCKET}/${r2Path} ${r2Flag}`,
+              `pnpm exec wrangler r2 object get ${R2_BUCKET}/${r2Path} ${r2Flag} ${env !== "development" ? `--env ${wranglerEnv}` : ""}`,
               {
                 stdio: "pipe",
               }
@@ -1024,7 +921,7 @@ async function main() {
           // Upload to R2 directly from source (skipping optimization as requested)
           console.log(`   Uploading to ${r2Path}...`);
           execSync(
-            `npx wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath} ${r2Flag}`,
+            `pnpm exec wrangler r2 object put ${R2_BUCKET}/${r2Path} --file=${fullLocalPath} ${r2Flag} ${env !== "development" ? `--env ${wranglerEnv}` : ""}`,
             {
               stdio: "ignore",
             }
@@ -1042,15 +939,17 @@ async function main() {
       };
 
       // Categories (only process for mock products, real products don't have category images yet)
+      // Categories (only process for mock products, real products don't have category images yet)
+      // Skipped for now as we don't have local images for mock categories
       if (!useRealProducts) {
-        for (const cat of mockProductCategories) {
-          if (cat.image) {
-            await processImage(cat.image, `images/categories/${cat.slug}.jpg`, "category", [
-              "category",
-              cat.slug,
-            ]);
-          }
-        }
+        // for (const cat of mockProductCategories) {
+        //   if (cat.image) {
+        //     await processImage(cat.image, `images/categories/${cat.slug}.jpg`, "category", [
+        //       "category",
+        //       cat.slug,
+        //     ]);
+        //   }
+        // }
       }
 
       // Products
@@ -1085,28 +984,22 @@ async function main() {
           );
         }
       } else {
-        // Use mock products with URL downloads
-        for (const prod of mockProducts) {
-          if (prod.image_url) {
-            await processImage(
-              prod.image_url,
-              `images/products/${prod.category_id}/${prod.slug}.jpg`,
-              prod.category_id,
-              ["product", prod.category_id, prod.slug]
-            );
-          }
-        }
+        // Use mock products with URL downloads - DISABLED
+        // We only support local image seeding now
+        console.log("   ⚠️  Skipping image upload for mock products (no local images available)");
       }
 
       // News (always use mock news posts)
-      for (const post of mockNewsPosts) {
-        if (post.image_url) {
-          await processImage(post.image_url, `images/news/${post.slug}.jpg`, "news", [
-            "news",
-            post.slug,
-          ]);
-        }
-      }
+      // News (always use mock news posts)
+      // Skipped for now as we don't have local images for mock news
+      // for (const post of mockNewsPosts) {
+      //   if (post.image_url) {
+      //     await processImage(post.image_url, `images/news/${post.slug}.jpg`, "news", [
+      //       "news",
+      //       post.slug,
+      //     ]);
+      //   }
+      // }
     }
 
     // 4. Persist image metadata after uploads
@@ -1116,10 +1009,13 @@ async function main() {
       fs.writeFileSync(imagesFile, imageInsertStatements.join("\n"));
 
       try {
-        execSync(`npx wrangler d1 execute ${DB_NAME} --local --file=${imagesFile}`, {
-          stdio: "pipe",
-          encoding: "utf-8",
-        });
+        execSync(
+          `pnpm exec wrangler d1 execute ${DB_NAME} ${dbFlag} ${envFlag} --file=${imagesFile}`,
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+          }
+        );
         console.log("   ✅ Image metadata inserted");
       } catch (e: unknown) {
         console.error("\n❌ Failed to insert image metadata:");

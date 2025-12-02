@@ -1,5 +1,121 @@
 # Deployment Runbook
 
+## One-Time Setup
+
+Before deploying for the first time, you must bootstrap the environment.
+
+1.  **Login to Cloudflare**:
+
+    ```bash
+    pnpm exec wrangler login
+    ```
+
+2.  **Bootstrap Staging**:
+
+    ```bash
+    pnpm setup:staging
+    ```
+
+3.  **Bootstrap Production**:
+    ```bash
+    pnpm setup:prod
+    ```
+
+## Build Configuration
+
+This project uses **OpenNext for Cloudflare** to adapt Next.js for Cloudflare Pages/Workers.
+
+### Build Command
+
+```bash
+npx opennextjs-cloudflare build
+```
+
+**Output**: `.open-next/cloudflare/`
+
+### Required Configuration
+
+**`open-next.config.ts`**:
+
+```typescript
+const config = {
+  default: {
+    override: {
+      wrapper: "cloudflare-node",
+      converter: "edge",
+      proxyExternalRequest: "fetch",
+      incrementalCache: "dummy",
+      tagCache: "dummy",
+      queue: "dummy",
+    },
+  },
+  edgeExternals: ["node:crypto"], // REQUIRED
+  middleware: {
+    external: true,
+    override: {
+      wrapper: "cloudflare-edge",
+      converter: "edge",
+      proxyExternalRequest: "fetch",
+      incrementalCache: "dummy",
+      tagCache: "dummy",
+      queue: "dummy",
+    },
+  },
+};
+```
+
+**`wrangler.jsonc`**:
+
+```jsonc
+{
+  "pages_build_output_dir": ".open-next/cloudflare",
+  "env": {
+    "preview": {
+      // NOT "staging" - Pages only supports "preview" and "production"
+      "name": "bandofbakers-v2-staging",
+      // ... bindings
+    },
+  },
+}
+```
+
+**`next.config.ts`**:
+
+```typescript
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Only initialize for dev
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
+
+const nextConfig = {
+  output: "standalone", // REQUIRED for OpenNext
+  // ... rest of config
+};
+```
+
+### Environment Mapping
+
+The deployment script maps user-facing environment names to Wrangler environment names:
+
+- `--env=staging` → `--env preview` (for Wrangler commands)
+- `--env=production` → `--env production`
+
+This is because **Cloudflare Pages only supports named environments called "preview" and "production"**, but we use "staging" for user-facing commands.
+
+## Custom Domain Setup
+
+**Required**: Custom domains must be manually configured in Cloudflare Dashboard.
+
+See [`docs/CUSTOM_DOMAINS.md`](./CUSTOM_DOMAINS.md) for complete instructions.
+
+**Quick setup**:
+
+1. Go to Cloudflare Dashboard → Pages → bandofbakers-v2 → Custom domains
+2. Add `staging.bandofbakers.co.uk` → Environment: Preview, Branch: staging
+3. Add `bandofbakers.co.uk` → Environment: Production
+
 ## Quick Start
 
 ### Staging Deployment
@@ -58,6 +174,29 @@ If a migration fails, the script will stop before deployment.
 2. Fix the migration file or the database state.
 3. Resume deployment or manually apply the fix.
 
+### Database Seeding
+
+The seed script supports several flags to control what data is populated:
+
+- **`--env=staging|production`**: Targets the specified environment (defaults to development).
+- **`--prod-init`**: **Recommended for initial setup.** Seeds only real products, images, and the admin user. Skips all mock data (news, reviews, testimonials, orders).
+- **`--real-products`**: Seeds real products and images, but includes mock news and users. Uses real reviews/testimonials if available.
+- **`--clear`**: **Destructive.** Clears the R2 bucket before seeding. (Note: The database is always cleared before seeding).
+- **`--admin-only`**: Seeds only the admin user.
+
+**Examples:**
+
+```bash
+# Initial Staging Setup (Clean Slate)
+pnpm seed --env=staging --prod-init --clear
+
+# Reset Staging Database (Keep Images)
+pnpm seed --env=staging --prod-init
+
+# Seed with Mock Data for Testing
+pnpm seed --env=staging --real-products
+```
+
 ### Health Check Failed
 
 If the health check fails after deployment:
@@ -101,3 +240,60 @@ To roll back to a previous state:
 - **Deployment Logs**: GitHub Actions logs.
 - **Runtime Logs**: Cloudflare Pages logs / Logflare.
 - **State File**: `deploy-state.json` (local) or artifact (CI).
+
+## Troubleshooting
+
+### Authentication Error (Code 10000)
+
+If you see `Authentication error [code: 10000]`, it means Wrangler is not authenticated.
+**Fix**: Run `pnpm exec wrangler login`.
+
+### Unknown Argument: json
+
+If you see `Unknown argument: json` or `Unknown arguments: json, kv:namespace, list`, ensure you are using the latest `scripts/setup.ts`.
+**Fix**: The script has been updated to use `pnpm exec` and avoid unsupported flags. Pull the latest changes.
+
+### JSON Parse Error in Setup
+
+If you see `SyntaxError: Bad control character in string literal`, it might be due to URL parsing in `wrangler.jsonc`.
+**Fix**: The `scripts/setup.ts` regex has been updated to handle URLs correctly. Ensure you are using the latest version.
+
+### OpenNext Build Errors
+
+#### `copyTracedFiles` Error
+
+If `opennextjs-cloudflare build` fails with a `copyTracedFiles` error, this is often caused by:
+
+1. **Missing `open-next.config.ts`** - Ensure the config file exists with proper Cloudflare configuration
+2. **Missing `edgeExternals`** - The config MUST include `edgeExternals: ["node:crypto"]`
+3. **Incomplete config** - All required fields must be present (see Build Configuration section)
+
+**Workaround**: If builds are inconsistent, use the `--build-local` flag to reuse a successful build:
+
+```bash
+# Build once successfully
+npx opennextjs-cloudflare build
+
+# Deploy without rebuilding
+pnpm deploy:staging --confirm --skip-backup --build-local
+```
+
+#### Wrong Build Output Directory
+
+If deployment fails with "directory not found":
+
+- Ensure `wrangler.jsonc` has `"pages_build_output_dir": ".open-next/cloudflare"`
+- NOT `.open-next/assets` or `.open-next/worker-build`
+- The `opennextjs-cloudflare` package outputs to `.open-next/cloudflare`
+
+#### "next-on-pages is deprecated" Warning
+
+This project uses `@opennextjs/cloudflare`, not `next-on-pages`. If you see references to `next-on-pages`, they should be replaced with `opennextjs-cloudflare`.
+
+### Health Check Always Fails
+
+If health checks always fail:
+
+1. **Custom domain not configured** - The health check tries `staging.bandofbakers.co.uk` which requires manual DNS setup
+2. **No health endpoint** - Ensure `/api/health/route.ts` exists
+3. **Temporary workaround** - Use `--no-health-check` flag or check the actual `.pages.dev` URL manually

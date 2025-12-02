@@ -23,8 +23,11 @@ function runCommand(command: string): string {
 
 function getWranglerConfig() {
   const content = fs.readFileSync(WRANGLER_CONFIG_PATH, "utf-8");
-  // Simple JSONC parser (removes comments)
-  const json = content.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+  // Robust JSONC parser that preserves strings containing //
+  const json = content.replace(/(".*?"|'.*?')|(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm, (match, string) => {
+    if (string) return string; // Keep strings
+    return ""; // Remove comments
+  });
   return JSON.parse(json);
 }
 
@@ -70,13 +73,15 @@ async function main() {
   const dbName = envConfig.d1_databases[0].database_name;
   console.log(`Checking D1 database: ${dbName}...`);
   try {
-    const d1List = JSON.parse(runCommand("npx wrangler d1 list --json"));
+    const d1List = JSON.parse(runCommand("pnpm exec wrangler d1 list --json"));
     let db = d1List.find((d: any) => d.name === dbName);
 
     if (!db) {
       console.log(`Creating D1 database: ${dbName}...`);
-      const createOutput = JSON.parse(runCommand(`npx wrangler d1 create ${dbName} --json`));
-      db = createOutput;
+      runCommand(`pnpm exec wrangler d1 create ${dbName}`);
+      // Re-fetch list to get the new DB ID
+      const d1ListNew = JSON.parse(runCommand("pnpm exec wrangler d1 list --json"));
+      db = d1ListNew.find((d: any) => d.name === dbName);
     }
 
     console.log(`✅ D1 Database ID: ${db.uuid}`);
@@ -95,15 +100,17 @@ async function main() {
     console.log(`Checking KV namespace: ${kvName}...`);
 
     try {
-      const kvList = JSON.parse(runCommand("npx wrangler kv:namespace list --json"));
+      // wrangler kv namespace list returns JSON by default
+      const kvList = JSON.parse(runCommand("pnpm exec wrangler kv namespace list"));
       let kv = kvList.find((k: any) => k.title === kvName);
 
       if (!kv) {
         console.log(`Creating KV namespace: ${kvName}...`);
-        const createOutput = JSON.parse(
-          runCommand(`npx wrangler kv:namespace create ${kvName} --json`)
-        );
-        kv = createOutput;
+        runCommand(`pnpm exec wrangler kv namespace create ${kvName}`);
+
+        // Re-fetch list to get the new KV ID
+        const kvListNew = JSON.parse(runCommand("pnpm exec wrangler kv namespace list"));
+        kv = kvListNew.find((k: any) => k.title === kvName);
       }
 
       console.log(`✅ KV Namespace ID for ${binding}: ${kv.id}`);
@@ -124,7 +131,7 @@ async function main() {
   // 4. Apply Migrations
   console.log("Applying migrations...");
   try {
-    runCommand(`npx wrangler d1 migrations apply DB --env ${ENV} --remote`);
+    runCommand(`pnpm exec wrangler d1 migrations apply DB --env ${ENV} --remote`);
     console.log("✅ Migrations applied successfully.");
   } catch (error) {
     console.error("Failed to apply migrations.");

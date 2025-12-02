@@ -2,12 +2,15 @@ import type { NextConfig } from "next";
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-initOpenNextCloudflareForDev();
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
 
 const isProd = process.env.NODE_ENV === "production";
 const cloudflareImagesDomain = process.env.NEXT_PUBLIC_CLOUDFLARE_IMAGES_DOMAIN;
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     loader: isProd ? "custom" : undefined,
     loaderFile: isProd ? "./src/lib/image-loader.ts" : undefined,

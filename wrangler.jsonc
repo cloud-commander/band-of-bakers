@@ -2,52 +2,57 @@
   "name": "bandofbakers-v2",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
-  "pages_build_output_dir": ".open-next/assets",
+  "main": ".open-next/worker.js",
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "bandofbakers-db",
       "database_id": "6f8424bd-f96f-493f-9f42-2b8ec5262454",
-      "preview_database_id": "DB"
-    }
+      "preview_database_id": "DB",
+    },
   ],
-  "kv_namespaces": [
-    {
-      "binding": "KV",
-      "id": "4d25b8936ea643a08e49af105979512e",
-      "preview_id": "8915e216f6dc4e6f8d2f4cd6ca8a0138"
-    }
-  ],
+
   "r2_buckets": [
     {
       "binding": "R2",
       "bucket_name": "bandofbakers-assets",
-      "preview_bucket_name": "bandofbakers-assets"
-    }
+      "preview_bucket_name": "bandofbakers-assets",
+    },
   ],
   "env": {
-    "staging": {
+    "preview": {
       "name": "bandofbakers-v2-staging",
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "bandofbakers-db-staging",
-          "database_id": "TODO_STAGING_DB_ID"
-        }
+          "database_id": "c1a2e6ed-e9f3-4788-ae8e-1835375e7737",
+        },
       ],
       "kv_namespaces": [
         {
           "binding": "NEXT_DATA_KV",
-          "id": "TODO_STAGING_NEXT_DATA_KV_ID"
+          "id": "a39b3e6174c94083981fc27a0e851680",
         },
         {
           "binding": "ASSETS_KV",
-          "id": "TODO_STAGING_ASSETS_KV_ID"
-        }
+          "id": "51053156bc7c4d62b8a23a2f8a7ded4d",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "R2",
+          "bucket_name": "bandofbakers-assets",
+          "preview_bucket_name": "bandofbakers-assets",
+        },
       ],
       "vars": {
-        "NEXT_PUBLIC_BASE_URL": "https://staging.bandofbakers.co.uk"
-      }
+        "NEXT_PUBLIC_BASE_URL": "https://staging.bandofbakers.co.uk",
+      },
     },
     "production": {
       "name": "bandofbakers-v2-production",
@@ -55,22 +60,22 @@
         {
           "binding": "DB",
           "database_name": "bandofbakers-db-prod",
-          "database_id": "TODO_PROD_DB_ID"
-        }
+          "database_id": "PROD_SETUP_PENDING",
+        },
       ],
       "kv_namespaces": [
         {
           "binding": "NEXT_DATA_KV",
-          "id": "TODO_PROD_NEXT_DATA_KV_ID"
+          "id": "PROD_SETUP_PENDING",
         },
         {
           "binding": "ASSETS_KV",
-          "id": "TODO_PROD_ASSETS_KV_ID"
-        }
+          "id": "PROD_SETUP_PENDING",
+        },
       ],
       "vars": {
-        "NEXT_PUBLIC_BASE_URL": "https://bandofbakers.co.uk"
-      }
-    }
-  }
+        "NEXT_PUBLIC_BASE_URL": "https://bandofbakers.co.uk",
+      },
+    },
+  },
 }
