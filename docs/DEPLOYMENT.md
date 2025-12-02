@@ -23,7 +23,7 @@ Before deploying for the first time, you must bootstrap the environment.
 
 ## Build Configuration
 
-This project uses **OpenNext for Cloudflare** to adapt Next.js for Cloudflare Pages/Workers.
+This project uses **OpenNext for Cloudflare** to adapt Next.js for Cloudflare Workers.
 
 ### Build Command
 
@@ -31,7 +31,7 @@ This project uses **OpenNext for Cloudflare** to adapt Next.js for Cloudflare Pa
 npx opennextjs-cloudflare build
 ```
 
-**Output**: `.open-next/cloudflare/`
+**Output**: `.open-next/worker.js` (entry point) and `.open-next/assets` (static assets)
 
 ### Required Configuration
 
@@ -68,10 +68,14 @@ const config = {
 
 ```jsonc
 {
-  "pages_build_output_dir": ".open-next/cloudflare",
+  "main": ".open-next/worker.js",
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "compatibility_flags": ["nodejs_compat"],
   "env": {
     "preview": {
-      // NOT "staging" - Pages only supports "preview" and "production"
       "name": "bandofbakers-v2-staging",
       // ... bindings
     },
@@ -112,9 +116,9 @@ See [`docs/CUSTOM_DOMAINS.md`](./CUSTOM_DOMAINS.md) for complete instructions.
 
 **Quick setup**:
 
-1. Go to Cloudflare Dashboard → Pages → bandofbakers-v2 → Custom domains
-2. Add `staging.bandofbakers.co.uk` → Environment: Preview, Branch: staging
-3. Add `bandofbakers.co.uk` → Environment: Production
+1. Go to Cloudflare Dashboard → Workers & Pages → bandofbakers-v2 → Triggers → Custom Domains
+2. Add `staging.bandofbakers.co.uk` (for staging/preview environment)
+3. Add `bandofbakers.co.uk` (for production environment)
 
 ## Quick Start
 
@@ -161,7 +165,7 @@ pnpm deploy:rollback --env=production --timestamp=20251202-120000
 3. **Secret Sync**: Syncs whitelisted secrets to Cloudflare (skipped in CI if configured).
 4. **Safety Backup**: Backs up D1 database to R2.
 5. **Migration**: Applies pending D1 migrations.
-6. **Deploy**: Builds and deploys the Next.js app to Cloudflare Pages.
+6. **Deploy**: Builds and deploys the Next.js app to Cloudflare Workers.
 7. **Health Check**: Verifies the deployment is live and responding.
 
 ## Failure Scenarios
@@ -202,7 +206,7 @@ pnpm seed --env=staging --real-products
 If the health check fails after deployment:
 
 1. The script will prompt for rollback (interactive mode).
-2. Check Cloudflare Pages logs for runtime errors.
+2. Check Cloudflare Workers logs for runtime errors.
 3. Verify environment variables and secrets.
 
 ### Backup Corrupted
@@ -238,7 +242,7 @@ To roll back to a previous state:
 ## Logging & Debugging
 
 - **Deployment Logs**: GitHub Actions logs.
-- **Runtime Logs**: Cloudflare Pages logs / Logflare.
+- **Runtime Logs**: Cloudflare Workers logs / Logflare.
 - **State File**: `deploy-state.json` (local) or artifact (CI).
 
 ## Troubleshooting
@@ -264,9 +268,9 @@ If you see `SyntaxError: Bad control character in string literal`, it might be d
 
 If `opennextjs-cloudflare build` fails with a `copyTracedFiles` error, this is often caused by:
 
-1. **Missing `open-next.config.ts`** - Ensure the config file exists with proper Cloudflare configuration
-2. **Missing `edgeExternals`** - The config MUST include `edgeExternals: ["node:crypto"]`
-3. **Incomplete config** - All required fields must be present (see Build Configuration section)
+1.  **Missing `open-next.config.ts`** - Ensure the config file exists with proper Cloudflare configuration
+2.  **Missing `edgeExternals`** - The config MUST include `edgeExternals: ["node:crypto"]`
+3.  **Incomplete config** - All required fields must be present (see Build Configuration section)
 
 **Workaround**: If builds are inconsistent, use the `--build-local` flag to reuse a successful build:
 
@@ -278,22 +282,25 @@ npx opennextjs-cloudflare build
 pnpm deploy:staging --confirm --skip-backup --build-local
 ```
 
-#### Wrong Build Output Directory
+#### "Missing entry-point" Error
 
-If deployment fails with "directory not found":
+If deployment fails with "Missing entry-point":
 
-- Ensure `wrangler.jsonc` has `"pages_build_output_dir": ".open-next/cloudflare"`
-- NOT `.open-next/assets` or `.open-next/worker-build`
-- The `opennextjs-cloudflare` package outputs to `.open-next/cloudflare`
+- Ensure `wrangler.jsonc` has `"main": ".open-next/worker.js"`
+- Ensure the build completed successfully and created `.open-next/worker.js`
+- Try cleaning the build directory: `rm -rf .open-next` and rebuilding
 
-#### "next-on-pages is deprecated" Warning
+#### "Module format" Error
 
-This project uses `@opennextjs/cloudflare`, not `next-on-pages`. If you see references to `next-on-pages`, they should be replaced with `opennextjs-cloudflare`.
+If deployment fails with "Unexpected external import...":
+
+- You might be pointing `main` to `.open-next/cloudflare/init.js` instead of `.open-next/worker.js`
+- Ensure `wrangler.jsonc` points to the correct worker file
 
 ### Health Check Always Fails
 
 If health checks always fail:
 
-1. **Custom domain not configured** - The health check tries `staging.bandofbakers.co.uk` which requires manual DNS setup
-2. **No health endpoint** - Ensure `/api/health/route.ts` exists
-3. **Temporary workaround** - Use `--no-health-check` flag or check the actual `.pages.dev` URL manually
+1.  **Custom domain not configured** - The health check tries `staging.bandofbakers.co.uk` which requires manual DNS setup
+2.  **No health endpoint** - Ensure `/api/health/route.ts` exists
+3.  **Temporary workaround** - Use `--no-health-check` flag
