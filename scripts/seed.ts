@@ -43,18 +43,33 @@ import {
 import { FAQS } from "@/constants/faq";
 
 // Configuration
-const DB_NAME = "bandofbakers-db";
-const R2_BUCKET = "bandofbakers-assets";
-const TEMP_DIR = path.join(process.cwd(), "temp_seed");
+const SEED_CONFIG_PATH = path.join(process.cwd(), "scripts", "seed-config.json");
+const seedConfig = JSON.parse(fs.readFileSync(SEED_CONFIG_PATH, "utf-8"));
 
 // Arguments
 const args = process.argv.slice(2);
+const envArg = args.find((arg) => arg.startsWith("--env="))?.split("=")[1];
+const env =
+  envArg === "production" ? "production" : envArg === "staging" ? "staging" : "development";
+
+const DB_NAME =
+  env === "production"
+    ? "bandofbakers-db-prod"
+    : env === "staging"
+      ? "bandofbakers-db-staging"
+      : "bandofbakers-db";
+const R2_BUCKET = "bandofbakers-assets";
+const TEMP_DIR = path.join(process.cwd(), "temp_seed");
+
 const isAdminOnly = args.includes("--admin-only");
 const skipR2 = args.includes("--skip-r2");
-const useRealProducts = args.includes("--real-products");
+// Use real products if specified in args OR if configured for the environment
+const useRealProducts =
+  args.includes("--real-products") || seedConfig[env]?.useRealProducts === true;
 const imagesOnly = args.includes("--images-only"); // Full reset mode with only images focus
-const r2Target = args.includes("--r2-remote") ? "remote" : "local";
+const r2Target = args.includes("--r2-remote") || env !== "development" ? "remote" : "local";
 const r2Flag = r2Target === "remote" ? "--remote" : "--local";
+const dbFlag = env !== "development" ? `--remote` : "--local"; // Use remote for staging/prod
 
 const normalizeR2Path = (r2Path: string) => (r2Path.startsWith("/") ? r2Path.slice(1) : r2Path);
 const publicUrlForR2Path = (r2Path: string) => `/${normalizeR2Path(r2Path)}`;
@@ -62,6 +77,8 @@ const publicUrlForR2Path = (r2Path: string) => `/${normalizeR2Path(r2Path)}`;
 
 async function main() {
   console.log("🌱 Starting seed process...");
+  console.log(`   Environment: ${env}`);
+  console.log(`   Database: ${DB_NAME} (${dbFlag})`);
   console.log(
     `   Mode: ${imagesOnly ? "Images Only (Full Reset)" : isAdminOnly ? "Admin Only" : "Full Seed"}`
   );

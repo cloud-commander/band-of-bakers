@@ -1,0 +1,10 @@
+{
+  "staging": {
+    "useRealProducts": false,
+    "adminEmail": "admin@staging.bandofbakers.co.uk"
+  },
+  "production": {
+    "useRealProducts": true,
+    "adminEmail": "admin@bandofbakers.co.uk"
+  }
+}

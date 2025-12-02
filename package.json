@@ -18,8 +18,14 @@
     "images:optimize": "node scripts/optimize-images.js",
     "images:update-refs": "node scripts/update-image-refs.js",
     "images:cleanup": "node scripts/cleanup-old-images.js",
-    "deploy:staging": "npm run build && wrangler pages deploy .open-next/assets --branch staging",
-    "deploy:prod": "npm run build && wrangler pages deploy .open-next/assets --branch main"
+    "deploy:staging": "npx tsx scripts/deploy.ts --env=staging",
+    "deploy:prod": "npx tsx scripts/deploy.ts --env=production",
+    "deploy:rollback": "npx tsx scripts/deploy.ts --rollback",
+    "setup:staging": "npx tsx scripts/setup.ts --env=staging",
+    "setup:prod": "npx tsx scripts/setup.ts --env=production",
+    "seed:staging": "npx tsx scripts/seed.ts --env=staging",
+    "seed:prod": "npx tsx scripts/seed.ts --env=production",
+    "seed:reset": "npx tsx scripts/seed.ts --reset"
   },
   "dependencies": {
     "@builder.io/partytown": "^0.10.3",
