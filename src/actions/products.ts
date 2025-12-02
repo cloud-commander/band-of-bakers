@@ -353,7 +353,26 @@ export async function updateProduct(
     }
 
     // 6b. Persist bake sale availability toggle if provided
-    if (bakeSaleId && isAvailableForBakeSale !== null) {
+    const bakeSaleAvailabilitiesRaw = formData.get("bake_sale_availabilities");
+    if (bakeSaleAvailabilitiesRaw) {
+      try {
+        const availabilities = JSON.parse(bakeSaleAvailabilitiesRaw as string) as Record<
+          string,
+          boolean
+        >;
+        const { productAvailabilityRepository } =
+          await import("@/lib/repositories/product-availability.repository");
+
+        await Promise.all(
+          Object.entries(availabilities).map(([bsId, isAvailable]) =>
+            productAvailabilityRepository.setAvailability(id, bsId, isAvailable)
+          )
+        );
+      } catch (availabilityError) {
+        console.error("Failed to update bake sale availabilities:", availabilityError);
+      }
+    } else if (bakeSaleId && isAvailableForBakeSale !== null) {
+      // Backward compatibility for single bake sale update
       try {
         const { productAvailabilityRepository } =
           await import("@/lib/repositories/product-availability.repository");
@@ -774,5 +793,34 @@ export async function getRandomProducts(count: number = 3) {
   } catch (error) {
     console.error("Get random products error:", error);
     return [];
+  }
+}
+
+/**
+ * Get unavailable products map for multiple bake sales
+ */
+export async function getUnavailableProductsMap(
+  bakeSaleIds: string[]
+): Promise<Record<string, string[]>> {
+  try {
+    const { productAvailabilityRepository } =
+      await import("@/lib/repositories/product-availability.repository");
+
+    const map: Record<string, string[]> = {};
+
+    await Promise.all(
+      bakeSaleIds.map(async (id) => {
+        const unavailableProductIds =
+          await productAvailabilityRepository.getUnavailableProducts(id);
+        if (unavailableProductIds.length > 0) {
+          map[id] = unavailableProductIds;
+        }
+      })
+    );
+
+    return map;
+  } catch (error) {
+    console.error("Failed to fetch unavailable products map:", error);
+    return {};
   }
 }

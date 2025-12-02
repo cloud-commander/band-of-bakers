@@ -63,16 +63,16 @@ interface EditProductFormProps {
   productId: string;
   categories: ProductCategory[];
   initialProduct: Product & { variants: ProductVariant[] };
-  latestBakeSale?: BakeSaleWithLocation | null;
-  initialAvailability?: boolean;
+  upcomingBakeSales: BakeSaleWithLocation[];
+  initialAvailabilities: Record<string, boolean>;
 }
 
 export default function EditProductForm({
   productId,
   categories,
   initialProduct,
-  latestBakeSale = null,
-  initialAvailability = true,
+  upcomingBakeSales,
+  initialAvailabilities,
 }: EditProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,7 +80,8 @@ export default function EditProductForm({
   const [selectedImage, setSelectedImage] = useState<string>(initialProduct.image_url || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(initialProduct.category_id);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [isAvailableForBakeSale, setIsAvailableForBakeSale] = useState(initialAvailability);
+  const [bakeSaleAvailabilities, setBakeSaleAvailabilities] =
+    useState<Record<string, boolean>>(initialAvailabilities);
 
   // Calculate absolute prices for variants
   const variantsWithPrices = initialProduct.variants.map((v) => ({
@@ -120,14 +121,6 @@ export default function EditProductForm({
   // Calculate starting price based on variants
   const startingPrice =
     variants && variants.length > 0 ? Math.min(...variants.map((v) => v.price || 0)) : null;
-  const latestBakeSaleLabel = latestBakeSale
-    ? new Date(latestBakeSale.date).toLocaleDateString("en-GB", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,9 +164,8 @@ export default function EditProductForm({
         }
       }
 
-      if (latestBakeSale) {
-        formData.append("bake_sale_id", latestBakeSale.id);
-        formData.append("is_available_for_bake_sale", String(isAvailableForBakeSale));
+      if (upcomingBakeSales.length > 0) {
+        formData.append("bake_sale_availabilities", JSON.stringify(bakeSaleAvailabilities));
       }
 
       const result = await updateProduct(productId, formData);
@@ -356,28 +348,69 @@ export default function EditProductForm({
             </Label>
           </div>
 
-          <div className="space-y-2">
-            <Label>Availability for bake sale</Label>
-            {latestBakeSale ? (
-              <div className="flex items-start gap-3 border rounded-lg p-3 bg-muted/40">
-                <Checkbox
-                  id="bake-sale-availability"
-                  checked={isAvailableForBakeSale}
-                  onCheckedChange={(checked) => setIsAvailableForBakeSale(checked === true)}
-                />
-                <div className="space-y-1">
-                  <Label htmlFor="bake-sale-availability" className="cursor-pointer">
-                    {latestBakeSaleLabel} at {latestBakeSale.location.name}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Uncheck to mark this product unavailable for this collection date. New bake sale
-                    dates will inherit this setting.
-                  </p>
+          <div className="space-y-4">
+            <Label>Availability for bake sales</Label>
+            {upcomingBakeSales.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="select-all-bake-sales"
+                      checked={
+                        upcomingBakeSales.every((bs) => bakeSaleAvailabilities[bs.id] !== false)
+                          ? true
+                          : upcomingBakeSales.some((bs) => bakeSaleAvailabilities[bs.id] !== false)
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={(checked: boolean | "indeterminate") => {
+                        const newValue = checked === true;
+                        const newAvailabilities = { ...bakeSaleAvailabilities };
+                        upcomingBakeSales.forEach((bs) => {
+                          newAvailabilities[bs.id] = newValue;
+                        });
+                        setBakeSaleAvailabilities(newAvailabilities);
+                      }}
+                    />
+                    <Label htmlFor="select-all-bake-sales" className="cursor-pointer font-medium">
+                      Select All
+                    </Label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {upcomingBakeSales.map((bakeSale) => (
+                    <div
+                      key={bakeSale.id}
+                      className="flex items-center gap-3 border rounded-lg p-3 bg-muted/40"
+                    >
+                      <Checkbox
+                        id={`bake-sale-${bakeSale.id}`}
+                        checked={bakeSaleAvailabilities[bakeSale.id] ?? true}
+                        onCheckedChange={(checked: boolean | "indeterminate") =>
+                          setBakeSaleAvailabilities((prev) => ({
+                            ...prev,
+                            [bakeSale.id]: checked === true,
+                          }))
+                        }
+                      />
+                      <Label
+                        htmlFor={`bake-sale-${bakeSale.id}`}
+                        className="cursor-pointer text-sm"
+                      >
+                        {new Date(bakeSale.date).toLocaleDateString("en-GB", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                        })}{" "}
+                        at {bakeSale.location.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No upcoming bake sale date configured yet.
+                No upcoming bake sale dates configured yet.
               </p>
             )}
           </div>

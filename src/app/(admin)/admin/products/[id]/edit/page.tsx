@@ -1,5 +1,5 @@
 import { getCategories } from "@/actions/categories";
-import { getProductAvailabilityForBakeSale, getProductById } from "@/actions/products";
+import { getProductAvailabilityForBakeSales, getProductById } from "@/actions/products";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { notFound } from "next/navigation";
 import EditProductForm from "./edit-form";
@@ -18,18 +18,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  const latestBakeSale = upcomingBakeSales.at(-1) ?? null;
-  const latestAvailability = latestBakeSale
-    ? await getProductAvailabilityForBakeSale(id, latestBakeSale.id)
-    : true;
+  const upcomingBakeSaleIds = upcomingBakeSales.map((bs) => bs.id);
+  const availabilities = await getProductAvailabilityForBakeSales(id, upcomingBakeSaleIds);
 
   return (
     <EditProductForm
       productId={id}
       categories={categories}
       initialProduct={product}
-      latestBakeSale={latestBakeSale}
-      initialAvailability={latestAvailability}
+      upcomingBakeSales={upcomingBakeSales}
+      initialAvailabilities={availabilities}
     />
   );
 }

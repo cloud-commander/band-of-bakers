@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getActiveProducts, getCategories } from "@/actions/products";
+import { getActiveProducts, getCategories, getUnavailableProductsMap } from "@/actions/products";
 import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { MenuContent } from "./menu-content";
 
@@ -7,11 +7,14 @@ export const dynamic = "force-dynamic";
 export const runtime = "edge";
 
 export default async function MenuPage() {
+  const upcomingBakeSales = await getUpcomingBakeSales();
+  const upcomingBakeSaleIds = upcomingBakeSales.map((bs) => bs.id);
+
   // Fetch data in parallel
-  const [products, categories, upcomingBakeSales] = await Promise.all([
+  const [products, categories, unavailableProductsMap] = await Promise.all([
     getActiveProducts(),
     getCategories(),
-    getUpcomingBakeSales(),
+    getUnavailableProductsMap(upcomingBakeSaleIds),
   ]);
 
   return (
@@ -20,6 +23,7 @@ export default async function MenuPage() {
         initialProducts={products}
         categories={categories}
         upcomingBakeSales={upcomingBakeSales}
+        unavailableProductsMap={unavailableProductsMap}
       />
     </Suspense>
   );

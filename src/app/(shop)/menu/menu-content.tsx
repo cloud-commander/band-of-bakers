@@ -37,9 +37,15 @@ interface MenuContentProps {
   initialProducts: ProductWithVariants[];
   categories: ProductCategory[];
   upcomingBakeSales: BakeSaleWithLocation[];
+  unavailableProductsMap: Record<string, string[]>;
 }
 
-export function MenuContent({ initialProducts, categories, upcomingBakeSales }: MenuContentProps) {
+export function MenuContent({
+  initialProducts,
+  categories,
+  upcomingBakeSales,
+  unavailableProductsMap,
+}: MenuContentProps) {
   const { addItem } = useCart();
   const router = useRouter();
   const pathname = usePathname();
@@ -86,6 +92,12 @@ export function MenuContent({ initialProducts, categories, upcomingBakeSales }: 
   let products = selectedCategory
     ? initialProducts.filter((p) => p.category_id === selectedCategory)
     : initialProducts;
+
+  // Filter out unavailable products for the selected bake sale
+  if (selectedBakeSale && unavailableProductsMap[selectedBakeSale]) {
+    const unavailableIds = unavailableProductsMap[selectedBakeSale];
+    products = products.filter((p) => !unavailableIds.includes(p.id));
+  }
 
   // Apply search filter
   if (searchQuery) {
