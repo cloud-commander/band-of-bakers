@@ -6,7 +6,7 @@ import { revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache";
 import { getDb } from "@/lib/db";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 /**
  * Update image metadata

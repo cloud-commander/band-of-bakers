@@ -4,7 +4,7 @@ import { getUpcomingBakeSales } from "@/actions/bake-sales";
 import { MenuContent } from "./menu-content";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export default async function MenuPage() {
   const upcomingBakeSales = await getUpcomingBakeSales();

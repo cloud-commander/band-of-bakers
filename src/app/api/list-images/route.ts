@@ -4,7 +4,7 @@ import { getCachedImages } from "@/lib/cache";
 import { safeLog } from "@/lib/logger/safe-log";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 /**
  * List images from DB with filtering

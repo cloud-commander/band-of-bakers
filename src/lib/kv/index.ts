@@ -28,8 +28,13 @@ export interface RateLimitData {
 export class KVService {
   private async getKV() {
     const { env } = await getCloudflareContext({ async: true });
+    // Prefer the app data KV binding (NEXT_DATA_KV), but fall back to KV if present.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (env as any).KV;
+    const binding = (env as any).NEXT_DATA_KV ?? (env as any).KV;
+    if (!binding) {
+      throw new Error("No KV binding found (expected NEXT_DATA_KV or KV)");
+    }
+    return binding;
   }
 
   // ==========================================

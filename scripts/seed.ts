@@ -989,6 +989,90 @@ async function main() {
         console.log("   ⚠️  Skipping image upload for mock products (no local images available)");
       }
 
+      // Site/brand assets (hero, logos, team, categories)
+      const siteImages: Array<{
+        local: string;
+        r2Path: string;
+        category: string;
+        tags?: string[];
+      }> = [
+        // Hero / marketing
+        { local: "site/hero/workspace-hero.webp", r2Path: "images/hero/workspace-hero.webp", category: "hero", tags: ["hero"] },
+        { local: "site/hero/bakery-workspace.webp", r2Path: "images/hero/bakery-workspace.webp", category: "hero", tags: ["hero"] },
+        { local: "site/hero/about-hero-v2.webp", r2Path: "images/hero/about-hero-v2.webp", category: "hero", tags: ["hero"] },
+        { local: "site/hero/artisan-bread.webp", r2Path: "images/hero/artisan-bread.webp", category: "hero", tags: ["hero"] },
+        // Logos
+        {
+          local: "site/logos/logo-transparent-256.png",
+          r2Path: "images/logos/logo-transparent-256.png",
+          category: "logo",
+          tags: ["logo", "transparent", "256"],
+        },
+        {
+          local: "site/logos/bandofbakers-256.png",
+          r2Path: "images/logos/bandofbakers-256.png",
+          category: "logo",
+          tags: ["logo", "256"],
+        },
+        {
+          local: "site/logos/logo-transparent-512.png",
+          r2Path: "images/logos/logo-transparent-512.png",
+          category: "logo",
+          tags: ["logo", "transparent", "512"],
+        },
+        {
+          local: "site/logos/logo-transparent-1200.png",
+          r2Path: "images/logos/logo-transparent-1200.png",
+          category: "logo",
+          tags: ["logo", "transparent", "1200"],
+        },
+        // Team
+        { local: "site/team/jon.webp", r2Path: "images/team/jon.webp", category: "team", tags: ["team", "jon"] },
+        { local: "site/team/mike.webp", r2Path: "images/team/mike.webp", category: "team", tags: ["team", "mike"] },
+        // Category hero images (share product assets but exposed under categories/)
+        { local: "foccacia-detail.webp", r2Path: "images/categories/foccacia-detail.webp", category: "category", tags: ["category", "breads-loaves"] },
+        {
+          local: "cinnamon_knots-detail.webp",
+          r2Path: "images/categories/cinnamon_knots-detail.webp",
+          category: "category",
+          tags: ["category", "pastries"],
+        },
+        {
+          local: "large_apple_pie-detail.webp",
+          r2Path: "images/categories/large_apple_pie-detail.webp",
+          category: "category",
+          tags: ["category", "pies-tarts"],
+        },
+        {
+          local: "frangipane_slice-detail.webp",
+          r2Path: "images/categories/frangipane_slice-detail.webp",
+          category: "category",
+          tags: ["category", "cakes-slices"],
+        },
+        {
+          local: "pesto_swirl-detail.webp",
+          r2Path: "images/categories/pesto_swirl-detail.webp",
+          category: "category",
+          tags: ["category", "savory"],
+        },
+        {
+          local: "tiffin_cake_slice-detail.webp",
+          r2Path: "images/categories/tiffin_cake_slice-detail.webp",
+          category: "category",
+          tags: ["category", "biscuits-bars"],
+        },
+        {
+          local: "small_appleblackberry_pies-detail.webp",
+          r2Path: "images/categories/small_appleblackberry_pies-detail.webp",
+          category: "category",
+          tags: ["category", "pies-tarts"],
+        },
+      ];
+
+      for (const img of siteImages) {
+        await processLocalImage(img.local, img.r2Path, img.category, img.tags || []);
+      }
+
       // News (always use mock news posts)
       // News (always use mock news posts)
       // Skipped for now as we don't have local images for mock news

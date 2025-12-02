@@ -14,7 +14,7 @@ interface ProductPageProps {
   }>;
 }
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;

@@ -5,7 +5,7 @@ import { getDb } from "@/lib/db";
 import { images } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 /**
  * Delete image from Cloudflare R2 and DB

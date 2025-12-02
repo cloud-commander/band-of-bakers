@@ -10,7 +10,7 @@ interface OrderDetailPageProps {
   }>;
 }
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
   const order = await getOrderById((await params).id);

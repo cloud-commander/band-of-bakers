@@ -5,7 +5,7 @@ import { images } from "@/db/schema";
 import { nanoid } from "nanoid";
 import { getDb } from "@/lib/db";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 /**
  * Upload image to Cloudflare R2 and save metadata to DB

@@ -121,12 +121,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  experimental: {
-    reactCompiler: false,
-    serverActions: {
-      bodySizeLimit: "5mb",
-    },
-  },
   webpack: (config) => {
     config.module.rules.push({
       test: /https:\/\/fonts\.gstatic\.com\/.*\.ttf$/,

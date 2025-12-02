@@ -25,9 +25,9 @@ export const getDb = cache(async () => {
     return drizzle(env.DB, { schema });
   }
 
-  // Dev/Build fallback (do not import in Edge)
-  // If env.DB is missing, we assume we are in a local environment (dev or build)
-  if (process.env.NEXT_RUNTIME !== "edge") {
+  // Dev-only fallback (skip during production build/edge)
+  // Prevent bundling dev-only deps (better-sqlite3) into the Worker bundle.
+  if (process.env.NODE_ENV !== "production" && process.env.NEXT_RUNTIME !== "edge") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalForDb = globalThis as unknown as { __localDb?: any };
     if (globalForDb.__localDb) {

@@ -25,6 +25,13 @@ Before deploying for the first time, you must bootstrap the environment.
 
 This project uses **OpenNext for Cloudflare** to adapt Next.js for Cloudflare Workers.
 
+### OpenNext/Workers specifics
+
+- The Worker entry point **must** be `.open-next/worker.js`. If that file is missing, rerun `npx opennextjs-cloudflare build` (clean `.open-next` if needed).
+- Deploying via `npx opennextjs-cloudflare deploy --env preview` runs the build first; `npx wrangler deploy --env preview` assumes `.open-next` already exists.
+- Pages/routes cannot use `runtime = "edge"` in the main bundle. Set `runtime = "nodejs"` for app routes/API handlers you want in the Worker bundle.
+- The app uses a KV binding named `NEXT_DATA_KV` (falls back to `KV`) for homepage Instagram settings and other cached data—ensure that binding exists in each Wrangler environment.
+
 ### Build Command
 
 ```bash
@@ -169,6 +176,21 @@ pnpm deploy:rollback --env=production --timestamp=20251202-120000
 7. **Health Check**: Verifies the deployment is live and responding.
 
 ## Failure Scenarios
+
+### Missing Worker entry
+
+Symptom: Wrangler reports “Missing entry-point”.  
+Fix: Remove `.open-next`, rerun `npx opennextjs-cloudflare build`, and confirm `.open-next/worker.js` exists.
+
+### Edge runtime in app routes
+
+Symptom: `app/... cannot use the edge runtime. OpenNext requires edge runtime function to be defined in a separate function.`  
+Fix: Switch `export const runtime = "edge";` to `"nodejs"` for app routes/API handlers bundled into the Worker.
+
+### KV binding missing for Instagram settings
+
+Symptom: Build logs “Failed to fetch instagram settings from KV (env binding undefined)”.  
+Fix: Ensure the environment binds `NEXT_DATA_KV` (or `KV`) in `wrangler.jsonc`; the code reads Instagram embed HTML and feature flag from that KV.
 
 ### Migration Failed
 

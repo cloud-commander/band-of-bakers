@@ -3,7 +3,7 @@ import { FAQ_CATEGORIES, FAQS } from "@/constants/faq";
 import { FaqContent } from "./faq-content";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export default async function FAQPage() {
   const result = await getPublicFaqs();
