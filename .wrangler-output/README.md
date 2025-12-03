@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "bandofbakers-v2" generated at 2025-12-03T18:33:35.887Z.

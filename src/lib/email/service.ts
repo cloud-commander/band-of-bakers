@@ -25,7 +25,6 @@ function getFromAddress() {
 }
 
 const BRAND_LOGO_URL = "https://bandofbakers.co.uk/images/logos/bandofbakers-256.png";
-const BRAND_PRIMARY = "#d97706"; // amber-600
 const BRAND_TEXT = "#1c1917"; // stone-900
 const BRAND_MUTED = "#57534e"; // stone-600
 const BRAND_BG = "#fafaf9"; // stone-50

@@ -4,6 +4,11 @@
 
 @layer base {
   :root {
+    --font-inter: "Inter", system-ui, sans-serif;
+    --font-playfair: "Playfair Display", "Times New Roman", serif;
+    --font-dm-serif: "DM Serif Display", "Times New Roman", serif;
+    --font-geist-sans: "Inter", system-ui, sans-serif;
+
     /* Tactile Brutalism Palette */
     --bg: 36 14% 96%; /* #F7F5F3 Warm Flour */
     --bg-warm: #f7f5f3;

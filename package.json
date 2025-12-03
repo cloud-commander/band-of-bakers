@@ -28,7 +28,6 @@
     "seed:reset": "npx tsx scripts/seed.ts --reset"
   },
   "dependencies": {
-    "@builder.io/partytown": "^0.10.3",
     "@hookform/resolvers": "^5.2.2",
     "@next/bundle-analyzer": "^16.0.5",
     "@opennextjs/cloudflare": "^1.13.1",

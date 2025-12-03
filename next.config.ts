@@ -11,6 +11,12 @@ const cloudflareImagesDomain = process.env.NEXT_PUBLIC_CLOUDFLARE_IMAGES_DOMAIN;
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Externalize these packages to prevent them from being bundled in the worker
+  serverExternalPackages: [
+    "rollbar",
+    "better-sqlite3",
+    "@react-email/components",
+  ],
   images: {
     loader: isProd ? "custom" : undefined,
     loaderFile: isProd ? "./src/lib/image-loader.ts" : undefined,
@@ -121,7 +127,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    // Externalize packages that shouldn't be bundled
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        "better-sqlite3": "commonjs better-sqlite3",
+        rollbar: "commonjs rollbar",
+        sharp: "commonjs sharp",
+      });
+    }
+
     config.module.rules.push({
       test: /https:\/\/fonts\.gstatic\.com\/.*\.ttf$/,
       use: {

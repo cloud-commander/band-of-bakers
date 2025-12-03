@@ -1,29 +1,8 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-
-const dmSerifDisplay = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-dm-serif",
-  display: "swap",
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-playfair",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bandofbakers.co.uk"),
@@ -52,8 +31,8 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: "/logo.ico",
-    apple: "/images/logos/bandofbakers-256.png",
+    icon: "https://bandofbakers.co.uk/logo.ico",
+    apple: "https://bandofbakers.co.uk/images/logos/bandofbakers-256.png",
   },
   openGraph: {
     type: "website",
@@ -65,7 +44,7 @@ export const metadata: Metadata = {
       "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
     images: [
       {
-        url: "/images/logos/bandofbakers-256.png",
+        url: "https://bandofbakers.co.uk/images/logos/bandofbakers-256.png",
         width: 1200,
         height: 630,
         alt: "Band of Bakers - Artisan Bakery",
@@ -77,7 +56,7 @@ export const metadata: Metadata = {
     title: "Band of Bakers | Artisan Bakery in Shropshire",
     description:
       "Award-winning artisan bakery in Shropshire. Fresh-baked sourdough bread, pastries, and baked goods.",
-    images: ["/images/logos/bandofbakers-256.png"],
+    images: ["https://bandofbakers.co.uk/images/logos/bandofbakers-256.png"],
     creator: "@bandofbakers",
   },
   robots: {
@@ -104,13 +83,10 @@ import {
   LazyLogflareProvider,
   LazyWebVitalsProvider,
 } from "@/components/analytics/lazy-providers";
-import { Partytown } from "@builder.io/partytown/react";
 import { LazyMotionProvider } from "@/components/providers/lazy-motion-provider";
 
 import { StructuredData } from "@/components/seo/structured-data";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
-
-const enablePartytown = process.env.NEXT_PUBLIC_PARTYTOWN === "true";
 
 export default function RootLayout({
   children,
@@ -118,22 +94,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfairDisplay.variable}`}>
+    <html lang="en">
       <head>
         <GoogleAnalytics />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=DM+Serif+Display&display=swap"
+        />
         <link rel="preconnect" href="https://pub-e6068271bc7f407fa2c8d76686fe9cfe.r2.dev" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* PWA manifest removed (not in use) */}
-        {enablePartytown && <Partytown debug={false} forward={["dataLayer.push"]} />}
         <StructuredData />
       </head>
-      <body
-        className={cn(
-          "min-h-screen antialiased font-sans bg-stone-50 relative",
-          dmSerifDisplay.variable
-        )}
-      >
+      <body className={cn("min-h-screen antialiased font-sans bg-stone-50 relative")}>
         <div
           className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-multiply"
           style={{

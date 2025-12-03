@@ -1,9 +1,10 @@
 // Server-side Rollbar logger for Next.js API routes and server actions
-import Rollbar from "rollbar";
+// IMPORTANT: Lazy-loaded to prevent bundling in Cloudflare Workers
+import type Rollbar from "rollbar";
 
 let rollbarInstance: Rollbar | null = null;
 
-function initializeRollbar(): Rollbar {
+async function initializeRollbar(): Promise<Rollbar> {
   if (rollbarInstance) {
     return rollbarInstance;
   }
@@ -11,28 +12,41 @@ function initializeRollbar(): Rollbar {
   const token = process.env.ROLLBAR_SERVER_TOKEN;
   const isDisabled = process.env.NEXT_PUBLIC_ROLLBAR_DISABLED === "true";
 
-  if (!token || isDisabled) {
-    // Return a no-op logger if Rollbar is not configured or disabled
+  // Skip Rollbar in Edge runtime (Cloudflare Workers)
+  const isEdge = process.env.NEXT_RUNTIME === "edge" ||
+    typeof (globalThis as unknown as { EdgeRuntime?: unknown }).EdgeRuntime !== "undefined";
+
+  if (!token || isDisabled || isEdge) {
+    // Return a no-op logger if Rollbar is not configured, disabled, or on Edge
     return createNoOpRollbar();
   }
 
-  rollbarInstance = new Rollbar({
-    accessToken: token,
-    environment: process.env.NODE_ENV || "development",
-    captureUncaught: true,
-    captureUnhandledRejections: true,
-    payload: {
-      environment: process.env.NODE_ENV || "development",
-      code_version: "1.0.0",
-      server: {
-        host: process.env.VERCEL_URL || "localhost",
-        branch: process.env.VERCEL_GIT_COMMIT_REF || "main",
-        code_version: process.env.VERCEL_GIT_COMMIT_SHA || "unknown",
-      },
-    },
-  });
+  // Lazy load Rollbar only when needed and only in Node.js runtime
+  try {
+    const RollbarModule = await import("rollbar");
+    const RollbarClass = RollbarModule.default;
 
-  return rollbarInstance;
+    rollbarInstance = new RollbarClass({
+      accessToken: token,
+      environment: process.env.NODE_ENV || "development",
+      captureUncaught: true,
+      captureUnhandledRejections: true,
+      payload: {
+        environment: process.env.NODE_ENV || "development",
+        code_version: "1.0.0",
+        server: {
+          host: process.env.VERCEL_URL || "localhost",
+          branch: process.env.VERCEL_GIT_COMMIT_REF || "main",
+          code_version: process.env.VERCEL_GIT_COMMIT_SHA || "unknown",
+        },
+      },
+    });
+
+    return rollbarInstance;
+  } catch {
+    // If Rollbar fails to load (e.g., in Edge runtime), return no-op
+    return createNoOpRollbar();
+  }
 }
 
 function createNoOpRollbar(): Rollbar {
@@ -46,8 +60,8 @@ function createNoOpRollbar(): Rollbar {
   } as unknown as Rollbar;
 }
 
-export function getRollbar(): Rollbar {
-  return initializeRollbar();
+export async function getRollbar(): Promise<Rollbar> {
+  return await initializeRollbar();
 }
 
 export async function reportError(
@@ -55,7 +69,7 @@ export async function reportError(
   level: "warning" | "error" | "critical" = "error",
   extra?: Record<string, unknown>
 ): Promise<void> {
-  const rollbar = initializeRollbar();
+  const rollbar = await initializeRollbar();
 
   try {
     if (typeof error === "string") {
@@ -73,10 +87,12 @@ export async function reportError(
 
 export const serverRollbar = {
   info: async (message: string, extra?: Record<string, unknown>) => {
-    await getRollbar().info(message, extra);
+    const rollbar = await getRollbar();
+    await rollbar.info(message, extra);
   },
   warn: async (message: string, extra?: Record<string, unknown>) => {
-    await getRollbar().warning(message, extra);
+    const rollbar = await getRollbar();
+    await rollbar.warning(message, extra);
   },
   error: (error: Error | string, extra?: Record<string, unknown>) =>
     reportError(error, "error", extra),

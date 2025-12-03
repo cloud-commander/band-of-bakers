@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { signIn } from "next-auth/react";
@@ -54,12 +53,19 @@ export default function LoginPage() {
 
           <div className="text-center text-sm">
             <span>Don&apos;t have an account? </span>
-            <Link
-              href="/auth/signup"
+            <button
+              type="button"
+              onClick={() =>
+                signIn("cognito", {
+                  callbackUrl,
+                  redirect: true,
+                  screen_hint: "signup",
+                })
+              }
               className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
             >
               Sign up
-            </Link>
+            </button>
           </div>
         </CardContent>
       </Card>

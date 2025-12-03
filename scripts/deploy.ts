@@ -240,9 +240,9 @@ async function stage3_SafetyBackup() {
   log(`   Backing up ${dbName} to ${backupFile}...`);
 
   try {
-    runCommand(
-      `pnpm exec wrangler d1 execute ${dbName} --remote --command ".dump" > ${backupFile}`
-    );
+    // Use wrangler d1 export for remote backups (Wrangler 3.72+)
+    // The .dump meta-command is not supported by Cloudflare's remote D1 API
+    runCommand(`pnpm exec wrangler d1 export ${dbName} --remote --output ${backupFile}`);
 
     const stats = fs.statSync(backupFile);
     const sizeMB = stats.size / (1024 * 1024);
