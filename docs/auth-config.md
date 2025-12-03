@@ -207,72 +207,121 @@ This creates the OAuth callback endpoint at `/api/auth/callback/cognito`.
 
 ### 4. **src/app/(auth)/auth/login/page.tsx** - Login Page
 
-Client component that redirects to Cognito:
+Server component that redirects to a Route Handler for authentication:
 
 ```typescript
-"use client";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const session = await auth();
+  const params = await searchParams;
+  const callbackUrl = params.callbackUrl || "/";
 
-export const dynamic = "force-dynamic";
+  // If already logged in, redirect to callback URL
+  if (session?.user) {
+    redirect(callbackUrl);
+  }
 
-export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
-
-  useEffect(() => {
-    // Automatically redirect to Cognito login
-    // trustHost: true in auth.ts detects the correct environment
-    const handleLogin = async () => {
-      await signIn("cognito", { callbackUrl, redirect: true });
-    };
-
-    handleLogin().catch((error) => {
-      console.error("Login error:", error);
-    });
-  }, [callbackUrl]);
-
-  return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign In</CardTitle>
-          <p className="text-sm text-muted-foreground">Redirecting to login...</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-center text-sm text-muted-foreground">
-            If you are not redirected automatically, click below.
-          </p>
-          <Button
-            onClick={() => signIn("cognito", { callbackUrl, redirect: true })}
-            className="w-full"
-          >
-            Sign in with Cognito
-          </Button>
-          <div className="text-center text-sm">
-            <span>Don&apos;t have an account? </span>
-            <Link href="/auth/signup" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </>
-  );
+  // Redirect to route handler that will initiate Cognito OAuth flow
+  redirect(`/api/auth/signin-cognito?callbackUrl=${encodeURIComponent(callbackUrl)}`);
 }
 ```
 
 **Key Features:**
 
-- **Auto-redirect** - Immediately triggers `signIn("cognito")` on page load
-- **Fallback button** - Manual signin option if auto-redirect fails
-- **callbackUrl support** - Returns user to intended page after login
-- **force-dynamic** - Prevents page caching (important for auth flows)
+- **Server Component** - Uses Next.js 15 async Server Components
+- **Session Check** - Redirects already logged-in users to their intended destination
+- **Route Handler Redirect** - Delegates to `/api/auth/signin-cognito` which can modify cookies
+- **callbackUrl support** - Preserves intended destination through the auth flow
+
+**Important:** In Next.js 15, Server Components cannot modify cookies directly. The `signIn()` function from NextAuth requires cookie modification, so we redirect to a Route Handler instead.
+
+### 5. **src/app/api/auth/signin-cognito/route.ts** - Sign In Route Handler
+
+Route Handler that initiates Cognito OAuth flow:
+
+```typescript
+import { signIn } from "@/auth";
+import { NextRequest } from "next/server";
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  // Use NextAuth signIn action to redirect to Cognito Hosted UI
+  await signIn("cognito", {
+    redirectTo: callbackUrl,
+  });
+}
+```
+
+**Key Features:**
+
+- **Route Handler** - Can modify cookies (required for OAuth flow)
+- **Query Parameters** - Accepts `callbackUrl` and optional `screen_hint` for signup
+- **Redirect to Cognito** - Initiates OAuth flow with Cognito Hosted UI
+
+### 6. **src/app/api/auth/signout-cognito/route.ts** - Sign Out Route Handler
+
+Route Handler that properly logs out from both NextAuth and Cognito:
+
+```typescript
+import { signOut } from "@/auth";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  // First, sign out from NextAuth
+  await signOut({ redirect: false });
+
+  // Get Cognito configuration
+  const cognitoIssuer = process.env.AUTH_COGNITO_ISSUER;
+  const clientId = process.env.AUTH_COGNITO_ID;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin;
+
+  if (!cognitoIssuer || !clientId) {
+    return NextResponse.redirect(new URL(callbackUrl, baseUrl));
+  }
+
+  // Extract region and user pool ID from issuer URL
+  // Format: https://cognito-idp.{region}.amazonaws.com/{userPoolId}
+  const issuerMatch = cognitoIssuer.match(/https:\/\/cognito-idp\.([^.]+)\.amazonaws\.com\/([^/]+)/);
+
+  if (!issuerMatch) {
+    return NextResponse.redirect(new URL(callbackUrl, baseUrl));
+  }
+
+  const region = issuerMatch[1];
+  const userPoolId = issuerMatch[2];
+
+  // Construct Cognito logout URL
+  const cognitoDomain = `https://${userPoolId}.auth.${region}.amazoncognito.com`;
+  const logoutUrl = new URL(`${cognitoDomain}/logout`);
+  logoutUrl.searchParams.set("client_id", clientId);
+  logoutUrl.searchParams.set("logout_uri", `${baseUrl}${callbackUrl}`);
+
+  // Redirect to Cognito logout endpoint
+  return NextResponse.redirect(logoutUrl.toString());
+}
+```
+
+**Key Features:**
+
+- **Two-Step Logout** - Clears both NextAuth session and Cognito session
+- **Cognito Logout URL** - Constructs logout URL from issuer and client ID
+- **Callback URL** - Returns user to specified page after logout
+- **Fallback** - Gracefully handles missing Cognito configuration
+
+**Why This Is Needed:**
+
+Without logging out from Cognito, the Cognito session remains active. When the user tries to login again, Cognito automatically logs them back in without prompting for credentials, making logout ineffective.
 
 ### 5. **wrangler.jsonc** - Environment Variables
 
@@ -352,14 +401,16 @@ In AWS Cognito console:
   https://bandofbakers.co.uk/api/auth/callback/cognito
   ```
 
-- **Sign out URL(s):**
+- **Sign out URL(s):** (Required for proper logout flow)
 
   ```
-  http://localhost:3000
-  http://localhost:8788
-  https://staging.bandofbakers.co.uk
-  https://bandofbakers.co.uk
+  http://localhost:3000/
+  http://localhost:8788/
+  https://staging.bandofbakers.co.uk/
+  https://bandofbakers.co.uk/
   ```
+
+  **Important:** The trailing slash is required! Cognito logout redirects to `logout_uri` parameter, which our `/api/auth/signout-cognito` handler provides.
 
 - **Allowed OAuth Scopes:** openid, profile, email
 - **Token Endpoint Authentication:** None
@@ -407,6 +458,96 @@ Same flow, but with production domain.
 **No code changes needed!** The `trustHost: true` setting handles environment detection automatically via HTTP Host headers.
 
 ## Common Issues & Solutions
+
+### Issue: "Cookies can only be modified in a Server Action or Route Handler"
+
+**Problem:** Mobile login fails with error: "Cookies can only be modified in a Server Action or Route Handler"
+
+**Cause:** In Next.js 15, Server Components cannot modify cookies. The `signIn()` function needs to set cookies for the OAuth state.
+
+**Solution:**
+
+1. Create a Route Handler at `/api/auth/signin-cognito/route.ts` that calls `signIn()`
+2. Make the login page redirect to this Route Handler instead of calling `signIn()` directly
+3. Example:
+
+```typescript
+// Login page - Server Component
+export default async function LoginPage({ searchParams }) {
+  const params = await searchParams;
+  const callbackUrl = params.callbackUrl || "/";
+  redirect(`/api/auth/signin-cognito?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+}
+
+// Route Handler - Can modify cookies
+export async function GET(request: NextRequest) {
+  const callbackUrl = request.nextUrl.searchParams.get("callbackUrl") || "/";
+  await signIn("cognito", { redirectTo: callbackUrl });
+}
+```
+
+### Issue: Mobile 404 error on auth pages
+
+**Problem:** Auth pages work on desktop but show 404 on mobile
+
+**Cause:** In Next.js 15, `useSearchParams()` requires a Suspense boundary, but this was only failing on some devices/browsers
+
+**Solution (Original):**
+
+Wrap components using `useSearchParams()` in a Suspense boundary:
+
+```typescript
+<Suspense fallback={<div>Loading...</div>}>
+  <LoginContent />
+</Suspense>
+```
+
+**Solution (Better):**
+
+Use Server Components with async `searchParams` instead:
+
+```typescript
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const params = await searchParams; // No Suspense needed!
+  const callbackUrl = params.callbackUrl || "/";
+  // ...
+}
+```
+
+### Issue: Logout doesn't work - auto-logs back in
+
+**Problem:** After clicking logout, user is immediately logged back in without entering credentials
+
+**Cause:** Only the NextAuth session is cleared, but the Cognito session remains active. When redirecting to login, Cognito sees the active session and automatically re-authenticates.
+
+**Solution:**
+
+1. Create a custom logout Route Handler at `/api/auth/signout-cognito/route.ts`
+2. First call `signOut({ redirect: false })` to clear NextAuth session
+3. Then redirect to Cognito's logout endpoint: `https://{userPoolId}.auth.{region}.amazoncognito.com/logout`
+4. Include `client_id` and `logout_uri` parameters
+5. Update logout buttons to use `/api/auth/signout-cognito` instead of calling `signOut()` directly
+
+**Example logout flow:**
+
+```typescript
+// User clicks logout
+window.location.href = "/api/auth/signout-cognito?callbackUrl=/";
+
+// Route Handler
+export async function GET(request: NextRequest) {
+  await signOut({ redirect: false }); // Clear NextAuth
+
+  // Construct Cognito logout URL
+  const logoutUrl = `https://${userPoolId}.auth.${region}.amazoncognito.com/logout?client_id=${clientId}&logout_uri=${baseUrl}/`;
+
+  return NextResponse.redirect(logoutUrl); // Clear Cognito session
+}
+```
 
 ### Issue: Redirect to localhost on staging
 

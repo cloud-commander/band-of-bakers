@@ -1,75 +1,20 @@
-"use client";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { QuotesDisplay } from "@/components/quotes-display";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const session = await auth();
+  const params = await searchParams;
+  const callbackUrl = params.callbackUrl || "/";
 
-export const dynamic = "force-dynamic";
+  // If already logged in, redirect to callback URL
+  if (session?.user) {
+    redirect(callbackUrl);
+  }
 
-export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
-
-  useEffect(() => {
-    // Automatically redirect to Cognito login
-    // This ensures the auth flow works correctly across all environments
-    // (localhost, staging, production) with trustHost: true detecting the correct host
-    const handleLogin = async () => {
-      await signIn("cognito", { callbackUrl, redirect: true });
-    };
-
-    handleLogin().catch((error) => {
-      console.error("Login error:", error);
-    });
-  }, [callbackUrl]);
-
-  return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle
-            className={`${DESIGN_TOKENS.typography.h2.size} ${DESIGN_TOKENS.typography.h2.weight}`}
-            style={{ fontFamily: DESIGN_TOKENS.typography.h2.family }}
-          >
-            Sign In
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">Redirecting to login...</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-center text-sm text-muted-foreground">
-            If you are not redirected automatically, click the button below.
-          </p>
-
-          <Button
-            onClick={() => signIn("cognito", { callbackUrl, redirect: true })}
-            className="w-full"
-          >
-            Sign in with Cognito
-          </Button>
-
-          <div className="text-center text-sm">
-            <span>Don&apos;t have an account? </span>
-            <button
-              type="button"
-              onClick={() =>
-                signIn("cognito", {
-                  callbackUrl,
-                  redirect: true,
-                  screen_hint: "signup",
-                })
-              }
-              className="text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
-            >
-              Sign up
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-      <QuotesDisplay />
-    </>
-  );
+  // Redirect to route handler that will initiate Cognito OAuth flow
+  redirect(`/api/auth/signin-cognito?callbackUrl=${encodeURIComponent(callbackUrl)}`);
 }

@@ -68,7 +68,7 @@ export const UserMenu = memo(function UserMenu({ isLoggedIn, userImage, userName
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="flex items-center cursor-pointer"
-          onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
+          onClick={() => window.location.href = "/api/auth/signout-cognito?callbackUrl=/"}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Logout

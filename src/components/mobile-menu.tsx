@@ -226,7 +226,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
                           )}
                           <button
                             className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left"
-                            onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
+                            onClick={() => window.location.href = "/api/auth/signout-cognito?callbackUrl=/"}
                           >
                             <LogOut className="h-5 w-5" />
                             <span>Log Out</span>
