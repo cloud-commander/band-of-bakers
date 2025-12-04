@@ -5,6 +5,7 @@ import readline from "readline";
 
 // --- Configuration ---
 const WRANGLER_CONFIG_PATH = path.join(process.cwd(), "wrangler.jsonc");
+const CRON_WRANGLER_CONFIG_PATH = path.join(process.cwd(), "wrangler.overdue-cron.jsonc");
 const STATE_FILE_DEFAULT = "deploy-state.json";
 const BACKUP_DIR = path.join(process.cwd(), "backups");
 
@@ -182,7 +183,18 @@ async function stage2_SecretSync() {
   const secrets = envContent.split("\n").filter((line) => line.trim() && !line.startsWith("#"));
 
   // Whitelist
-  const whitelist = ["CLOUDFLARE_", "DATABASE_", "RESEND_", "BANDOFBAKERS_"];
+  const whitelist = [
+    "CLOUDFLARE_",
+    "DATABASE_",
+    "RESEND_",
+    "BANDOFBAKERS_",
+    // Cognito / NextAuth
+    "AUTH_COGNITO_",
+    "AUTH_SECRET",
+    "NEXTAUTH_URL",
+    "AUTH_URL",
+    "CRON_SECRET",
+  ];
   const secretsToSync = secrets.filter((s) => whitelist.some((prefix) => s.startsWith(prefix)));
 
   if (secretsToSync.length === 0) {
@@ -378,6 +390,59 @@ async function stage5_Deploy() {
   }
 }
 
+async function stage6_CronDeploy() {
+  log("⏰ Stage 6: Deploy Overdue Cron Worker");
+
+  if (!fs.existsSync(CRON_WRANGLER_CONFIG_PATH)) {
+    log("   Cron wrangler config not found, skipping (expected wrangler.overdue-cron.jsonc).");
+    return;
+  }
+
+  const envFile = `.env.${ENV}`;
+  const cronSecretLine = fs.existsSync(envFile)
+    ? fs
+        .readFileSync(envFile, "utf-8")
+        .split("\n")
+        .find((line) => line.startsWith("CRON_SECRET="))
+    : undefined;
+
+  if (!cronSecretLine) {
+    console.warn("⚠️  CRON_SECRET missing in env file. Cron deploy will continue without updating secret.");
+  } else {
+    const [, cronSecretValue] = cronSecretLine.split("=");
+    if (cronSecretValue) {
+      log("   Syncing CRON_SECRET for cron worker...");
+      const child = spawnSync(
+        "pnpm",
+        [
+          "exec",
+          "wrangler",
+          "secret",
+          "put",
+          "CRON_SECRET",
+          "--env",
+          WRANGLER_ENV,
+          "--config",
+          CRON_WRANGLER_CONFIG_PATH,
+        ],
+        {
+          input: cronSecretValue,
+          encoding: "utf-8",
+        }
+      );
+      if (child.status !== 0) {
+        console.error(`   ❌ Failed to sync CRON_SECRET for cron worker: ${child.stderr || child.stdout}`);
+      } else {
+        console.log("   ✅ Synced CRON_SECRET for cron worker");
+      }
+    }
+  }
+
+  log("   Deploying cron worker...");
+  runCommand(`pnpm exec wrangler deploy --config ${CRON_WRANGLER_CONFIG_PATH} --env ${WRANGLER_ENV}`);
+  log("   ✅ Cron worker deployed.");
+}
+
 async function performRollback() {
   log("⏪ Rollback Mode");
 
@@ -481,6 +546,9 @@ async function main() {
     saveState("stage4");
 
     await stage5_Deploy();
+    saveState("stage5");
+
+    await stage6_CronDeploy();
     saveState("complete");
 
     log("\n✨ Deployment complete!");

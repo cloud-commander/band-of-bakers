@@ -32,7 +32,8 @@ type StatusFilter =
   | "fulfilled"
   | "cancelled"
   | "refunded"
-  | "action_required";
+  | "action_required"
+  | "overdue";
 
 // Define the shape of the order with relations
 interface OrderWithRelations {
@@ -107,6 +108,11 @@ export function OrdersTable({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Keep local state in sync with server-provided data when navigating between pages
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
+
   // Determine the active bake sale filter
   const activeBakeSaleId = useMemo(() => {
     return bakeSaleFilter;
@@ -118,11 +124,36 @@ export function OrdersTable({
     return dateStr ? new Date(dateStr) : null;
   };
 
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const isOrderOverdue = (order: OrderWithRelations) => {
+    const bakeSaleDate = getBakeSaleDate(order);
+    if (!bakeSaleDate) return false;
+    const bakeSaleIso = bakeSaleDate.toISOString().slice(0, 10);
+    const status = order.status.toLowerCase();
+    const eligibleStatuses = ["pending", "processing", "ready", "action_required"];
+    return eligibleStatuses.includes(status) && bakeSaleIso < todayIso;
+  };
+
   // Helper function to get customer name
   const getCustomerName = (order: OrderWithRelations) => {
     if (order.user?.name) return order.user.name;
     if (order.user?.email) return order.user.email;
     return "Guest Customer";
+  };
+
+  const getItemCount = (order: OrderWithRelations) => {
+    // Prefer precomputed item_count; fall back to items length if available
+    if (typeof order.item_count === "number") return order.item_count;
+    // @ts-expect-error items may be present when fetched with relations
+    if (Array.isArray(order.items)) return order.items.length;
+    return 0;
+  };
+
+  const formatDate = (value: string | number | Date | null | undefined, opts?: Intl.DateTimeFormatOptions) => {
+    if (!value) return "N/A";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "N/A";
+    return parsed.toLocaleDateString("en-GB", opts);
   };
 
   // Filter and sort orders
@@ -148,7 +179,11 @@ export function OrdersTable({
 
     // Apply status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter((order) => order.status.toLowerCase() === statusFilter);
+      if (statusFilter === "overdue") {
+        filtered = filtered.filter((order) => isOrderOverdue(order));
+      } else {
+        filtered = filtered.filter((order) => order.status.toLowerCase() === statusFilter);
+      }
     }
 
     // Apply bake sale filter
@@ -194,7 +229,7 @@ export function OrdersTable({
   }, [currentPageProp, setCurrentPage]);
 
   // Calculate pagination using server-provided totals when no client-side filters/search are applied.
-  const hasClientFilters = Boolean(debouncedSearchTerm || statusFilter !== "all" || bakeSaleFilter);
+  const hasClientFilters = Boolean(debouncedSearchTerm || bakeSaleFilter || statusFilter !== "all");
   const totalPages = hasClientFilters
     ? Math.max(1, Math.ceil(filteredAndSortedOrders.length / pageSize))
     : Math.max(1, Math.ceil(totalCount / pageSize));
@@ -445,8 +480,21 @@ export function OrdersTable({
               <SelectItem value="action_required" className="text-base py-3">
                 Action Required
               </SelectItem>
+              <SelectItem value="overdue" className="text-base py-3">
+                Overdue
+              </SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            variant={statusFilter === "overdue" ? "default" : "outline"}
+            onClick={() => setStatusFilter(statusFilter === "overdue" ? "all" : "overdue")}
+          >
+            {statusFilter === "overdue" ? "Showing Overdue" : "Show Overdue"}
+          </Button>
         </div>
       </div>
 
@@ -455,7 +503,7 @@ export function OrdersTable({
         <PaginationInfo
           currentPage={currentPage}
           pageSize={pageSize}
-          totalItems={filteredAndSortedOrders.length}
+          totalItems={hasClientFilters ? filteredAndSortedOrders.length : totalCount}
         />
       </div>
 
@@ -504,7 +552,7 @@ export function OrdersTable({
             {filteredAndSortedOrders.map((order) => (
               <tr key={order.id} className="border-t hover:bg-muted/30 transition-colors">
                 <td className="p-4 text-sm text-muted-foreground">
-                  {new Date(order.created_at).toLocaleDateString("en-GB", {
+                  {formatDate(order.created_at, {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -537,11 +585,18 @@ export function OrdersTable({
                       order.status.toLowerCase() === "completed" &&
                         "bg-emerald-50 text-emerald-700 border-emerald-200",
                       order.status.toLowerCase() === "cancelled" &&
-                        "bg-red-50 text-red-700 border-red-200"
+                        "bg-red-50 text-red-700 border-red-200",
+                      order.status.toLowerCase() === "action_required" &&
+                        "bg-amber-50 text-amber-800 border-amber-200"
                     )}
                   >
                     {order.status}
                   </Badge>
+                  {isOrderOverdue(order) && (
+                    <Badge variant="destructive" className="ml-2">
+                      Overdue
+                    </Badge>
+                  )}
                   <Badge variant="secondary" className="ml-2 capitalize">
                     {order.fulfillment_method}
                   </Badge>
@@ -553,7 +608,7 @@ export function OrdersTable({
                   <div className="flex flex-col items-start gap-1">
                     <span>£{order.total.toFixed(2)}</span>
                     <span className="text-xs text-muted-foreground">
-                      {order.item_count ?? 0} item{(order.item_count ?? 0) !== 1 ? "s" : ""}
+                      {getItemCount(order)} item{getItemCount(order) !== 1 ? "s" : ""}
                     </span>
                   </div>
                 </td>
@@ -619,7 +674,9 @@ export function OrdersTable({
                     order.status.toLowerCase() === "completed" &&
                       "bg-emerald-50 text-emerald-700 border-emerald-200",
                     order.status.toLowerCase() === "cancelled" &&
-                      "bg-red-50 text-red-700 border-red-200"
+                      "bg-red-50 text-red-700 border-red-200",
+                    order.status.toLowerCase() === "action_required" &&
+                      "bg-amber-50 text-amber-800 border-amber-200"
                   )}
                 >
                   {order.status}
@@ -629,12 +686,7 @@ export function OrdersTable({
               <div className="grid grid-cols-2 gap-2 text-sm mb-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Order Date</p>
-                  <p className="font-medium">
-                    {new Date(order.created_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </p>
+                  <p className="font-medium">{formatDate(order.created_at, { day: "numeric", month: "short" })}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Bake Sale</p>
@@ -652,12 +704,13 @@ export function OrdersTable({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t">
-                <span className="font-serif font-bold text-lg">£{order.total.toFixed(2)}</span>
-                <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
-                  {getQuickAction(order)}
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <span className="font-serif font-bold text-lg">£{order.total.toFixed(2)}</span>
+                  <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                    {isOrderOverdue(order) && <Badge variant="destructive">Overdue</Badge>}
+                    {getQuickAction(order)}
+                  </div>
                 </div>
-              </div>
             </Link>
           </div>
         ))}

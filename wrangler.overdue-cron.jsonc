@@ -1,0 +1,30 @@
+{
+  "name": "bandofbakers-overdue-cron",
+  "main": "workers/overdue-cron.ts",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": {
+    "crons": [
+      // 02:00 UTC daily; adjust as needed
+      "0 2 * * *"
+    ]
+  },
+  "env": {
+    "preview": {
+      "name": "bandofbakers-overdue-cron-preview",
+      "vars": {
+        "BASE_URL": "https://staging.bandofbakers.co.uk",
+        "AUTO_CLOSE_DAYS": "7",
+        "DRY_RUN": "false"
+      }
+    },
+    "production": {
+      "name": "bandofbakers-overdue-cron-prod",
+      "vars": {
+        "BASE_URL": "https://bandofbakers.co.uk",
+        "AUTO_CLOSE_DAYS": "7",
+        "DRY_RUN": "false"
+      }
+    }
+  }
+}

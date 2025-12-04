@@ -75,9 +75,7 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
   const userItems = [
     { href: "/profile", label: "Profile", icon: UserCircle },
     { href: "/orders", label: "My Orders", icon: Package },
-    ...(isAdmin
-      ? [{ href: "/admin", label: "Admin Panel", icon: Shield }]
-      : []),
+    ...(isAdmin ? [{ href: "/admin", label: "Admin Panel", icon: Shield }] : []),
   ];
 
   return (
@@ -214,16 +212,6 @@ export function MobileMenu({ isLoggedIn, cartItemCount, session }: MobileMenuPro
                               <span>{item.label}</span>
                             </Link>
                           ))}
-                          {isAdmin && (
-                            <Link
-                              href="/admin"
-                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-red-700 font-medium"
-                              onClick={() => setIsOpen(false)}
-                            >
-                              <Shield className="h-5 w-5" />
-                              <span>Admin Panel</span>
-                            </Link>
-                          )}
                           <button
                             className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-destructive transition-colors text-left"
                             onClick={() => window.location.href = "/api/auth/signout-cognito?callbackUrl=/"}

@@ -45,7 +45,7 @@ export async function getDashboardStats() {
         ]);
         const todayIso = new Date().toISOString().slice(0, 10);
         const overdue = await orderRepository.overdueCountsByStatus(
-          ["processing", "ready"],
+          ["pending", "processing", "ready"],
           todayIso
         );
 
@@ -122,6 +122,7 @@ export async function getDashboardStats() {
             products: 0,
             customers: 0,
           },
+          overdue: [],
         };
       }
     },

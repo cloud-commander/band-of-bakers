@@ -3,6 +3,12 @@ import Cognito from "next-auth/providers/cognito";
 import { authConfig } from "./auth.config";
 import { JWT } from "next-auth/jwt";
 
+const cognitoAuthorizationUrl = process.env.AUTH_COGNITO_AUTH;
+const cognitoTokenUrl = process.env.AUTH_COGNITO_TOKEN;
+const cognitoUserInfoUrl = process.env.AUTH_COGNITO_USERINFO;
+const cognitoClientSecret = process.env.AUTH_COGNITO_SECRET;
+const nextAuthUrl = process.env.NEXTAUTH_URL;
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -44,20 +50,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Cognito({
       clientId: process.env.AUTH_COGNITO_ID,
+      ...(cognitoClientSecret ? { clientSecret: cognitoClientSecret } : {}),
       issuer: process.env.AUTH_COGNITO_ISSUER,
-      client: {
-        token_endpoint_auth_method: "none",
-      },
+      // Use custom domain metadata if provided; issuer stays as user-pool issuer.
+      wellKnown: process.env.AUTH_COGNITO_WELLKNOWN,
+      // If no client secret is provided, use public client (PKCE) auth; otherwise let
+      // NextAuth handle confidential client with client_secret_post/basic.
+      ...(cognitoClientSecret
+        ? {}
+        : {
+            client: {
+              token_endpoint_auth_method: "none",
+            },
+          }),
       authorization: {
+        ...(cognitoAuthorizationUrl ? { url: cognitoAuthorizationUrl } : {}),
         params: {
           scope: "openid profile email",
+          ...(nextAuthUrl
+            ? { redirect_uri: `${nextAuthUrl.replace(/\/$/, "")}/api/auth/callback/cognito` }
+            : {}),
         },
       },
       token: {
+        ...(cognitoTokenUrl ? { url: cognitoTokenUrl } : {}),
         params: {
           client_id: process.env.AUTH_COGNITO_ID,
         },
       },
+      ...(cognitoUserInfoUrl
+        ? {
+            userinfo: {
+              url: cognitoUserInfoUrl,
+            },
+          }
+        : {}),
     }),
   ],
   callbacks: {

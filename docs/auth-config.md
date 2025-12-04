@@ -4,6 +4,12 @@
 
 This document describes the complete configuration needed to integrate NextAuth.js with AWS Cognito in a Next.js application deployed on Cloudflare Workers. The setup supports multiple environments (development, staging, production) with environment-aware authentication flows.
 
+## Recent learnings / gotchas
+
+- **Logout must clear Cognito:** The signout route now derives the Cognito hosted domain from `AUTH_COGNITO_DOMAIN` (if set), otherwise from `AUTH_COGNITO_AUTH` (host) or `AUTH_COGNITO_ISSUER`. Ensure one of these is present so `/api/auth/signout-cognito` can redirect to Cognito `/logout` and clear the IdP session. Callback paths are now normalized to include a leading slash.
+- **Local dev URLs:** For localhost auth to work, set `AUTH_URL=http://localhost:3000` and `NEXTAUTH_URL=http://localhost:3000` in `.env.local` (Cognito app client must include the localhost callback). Staging/prod should keep their public URLs.
+- **Cron/overdue automation:** A separate cron worker (`wrangler.overdue-cron.jsonc`) is deployed; ensure `CRON_SECRET` is set in each environment and synced during deploys.
+
 ## Architecture
 
 ```
@@ -22,32 +28,35 @@ D1 Database (user sync)
 
 ### 1. **src/auth.ts** - Main NextAuth Configuration
 
-The core authentication setup with Cognito provider:
+The core authentication setup with Cognito provider (supports custom domain endpoints while keeping the issuer as the user-pool URL):
 
 ```typescript
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  // Trust host header for callback URL detection in Cloudflare Workers
-  // This allows the auth flow to work correctly across different environments
-  // (localhost, staging, production) without requiring explicit NEXTAUTH_URL
   trustHost: true,
   providers: [
     Cognito({
       clientId: process.env.AUTH_COGNITO_ID,
       issuer: process.env.AUTH_COGNITO_ISSUER,
+      // Optional: fetch metadata via custom domain for branded Hosted UI
+      wellKnown: process.env.AUTH_COGNITO_WELLKNOWN,
+      // Optional: override endpoints when using a custom domain
+      authorization: {
+        ...(process.env.AUTH_COGNITO_AUTH ? { url: process.env.AUTH_COGNITO_AUTH } : {}),
+        params: { scope: "openid profile email" },
+      },
       client: {
         token_endpoint_auth_method: "none",
       },
-      authorization: {
-        params: {
-          scope: "openid profile email",
-        },
-      },
       token: {
+        ...(process.env.AUTH_COGNITO_TOKEN ? { url: process.env.AUTH_COGNITO_TOKEN } : {}),
         params: {
           client_id: process.env.AUTH_COGNITO_ID,
         },
       },
+      ...(process.env.AUTH_COGNITO_USERINFO
+        ? { userinfo: { url: process.env.AUTH_COGNITO_USERINFO } }
+        : {}),
     }),
   ],
   // Callbacks for JWT and session management
@@ -331,44 +340,112 @@ Cloudflare Workers configuration with environment-aware URLs:
 {
   "env": {
     "preview": {
-      "name": "bandofbakers-v2-staging",
+      "name": "your-app-staging",
       "vars": {
-        "NEXT_PUBLIC_BASE_URL": "https://staging.bandofbakers.co.uk",
+        "NEXT_PUBLIC_BASE_URL": "https://staging.yourdomain.com",
       },
     },
     "production": {
-      "name": "bandofbakers-v2-production",
+      "name": "your-app-production",
       "vars": {
-        "NEXT_PUBLIC_BASE_URL": "https://bandofbakers.co.uk",
+        "NEXT_PUBLIC_BASE_URL": "https://yourdomain.com",
       },
     },
   },
 }
 ```
 
-## Environment Variables Required
+## Environment Variables & Repeatable Secret Sync
 
-Set these in AWS Secrets Manager or your CI/CD environment:
+- **Issuer rule:** `AUTH_COGNITO_ISSUER` must be the user-pool issuer (`https://cognito-idp.<region>.amazonaws.com/<user-pool-id>`). Do **not** point issuer to the custom domain.
+- **Custom-domain endpoints (for branded UI):** use `auth.<your-domain>` for wellKnown/auth/token/userinfo while keeping issuer as above.
 
-```bash
-# Cognito Configuration
-AUTH_COGNITO_ID=<your-cognito-app-client-id>
+### Required keys (all envs)
+```
+AUTH_COGNITO_ID=<cognito app client id>
 AUTH_COGNITO_ISSUER=https://cognito-idp.<region>.amazonaws.com/<user-pool-id>
-
-# NextAuth Secret (for JWT signing)
-AUTH_SECRET=<generate-with-openssl-rand-hex-32>
-
-# Database URLs (optional for sync)
-DATABASE_URL=file:./local.db  # Development
-DATABASE_URL_STAGING=...       # Staging (for migrations)
-DATABASE_URL_PROD=...          # Production (for migrations)
+AUTH_COGNITO_WELLKNOWN=https://auth.<your-domain>/oauth2/.well-known/openid-configuration
+AUTH_COGNITO_AUTH=https://auth.<your-domain>/oauth2/authorize
+AUTH_COGNITO_TOKEN=https://auth.<your-domain>/oauth2/token
+AUTH_COGNITO_USERINFO=https://auth.<your-domain>/oauth2/userInfo
+AUTH_SECRET=<openssl rand -hex 32>
+NEXTAUTH_URL=<app url for this env>      # e.g., https://staging.yourdomain.com (not localhost in staging/prod)
+AUTH_URL=<app url for this env>          # same as NEXTAUTH_URL
 ```
 
-### Generating AUTH_SECRET
+### Local env source
+- Put the above in `.env.local` (preferred) or `.env.staging` / `.env.production`.
+- Script defaults `NEXTAUTH_URL`/`AUTH_URL` to your staging or production URLs if not set.
 
-```bash
-openssl rand -hex 32
+### Repeatable secret sync to Workers
+- Script: `scripts/sync-secrets.js`
+- Usage:
+  ```
+  node scripts/sync-secrets.js --env=staging    # pushes to wrangler env "preview"
+  node scripts/sync-secrets.js --env=production # pushes to wrangler env "production"
+  ```
+- It reads `.env.local` (fallback `.env.<env>`), validates required keys, then runs `wrangler secret put` for that env.
+- Prereqs: `pnpm install`, `wrangler` auth (CLOUDFLARE_API_TOKEN or logged-in Wrangler).
+
+### CI example (GitHub Actions, optional)
+```yaml
+- name: Sync secrets to Worker
+  run: node scripts/sync-secrets.js --env=${ENV}
+  env:
+    CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+    ENV: staging # or production
 ```
+
+## Who does what (AI vs. human)
+
+- **AI / automation can do:**
+  - Pull required vars from `.env.local` / `.env.<env>` and push to Workers via `scripts/sync-secrets.js`.
+  - Deploy to staging/production using `scripts/deploy.ts` (if Cloudflare auth token is available).
+  - Verify discovery and TLS with `curl`/`openssl` against `auth.<domain>`.
+- **Human must do once:**
+  - Create/validate ACM cert in us-east-1 and add the validation CNAMEs in Cloudflare.
+  - Add Cognito custom domain and pick the issued cert.
+  - Create the Cloudflare CNAME `auth -> <CloudFront alias>` (DNS only).
+  - Create the Cognito App Client ID and enable PKCE/public client (no secret).
+  - Add callback/logout URLs in Cognito to match staging/prod.
+  - Provide `CLOUDFLARE_API_TOKEN` to CI/AI for secret sync and deploy.
+
+## Cognito Custom Domain (Cloudflare) — Automated/Scriptable Steps
+
+1) **Create/attach ACM cert (us-east-1)**
+   - Request in ACM **us-east-1** for `auth.yourdomain.com` (CloudFront requires us-east-1).
+   - Add the ACM validation CNAMEs in Cloudflare (DNS only).
+
+2) **Add custom domain to Cognito**
+   - In the User Pool → App integration → Domain name → "Use your domain".
+   - Choose the issued cert above. Note the alias target (e.g., `d2o4ca9l2zu3wt.cloudfront.net`).
+
+3) **Set Cloudflare DNS (scriptable)**
+   - Single record: `CNAME auth -> <alias-target> (DNS only / grey cloud)`.
+   - Remove A/AAAA/Workers on `auth`.
+   - Example (Cloudflare API):
+     ```bash
+     # CF_ZONE_ID and CF_TOKEN must be set; ALIAS is the CloudFront target from Cognito
+     curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records" \
+       -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" \
+       --data "{\"type\":\"CNAME\",\"name\":\"auth\",\"content\":\"$ALIAS\",\"proxied\":false}"
+     ```
+
+4) **Verify DNS/TLS (scriptable checks)**
+   ```bash
+   dig +short auth.yourdomain.com @1.1.1.1
+   curl -v https://auth.yourdomain.com/oauth2/.well-known/openid-configuration
+   ```
+   - Cert subject should be `auth.yourdomain.com`.
+   - Discovery path **must** include `/oauth2/` prefix; the root `/.well-known/openid-configuration` returns 404.
+
+5) **NextAuth envs**
+   - `AUTH_COGNITO_ISSUER` = `https://cognito-idp.<region>.amazonaws.com/<user-pool-id>` (do not set to custom domain).
+   - Optional overrides for custom domain: `AUTH_COGNITO_WELLKNOWN`, `AUTH_COGNITO_AUTH`, `AUTH_COGNITO_TOKEN`, `AUTH_COGNITO_USERINFO`.
+
+6) **Deploy**
+   - Push envs (e.g., `wrangler secret put ...`), redeploy.
+   - Login should redirect to `https://auth.yourdomain.com/...` with your branding.
 
 ## AWS Cognito Setup
 
@@ -397,8 +474,8 @@ In AWS Cognito console:
   ```
   http://localhost:3000/api/auth/callback/cognito
   http://localhost:8788/api/auth/callback/cognito
-  https://staging.bandofbakers.co.uk/api/auth/callback/cognito
-  https://bandofbakers.co.uk/api/auth/callback/cognito
+  https://staging.yourdomain.com/api/auth/callback/cognito
+  https://yourdomain.com/api/auth/callback/cognito
   ```
 
 - **Sign out URL(s):** (Required for proper logout flow)
@@ -406,8 +483,8 @@ In AWS Cognito console:
   ```
   http://localhost:3000/
   http://localhost:8788/
-  https://staging.bandofbakers.co.uk/
-  https://bandofbakers.co.uk/
+  https://staging.yourdomain.com/
+  https://yourdomain.com/
   ```
 
   **Important:** The trailing slash is required! Cognito logout redirects to `logout_uri` parameter, which our `/api/auth/signout-cognito` handler provides.
@@ -416,6 +493,13 @@ In AWS Cognito console:
 - **Token Endpoint Authentication:** None
 
 3. Note the **App Client ID** (use as `AUTH_COGNITO_ID`)
+
+### 2b. Custom Domain (branded Hosted UI)
+
+- ACM cert in **us-east-1** (for CloudFront).
+- Add Cognito custom domain with that cert; copy the alias target.
+- Cloudflare DNS: CNAME `auth` → alias target, DNS only.
+- Verify: `curl -v https://auth.yourdomain.com/oauth2/.well-known/openid-configuration`
 
 ### 3. Get Issuer URL
 
@@ -443,21 +527,56 @@ https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_abc123xyz
 6. Cognito redirects back to `http://localhost:3000/api/auth/callback/cognito`
 7. NextAuth verifies code, exchanges for tokens, syncs user to DB
 
-### Staging (staging.bandofbakers.co.uk)
+### Staging (staging.yourdomain.com)
 
 Same flow, but:
 
-- `trustHost: true` detects Host header as `staging.bandofbakers.co.uk`
-- Callback URL becomes: `https://staging.bandofbakers.co.uk/api/auth/callback/cognito`
+- `trustHost: true` detects Host header as `staging.yourdomain.com`
+- Callback URL becomes: `https://staging.yourdomain.com/api/auth/callback/cognito`
 - Must match one of the Cognito app client's Callback URLs
 
-### Production (bandofbakers.co.uk)
+### Production (yourdomain.com)
 
 Same flow, but with production domain.
 
 **No code changes needed!** The `trustHost: true` setting handles environment detection automatically via HTTP Host headers.
 
 ## Common Issues & Solutions
+
+### Issue: Server error after switching to custom domain
+
+- **Cause:** `AUTH_COGNITO_ISSUER` was set to the custom domain.  
+- **Fix:** Set `AUTH_COGNITO_ISSUER` back to the user-pool issuer. Use `AUTH_COGNITO_WELLKNOWN` (and optional AUTH/TOKEN/USERINFO URLs) for custom domain metadata.
+
+### Issue: TLS / "site can't be reached" on auth subdomain
+
+- Ensure Cloudflare CNAME points to the **CloudFront alias** from Cognito (not the pool domain).
+- Proxy must be **off** (DNS only).
+- Certificate in Cognito must be **Issued** and domain **Active**.
+- Verify with `openssl s_client -connect auth.yourdomain.com:443 -servername auth.yourdomain.com`.
+
+### Issue: 404 on discovery
+
+- Use the correct path: `https://auth.yourdomain.com/oauth2/.well-known/openid-configuration`.
+- The root `/.well-known/openid-configuration` returns 404.
+
+### Issue: Redirect mismatch / redirecting to localhost in staging/prod
+
+- **Causes:** `NEXTAUTH_URL` / `AUTH_URL` left as `http://localhost:3000`, or stale `authjs.callback-url` cookies pointing to localhost.
+- **Fix:** Ensure staging/prod secrets for `NEXTAUTH_URL` and `AUTH_URL` are set to the deployed domain (e.g., `https://staging.yourdomain.com`) and re-run `scripts/sync-secrets.js --env=staging` (or production) then redeploy. Clear `authjs.callback-url` cookies (browser) if the authorize URL still shows localhost.
+
+### Issue: `invalid_request` on callback (Configuration error page)
+
+- **Cause:** Cognito app client configured as confidential (client secret required) or missing Authorization Code + PKCE for public clients.
+- **Fix:** In Cognito App Client:
+  - Make it a **public client (no client secret)**; if a secret exists, create a new public client.
+  - Enable **Authorization code grant** and PKCE; Token endpoint auth = None.
+  - Ensure the custom domain endpoints are correct and callbacks match.
+
+### Issue: Hosted UI shows generic (unbranded) page
+
+- **Cause:** Custom domain is using Hosted UI (classic) branding, not Managed login.
+- **Fix:** In Cognito → App integration → Domain name, edit the custom domain and set Branding version to **Managed login**. In Branding/UI customization, assign your style to the app client and custom domain. Save, then open the login URL in incognito.
 
 ### Issue: "Cookies can only be modified in a Server Action or Route Handler"
 
@@ -608,17 +727,17 @@ pnpm dev
 
 ```bash
 # Deploy: pnpm deploy:staging
-# Visit: https://staging.bandofbakers.co.uk
+# Visit: https://staging.yourdomain.com
 # Click Login
 # Should redirect to Cognito Hosted UI with staging domain
-# Should return to https://staging.bandofbakers.co.uk/api/auth/callback/cognito
+# Should return to https://staging.yourdomain.com/api/auth/callback/cognito
 ```
 
 ### Verify User Sync
 
 ```bash
 # Query D1 database
-wrangler d1 execute bandofbakers-db-staging --remote --command "SELECT * FROM users WHERE email = 'test@example.com';"
+wrangler d1 execute your-db-staging --remote --command "SELECT * FROM users WHERE email = 'test@example.com';"
 ```
 
 ## Security Considerations

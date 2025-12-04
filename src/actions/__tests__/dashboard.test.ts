@@ -14,6 +14,7 @@ vi.mock("@/lib/repositories/order.repository", () => ({
     sumTotalSince: vi.fn().mockResolvedValue(0),
     sumTotalBetween: vi.fn().mockResolvedValue(0),
     overdueCountsByStatus: vi.fn().mockResolvedValue([
+      { status: "pending", count: 3 },
       { status: "processing", count: 2 },
       { status: "ready", count: 1 },
     ]),
@@ -43,12 +44,19 @@ describe("getDashboardStats", () => {
     vi.clearAllMocks();
   });
 
-  it("returns overdue counts for processing and ready orders", async () => {
+  it("returns overdue counts for pending, processing and ready orders", async () => {
     const result = await getDashboardStats();
 
+    const { orderRepository } = await import("@/lib/repositories/order.repository");
+
     expect(result.overdue).toEqual([
+      { status: "pending", count: 3 },
       { status: "processing", count: 2 },
       { status: "ready", count: 1 },
     ]);
+    expect(orderRepository.overdueCountsByStatus).toHaveBeenCalledWith(
+      ["pending", "processing", "ready"],
+      expect.any(String)
+    );
   });
 });

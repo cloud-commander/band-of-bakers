@@ -65,11 +65,14 @@ export default async function AdminDashboard() {
   } = await getDashboardStats();
   const topVouchers = await getTopVouchers(5);
 
+  const overduePending =
+    overdue.find((item: { status: string }) => item.status === "pending")?.count ?? 0;
   const overdueProcessing =
     overdue.find((item: { status: string }) => item.status === "processing")?.count ?? 0;
   const overdueReady =
     overdue.find((item: { status: string }) => item.status === "ready")?.count ?? 0;
-  const hasOverdue = overdueProcessing + overdueReady > 0;
+  const totalOverdue = overduePending + overdueProcessing + overdueReady;
+  const hasOverdue = totalOverdue > 0;
 
   return (
     <div>
@@ -81,10 +84,14 @@ export default async function AdminDashboard() {
       {hasOverdue && (
         <Alert variant="default" className="mb-6 border-amber-200 bg-amber-50 text-amber-900">
           <AlertTriangle className="h-4 w-4 text-amber-800" />
-          <AlertTitle>Orders overdue for collection</AlertTitle>
+          <AlertTitle>Orders past their bake sale date</AlertTitle>
           <AlertDescription>
-            {overdueProcessing > 0 && <span className="mr-3">{overdueProcessing} processing</span>}
-            {overdueReady > 0 && <span>{overdueReady} ready for collection</span>}
+            {overduePending > 0 && <span className="mr-3">{overduePending} pending</span>}
+            {overdueProcessing > 0 && (
+              <span className="mr-3">{overdueProcessing} processing</span>
+            )}
+            {overdueReady > 0 && <span className="mr-3">{overdueReady} ready</span>}
+            <span className="font-medium">Total: {totalOverdue}</span>
             <Link href="/admin/orders" className="underline ml-2 font-medium text-amber-900">
               Review orders →
             </Link>

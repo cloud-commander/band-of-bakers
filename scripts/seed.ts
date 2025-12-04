@@ -300,6 +300,21 @@ async function main() {
         `,
         variables: ["customer_name", "order_id", "change_details", "new_total"],
       },
+      {
+        id: "tmpl_order_auto_cancelled",
+        name: "order_auto_cancelled",
+        subject: "Order cancelled: bake sale date has passed",
+        content: `
+          <h1>Your order has been cancelled</h1>
+          <p>Hi {{customer_name}},</p>
+          <p>Your order {{order_reference}} was cancelled because the bake sale date has passed and payment wasn't completed.</p>
+          <p>No payment has been taken. If you'd like to reorder for a future bake sale, please get in touch.</p>
+          <p><strong>Bake sale date:</strong> {{bake_sale_date}}</p>
+          <p>If you believe this is a mistake, reply to this email or contact us at {{support_email}}.</p>
+          <p>Band of Bakers</p>
+        `,
+        variables: ["customer_name", "order_reference", "bake_sale_date", "support_email"],
+      },
     ];
 
     for (const tmpl of defaultTemplates) {

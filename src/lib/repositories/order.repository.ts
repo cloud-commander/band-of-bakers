@@ -5,6 +5,7 @@ import {
   products,
   bakeSales,
   locations,
+  users,
   type InsertOrder,
   type InsertOrderItem,
 } from "@/db/schema";
@@ -395,6 +396,10 @@ export class OrderRepository extends BaseRepository<typeof orders> {
 
   async overdueCountsByStatus(targetStatuses: Array<string>, todayIsoDate: string) {
     const db = await this.getDatabase();
+    // Prefer the snapshot date captured at time of order; fall back to live bake sale date
+    const effectiveBakeSaleDate = sql<string>`coalesce(${orders.bake_sale_date_snapshot}, ${bakeSales.date})`;
+    const effectiveDateOnly = sql<string>`substr(${effectiveBakeSaleDate}, 1, 10)`;
+
     const rows = await db
       .select({
         status: orders.status,
@@ -402,7 +407,7 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       })
       .from(orders)
       .leftJoin(bakeSales, eq(bakeSales.id, orders.bake_sale_id))
-      .where(and(inArray(orders.status, targetStatuses), lt(bakeSales.date, todayIsoDate)))
+      .where(and(inArray(orders.status, targetStatuses), lt(effectiveDateOnly, todayIsoDate)))
       .groupBy(orders.status);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -410,6 +415,46 @@ export class OrderRepository extends BaseRepository<typeof orders> {
       status: row.status,
       count: Number(row.count ?? 0),
     }));
+  }
+
+  async findOverdueOrders(targetStatuses: ReadonlyArray<string>, todayIsoDate: string) {
+    const db = await this.getDatabase();
+    const effectiveBakeSaleDate = sql<string>`coalesce(${orders.bake_sale_date_snapshot}, ${bakeSales.date})`;
+    const effectiveDateOnly = sql<string>`substr(${effectiveBakeSaleDate}, 1, 10)`;
+
+    const rows = await db
+      .select({
+        id: orders.id,
+        order_number: orders.order_number,
+        status: orders.status,
+        payment_status: orders.payment_status,
+        total: orders.total,
+        bake_sale_id: orders.bake_sale_id,
+        bake_sale_date: effectiveDateOnly,
+        user_email: users.email,
+        user_name: users.name,
+      })
+      .from(orders)
+      .leftJoin(bakeSales, eq(bakeSales.id, orders.bake_sale_id))
+      .leftJoin(users, eq(users.id, orders.user_id))
+      .where(and(inArray(orders.status, targetStatuses), lt(effectiveDateOnly, todayIsoDate)));
+
+    return rows.map(
+      (row: {
+        id: string;
+        order_number: number;
+        status: string;
+        payment_status: string;
+        total: number;
+        bake_sale_id: string | null;
+        bake_sale_date: string | null;
+        user_email: string | null;
+        user_name: string | null;
+      }) => ({
+        ...row,
+        bake_sale_date: row.bake_sale_date ?? null,
+      })
+    );
   }
 }
 
